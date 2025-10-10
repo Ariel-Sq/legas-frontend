@@ -1,123 +1,172 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { ShopFilters } from "@/components/shop-filters"
-import { ShopProductCard } from "@/components/shop-product-card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { X, SlidersHorizontal } from "lucide-react"
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { ShopFilters } from "@/components/shop-filters";
+import { ShopProductCard } from "@/components/shop-product-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { X, SlidersHorizontal } from "lucide-react";
 
 interface Product {
-  id: string
-  name: string
-  price: number
-  image: string
-  category: string
-  material: string
-  color: string
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  material?: string;
+  color?: string;
 }
 
 interface FilterOptions {
-  categories: string[]
-  materials: string[]
-  colors: { name: string; hex: string }[]
-  priceRange: { min: number; max: number }
+  categories: string[];
+  materials: string[];
+  colors: { name: string; hex: string }[];
+  priceRange: { min: number; max: number };
 }
 
 interface ShopContentProps {
-  products: Product[]
-  filterOptions: FilterOptions
-  searchQuery?: string
+  products: Product[];
+  filterOptions: FilterOptions;
+  searchQuery?: string;
 }
 
-export function ShopContent({ products, filterOptions, searchQuery }: ShopContentProps) {
-  const router = useRouter()
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
-  const [selectedColor, setSelectedColor] = useState<string | null>(null)
+export function ShopContent({
+  products,
+  filterOptions,
+  searchQuery,
+}: ShopContentProps) {
+  const router = useRouter();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([
     filterOptions.priceRange.min,
     filterOptions.priceRange.max,
-  ])
-  const [categoryFilter, setCategoryFilter] = useState<string>("All")
-  const [sortBy, setSortBy] = useState<string>("popular")
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  ]);
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("popular");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    let filtered = [...products]
+    let filtered = [...products];
 
     if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query),
-      )
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query)
+      );
     }
 
     // Filter by category buttons
     if (categoryFilter !== "All") {
-      filtered = filtered.filter((p) => p.category === categoryFilter)
+      filtered = filtered.filter((p) => p.category === categoryFilter);
     }
 
     // Filter by sidebar categories
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter((p) => selectedCategories.includes(p.category))
+      filtered = filtered.filter((p) =>
+        selectedCategories.includes(p.category)
+      );
     }
 
     // Filter by materials
     if (selectedMaterials.length > 0) {
-      filtered = filtered.filter((p) => selectedMaterials.includes(p.material))
+      filtered = filtered.filter(
+        (p) => p.material && selectedMaterials.includes(p.material)
+      );
     }
 
     // Filter by color
     if (selectedColor) {
-      filtered = filtered.filter((p) => p.color === selectedColor)
+      filtered = filtered.filter((p) => p.color === selectedColor);
     }
 
     // Filter by price range
-    filtered = filtered.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1])
+    filtered = filtered.filter(
+      (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
+    );
 
     // Sort products
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
+        filtered.sort((a, b) => a.price - b.price);
+        break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
+        filtered.sort((a, b) => b.price - a.price);
+        break;
       case "newest":
-        filtered.reverse()
-        break
+        filtered.reverse();
+        break;
       default:
-        break
+        break;
     }
 
-    return filtered
-  }, [products, selectedCategories, selectedMaterials, selectedColor, priceRange, categoryFilter, sortBy, searchQuery])
+    return filtered;
+  }, [
+    products,
+    selectedCategories,
+    selectedMaterials,
+    selectedColor,
+    priceRange,
+    categoryFilter,
+    sortBy,
+    searchQuery,
+  ]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
-  }
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const handleMaterialChange = (material: string) => {
-    setSelectedMaterials((prev) => (prev.includes(material) ? prev.filter((m) => m !== material) : [...prev, material]))
-  }
+    setSelectedMaterials((prev) =>
+      prev.includes(material)
+        ? prev.filter((m) => m !== material)
+        : [...prev, material]
+    );
+  };
 
   const handleColorChange = (color: string) => {
-    setSelectedColor((prev) => (prev === color ? null : color))
-  }
+    setSelectedColor((prev) => (prev === color ? null : color));
+  };
 
   const activeFiltersCount = useMemo(() => {
-    let count = 0
-    if (selectedCategories.length > 0) count += selectedCategories.length
-    if (selectedMaterials.length > 0) count += selectedMaterials.length
-    if (selectedColor) count += 1
-    if (priceRange[0] !== filterOptions.priceRange.min || priceRange[1] !== filterOptions.priceRange.max) count += 1
-    return count
-  }, [selectedCategories, selectedMaterials, selectedColor, priceRange, filterOptions.priceRange])
+    let count = 0;
+    if (selectedCategories.length > 0) count += selectedCategories.length;
+    if (selectedMaterials.length > 0) count += selectedMaterials.length;
+    if (selectedColor) count += 1;
+    if (
+      priceRange[0] !== filterOptions.priceRange.min ||
+      priceRange[1] !== filterOptions.priceRange.max
+    )
+      count += 1;
+    return count;
+  }, [
+    selectedCategories,
+    selectedMaterials,
+    selectedColor,
+    priceRange,
+    filterOptions.priceRange,
+  ]);
 
   return (
     <main className="flex flex-1">
@@ -140,7 +189,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-bold">
-              {searchQuery ? `Search results for "${searchQuery}"` : "Living Room Furniture"}
+              {searchQuery
+                ? `Search results for "${searchQuery}"`
+                : "Living Room Furniture"}
             </h1>
             {searchQuery && (
               <button
@@ -156,7 +207,10 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="lg:hidden cursor-pointer relative bg-transparent">
+                <Button
+                  variant="outline"
+                  className="lg:hidden cursor-pointer relative bg-transparent"
+                >
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
@@ -187,7 +241,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
               </SheetContent>
             </Sheet>
 
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline">Sort by:</span>
+            <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
+              Sort by:
+            </span>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-[180px] cursor-pointer">
                 <SelectValue placeholder="Sort by" />
@@ -215,7 +271,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
             <button
               onClick={() => setCategoryFilter("All")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "All" ? "bg-primary text-primary-foreground" : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === "All"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/20 hover:bg-primary/30"
               }`}
             >
               All
@@ -223,7 +281,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
             <button
               onClick={() => setCategoryFilter("Sofas")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Sofas" ? "bg-primary text-primary-foreground" : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === "Sofas"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/20 hover:bg-primary/30"
               }`}
             >
               Sofas
@@ -231,7 +291,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
             <button
               onClick={() => setCategoryFilter("Chairs")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Chairs" ? "bg-primary text-primary-foreground" : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === "Chairs"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/20 hover:bg-primary/30"
               }`}
             >
               Chairs
@@ -239,7 +301,9 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
             <button
               onClick={() => setCategoryFilter("Tables")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Tables" ? "bg-primary text-primary-foreground" : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === "Tables"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/20 hover:bg-primary/30"
               }`}
             >
               Tables
@@ -264,5 +328,5 @@ export function ShopContent({ products, filterOptions, searchQuery }: ShopConten
         )}
       </div>
     </main>
-  )
+  );
 }
