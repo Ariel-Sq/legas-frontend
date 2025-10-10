@@ -1,32 +1,32 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import Link from "next/link"
-import { Minus, Plus, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useCart } from "@/components/cart-provider"
-import type { CartItem } from "@/lib/cart"
+import Image from 'next/image';
+import Link from 'next/link';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/components/cart-provider';
+import type { CartItem } from '@/lib/cart';
 
 interface CartItemRowProps {
-  item: CartItem
+  item: CartItem;
 }
 
 export function CartItemRow({ item }: CartItemRowProps) {
-  const { updateQuantity, removeFromCart } = useCart()
+  const { updateQuantity, removeFromCart } = useCart();
 
   const handleDecrease = () => {
     if (item.quantity > 1) {
-      updateQuantity(item.id, item.quantity - 1)
+      updateQuantity(item.id, item.quantity - 1);
     }
-  }
+  };
 
   const handleIncrease = () => {
-    updateQuantity(item.id, item.quantity + 1)
-  }
+    updateQuantity(item.id, item.quantity + 1);
+  };
 
   const handleRemove = () => {
-    removeFromCart(item.id)
-  }
+    removeFromCart(item.id);
+  };
 
   return (
     <div className="flex gap-4 py-6 border-b border-border">
@@ -34,7 +34,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <Link href={`/product/${item.id}`} className="flex-shrink-0">
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-muted">
           <Image
-            src={item.image || "/placeholder.svg"}
+            src={item.image || '/placeholder.svg'}
             alt={item.name}
             fill
             className="object-cover hover:scale-105 transition-transform duration-300"
@@ -46,10 +46,14 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <div className="flex-grow flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex-grow">
           <Link href={`/product/${item.id}`}>
-            <h3 className="font-semibold text-lg hover:text-primary transition-colors cursor-pointer">{item.name}</h3>
+            <h3 className="font-semibold text-lg hover:text-primary transition-colors cursor-pointer">
+              {item.name}
+            </h3>
           </Link>
           <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
-          <p className="text-lg font-semibold text-primary mt-2">${item.price}</p>
+          <p className="text-lg font-semibold text-primary mt-2">
+            ${item.price}
+          </p>
         </div>
 
         {/* Quantity Controls */}
@@ -64,8 +68,15 @@ export function CartItemRow({ item }: CartItemRowProps) {
             >
               <Minus className="h-4 w-4" />
             </Button>
-            <span className="w-12 text-center font-medium">{item.quantity}</span>
-            <Button variant="ghost" size="icon" onClick={handleIncrease} className="h-10 w-10 cursor-pointer">
+            <span className="w-12 text-center font-medium">
+              {item.quantity}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleIncrease}
+              className="h-10 w-10 cursor-pointer"
+            >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -83,9 +94,11 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
         {/* Subtotal */}
         <div className="text-right md:w-24">
-          <p className="font-semibold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
+          <p className="font-semibold text-lg">
+            ${(item.price * item.quantity).toFixed(2)}
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

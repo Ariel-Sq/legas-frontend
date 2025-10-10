@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { useLanguage } from "@/components/language-provider"
+import Link from 'next/link';
+import { useLanguage } from '@/components/language-provider';
 
 export function HeroSection() {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   return (
     <section className="bg-primary/20 py-12 sm:py-20 md:py-24">
@@ -42,11 +42,13 @@ export function HeroSection() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6">
-              <p className="text-white text-2xl font-bold tracking-tight">Crafted for Comfort</p>
+              <p className="text-white text-2xl font-bold tracking-tight">
+                Crafted for Comfort
+              </p>
             </div>
           </div>
         </Link>
       </div>
     </section>
-  )
+  );
 }

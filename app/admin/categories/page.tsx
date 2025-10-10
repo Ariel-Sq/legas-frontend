@@ -1,111 +1,122 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState, useEffect } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, ChevronRight, Edit, Trash2 } from "lucide-react"
+import { useState, useEffect } from 'react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import {
   getCategories,
   createCategory,
   buildCategoryTree,
   type Category,
   type CategoryFormData,
-} from "@/lib/categories-admin"
-import { useRouter } from "next/navigation"
-import { getUser } from "@/lib/user"
+} from '@/lib/categories-admin';
+import { useRouter } from 'next/navigation';
+import { getUser } from '@/lib/user';
 
 export default function CategoriesAdminPage() {
-  const router = useRouter()
-  const [categories, setCategories] = useState<Category[]>([])
-  const [showForm, setShowForm] = useState(false)
+  const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<CategoryFormData>({
-    name: "",
-    slug: "",
-    description: "",
+    name: '',
+    slug: '',
+    description: '',
     parent_id: null,
-    image_url: "",
-    icon: "",
+    image_url: '',
+    icon: '',
     is_active: true,
-    meta_title: "",
-    meta_description: "",
-    meta_keywords: "",
-  })
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
+  });
 
   useEffect(() => {
     // Check if user is admin
     getUser().then((user) => {
       if (!user?.isAdmin) {
-        router.push("/")
+        router.push('/');
       }
-    })
+    });
 
     // Load categories
-    loadCategories()
-  }, [router])
+    loadCategories();
+  }, [router]);
 
   const loadCategories = async () => {
-    const data = await getCategories()
-    setCategories(data)
-  }
+    const data = await getCategories();
+    setCategories(data);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await createCategory(formData)
-    await loadCategories()
-    setShowForm(false)
+    e.preventDefault();
+    await createCategory(formData);
+    await loadCategories();
+    setShowForm(false);
     // Reset form
     setFormData({
-      name: "",
-      slug: "",
-      description: "",
+      name: '',
+      slug: '',
+      description: '',
       parent_id: null,
-      image_url: "",
-      icon: "",
+      image_url: '',
+      icon: '',
       is_active: true,
-      meta_title: "",
-      meta_description: "",
-      meta_keywords: "",
-    })
-  }
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: '',
+    });
+  };
 
   const handleNameChange = (name: string) => {
     setFormData({
       ...formData,
       name,
-      slug: name.toLowerCase().replace(/\s+/g, "-"),
-    })
-  }
+      slug: name.toLowerCase().replace(/\s+/g, '-'),
+    });
+  };
 
-  const categoryTree = buildCategoryTree(categories)
+  const categoryTree = buildCategoryTree(categories);
 
-  const renderCategoryTree = (cats: (Category & { children?: Category[] })[], depth = 0) => {
+  const renderCategoryTree = (
+    cats: (Category & { children?: Category[] })[],
+    depth = 0
+  ) => {
     return cats.map((category) => (
       <div key={category.id}>
         <div
           className="flex items-center gap-2 p-3 hover:bg-accent rounded-lg cursor-pointer"
           style={{ paddingLeft: `${depth * 24 + 12}px` }}
         >
-          {category.children && category.children.length > 0 && <ChevronRight className="h-4 w-4" />}
+          {category.children && category.children.length > 0 && (
+            <ChevronRight className="h-4 w-4" />
+          )}
           {category.icon && <span className="text-xl">{category.icon}</span>}
           <span className="flex-1 font-medium">{category.name}</span>
           <span className="text-sm text-muted-foreground">{category.slug}</span>
           <span
             className={`text-xs px-2 py-1 rounded ${
               category.is_active
-                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
             }`}
           >
-            {category.is_active ? "Activa" : "Inactiva"}
+            {category.is_active ? 'Activa' : 'Inactiva'}
           </span>
           <Button variant="ghost" size="sm">
             <Edit className="h-4 w-4" />
@@ -114,10 +125,12 @@ export default function CategoriesAdminPage() {
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-        {category.children && category.children.length > 0 && renderCategoryTree(category.children, depth + 1)}
+        {category.children &&
+          category.children.length > 0 &&
+          renderCategoryTree(category.children, depth + 1)}
       </div>
-    ))
-  }
+    ));
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -126,7 +139,9 @@ export default function CategoriesAdminPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Gestión de Categorías</h1>
-            <p className="text-muted-foreground mt-2">Administra las categorías de productos</p>
+            <p className="text-muted-foreground mt-2">
+              Administra las categorías de productos
+            </p>
           </div>
           <Button onClick={() => setShowForm(!showForm)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -159,7 +174,9 @@ export default function CategoriesAdminPage() {
                       <Input
                         id="slug"
                         value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, slug: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -182,11 +199,11 @@ export default function CategoriesAdminPage() {
                     <div>
                       <Label htmlFor="parent">Categoría Padre</Label>
                       <Select
-                        value={formData.parent_id?.toString() || "none"}
+                        value={formData.parent_id?.toString() || 'none'}
                         onValueChange={(value) =>
                           setFormData({
                             ...formData,
-                            parent_id: value === "none" ? null : Number(value),
+                            parent_id: value === 'none' ? null : Number(value),
                           })
                         }
                       >
@@ -194,10 +211,12 @@ export default function CategoriesAdminPage() {
                           <SelectValue placeholder="Sin categoría padre" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">Sin categoría padre (Raíz)</SelectItem>
+                          <SelectItem value="none">
+                            Sin categoría padre (Raíz)
+                          </SelectItem>
                           {categories.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {"  ".repeat(cat.level)}
+                              {'  '.repeat(cat.level)}
                               {cat.icon} {cat.name}
                             </SelectItem>
                           ))}
@@ -228,7 +247,9 @@ export default function CategoriesAdminPage() {
                       <Input
                         id="icon"
                         value={formData.icon}
-                        onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, icon: e.target.value })
+                        }
                         placeholder="🪑"
                       />
                     </div>
@@ -248,7 +269,9 @@ export default function CategoriesAdminPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="meta_description">Meta Descripción (SEO)</Label>
+                      <Label htmlFor="meta_description">
+                        Meta Descripción (SEO)
+                      </Label>
                       <Textarea
                         id="meta_description"
                         value={formData.meta_description}
@@ -281,7 +304,9 @@ export default function CategoriesAdminPage() {
                       <Switch
                         id="is_active"
                         checked={formData.is_active}
-                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, is_active: checked })
+                        }
                       />
                       <Label htmlFor="is_active">Categoría Activa</Label>
                     </div>
@@ -290,7 +315,11 @@ export default function CategoriesAdminPage() {
 
                 <div className="flex gap-4">
                   <Button type="submit">Crear Categoría</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForm(false)}
+                  >
                     Cancelar
                   </Button>
                 </div>
@@ -306,14 +335,18 @@ export default function CategoriesAdminPage() {
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No hay categorías creadas aún</p>
+              <p className="text-center text-muted-foreground py-8">
+                No hay categorías creadas aún
+              </p>
             ) : (
-              <div className="space-y-1">{renderCategoryTree(categoryTree)}</div>
+              <div className="space-y-1">
+                {renderCategoryTree(categoryTree)}
+              </div>
             )}
           </CardContent>
         </Card>
       </main>
       <Footer />
     </div>
-  )
+  );
 }

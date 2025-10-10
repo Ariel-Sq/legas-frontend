@@ -1,7 +1,7 @@
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { ShopContent } from "@/components/shop-content";
-import { getShopProducts, getFilterOptions } from "@/lib/data";
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { ShopContent } from '@/components/shop-content';
+import { getShopProducts, getFilterOptions } from '@/lib/data';
 
 export default async function ShopPage({
   searchParams,

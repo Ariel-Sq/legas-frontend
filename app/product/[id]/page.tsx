@@ -1,14 +1,14 @@
-import { ProductImageGallery } from "@/components/product-image-gallery";
-import { ProductCard } from "@/components/product-card";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { getProductById, getRelatedProducts } from "@/lib/data";
-import { Star, Truck } from "lucide-react";
-import { notFound } from "next/navigation";
-import { AddToCartSection } from "@/components/add-to-cart-section";
-import { ProductReviews } from "@/components/product-reviews";
-import { getProductReviews, getProductRatingSummary } from "@/lib/reviews";
-import { getCurrentUser } from "@/lib/user";
+import { ProductImageGallery } from '@/components/product-image-gallery';
+import { ProductCard } from '@/components/product-card';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { getProductById, getRelatedProducts } from '@/lib/data';
+import { Star, Truck } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { AddToCartSection } from '@/components/add-to-cart-section';
+import { ProductReviews } from '@/components/product-reviews';
+import { getProductReviews, getProductRatingSummary } from '@/lib/reviews';
+import { getCurrentUser } from '@/lib/user';
 
 export default async function ProductPage({
   params,
@@ -63,8 +63,8 @@ export default async function ProductPage({
                           key={i}
                           className={`h-5 w-5 ${
                             i < Math.floor(ratingSummary.averageRating)
-                              ? "fill-primary text-primary"
-                              : "text-muted"
+                              ? 'fill-primary text-primary'
+                              : 'text-muted'
                           }`}
                         />
                       ))}
@@ -82,8 +82,8 @@ export default async function ProductPage({
                           key={i}
                           className={`h-5 w-5 ${
                             i < Math.floor(product.rating!)
-                              ? "fill-primary text-primary"
-                              : "text-muted"
+                              ? 'fill-primary text-primary'
+                              : 'text-muted'
                           }`}
                         />
                       ))}
@@ -109,13 +109,13 @@ export default async function ProductPage({
                   <div className="flex items-center gap-2">
                     <div
                       className={`h-2 w-2 rounded-full ${
-                        product.stock > 0 ? "bg-green-500" : "bg-red-500"
+                        product.stock > 0 ? 'bg-green-500' : 'bg-red-500'
                       }`}
                     />
                     <span className="text-sm text-muted-foreground">
                       {product.stock > 0
                         ? `${product.stock} in stock`
-                        : "Out of stock"}
+                        : 'Out of stock'}
                     </span>
                   </div>
                 )}

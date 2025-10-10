@@ -1,28 +1,38 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, Home, ShoppingBag, Info, Mail } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { useLanguage } from "@/components/language-provider"
+import { useState } from 'react';
+import Link from 'next/link';
+import { Menu, Home, ShoppingBag, Info, Mail } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useLanguage } from '@/components/language-provider';
 
 export function MobileNav() {
-  const [open, setOpen] = useState(false)
-  const { t } = useLanguage()
+  const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
 
   const navItems = [
-    { href: "/", label: t.header.home, icon: Home },
-    { href: "/shop", label: t.header.shop, icon: ShoppingBag },
-    { href: "/about", label: t.header.about, icon: Info },
-    { href: "/contact", label: t.header.contact, icon: Mail },
-  ]
+    { href: '/', label: t.header.home, icon: Home },
+    { href: '/shop', label: t.header.shop, icon: ShoppingBag },
+    { href: '/about', label: t.header.about, icon: Info },
+    { href: '/contact', label: t.header.contact, icon: Mail },
+  ];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden cursor-pointer">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden cursor-pointer"
+        >
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
@@ -33,7 +43,7 @@ export function MobileNav() {
         <Separator className="mb-6" />
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => {
-            const Icon = item.icon
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
@@ -44,10 +54,10 @@ export function MobileNav() {
                 <Icon className="h-5 w-5" />
                 {item.label}
               </Link>
-            )
+            );
           })}
         </nav>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { ShoppingCart } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/components/cart-provider";
-import Link from "next/link";
+import { ShoppingCart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/components/cart-provider';
+import Link from 'next/link';
 
 export function CartButton() {
   const { itemCount } = useCart();

@@ -1,13 +1,16 @@
-import { getFeaturedProducts, getNewArrivals } from "@/lib/data"
-import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { FeaturedProducts } from "@/components/featured-products"
-import { NewArrivals } from "@/components/new-arrivals"
-import { CTASection } from "@/components/cta-section"
-import { Footer } from "@/components/footer"
+import { getFeaturedProducts, getNewArrivals } from '@/lib/data';
+import { Header } from '@/components/header';
+import { HeroSection } from '@/components/hero-section';
+import { FeaturedProducts } from '@/components/featured-products';
+import { NewArrivals } from '@/components/new-arrivals';
+import { CTASection } from '@/components/cta-section';
+import { Footer } from '@/components/footer';
 
 export default async function Home() {
-  const [featuredProducts, newArrivals] = await Promise.all([getFeaturedProducts(), getNewArrivals()])
+  const [featuredProducts, newArrivals] = await Promise.all([
+    getFeaturedProducts(),
+    getNewArrivals(),
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -20,5 +23,5 @@ export default async function Home() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

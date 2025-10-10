@@ -1,26 +1,29 @@
-"use client"
+'use client';
 
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ChevronLeft, ChevronRight, X } from "lucide-react"
-import Image from "next/image"
-import { useState } from "react"
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface ProductImageGalleryProps {
-  images: string[]
-  productName: string
+  images: string[];
+  productName: string;
 }
 
-export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [isZoomOpen, setIsZoomOpen] = useState(false)
+export function ProductImageGallery({
+  images,
+  productName,
+}: ProductImageGalleryProps) {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
 
   const handlePrevious = () => {
-    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }
+    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
 
   const handleNext = () => {
-    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
+    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <>
@@ -31,7 +34,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
           onClick={() => setIsZoomOpen(true)}
         >
           <Image
-            src={images[selectedImage] || "/placeholder.svg"}
+            src={images[selectedImage] || '/placeholder.svg'}
             alt={`${productName} - Image ${selectedImage + 1}`}
             fill
             className="object-cover"
@@ -46,11 +49,13 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={`relative aspect-square rounded-md overflow-hidden cursor-pointer transition-all ${
-                  selectedImage === index ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-primary/50"
+                  selectedImage === index
+                    ? 'ring-2 ring-primary'
+                    : 'ring-1 ring-border hover:ring-primary/50'
                 }`}
               >
                 <Image
-                  src={image || "/placeholder.svg"}
+                  src={image || '/placeholder.svg'}
                   alt={`${productName} thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
@@ -86,7 +91,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
             {/* Zoomed Image - fills entire dialog */}
             <div className="relative w-full h-full max-w-full max-h-full">
               <Image
-                src={images[selectedImage] || "/placeholder.svg"}
+                src={images[selectedImage] || '/placeholder.svg'}
                 alt={`${productName} - Zoomed`}
                 fill
                 className="object-contain"
@@ -116,5 +121,5 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

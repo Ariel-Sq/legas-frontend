@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { ShopFilters } from "@/components/shop-filters";
-import { ShopProductCard } from "@/components/shop-product-card";
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { ShopFilters } from '@/components/shop-filters';
+import { ShopProductCard } from '@/components/shop-product-card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { X, SlidersHorizontal } from "lucide-react";
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { X, SlidersHorizontal } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -57,8 +57,8 @@ export function ShopContent({
     filterOptions.priceRange.min,
     filterOptions.priceRange.max,
   ]);
-  const [categoryFilter, setCategoryFilter] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<string>("popular");
+  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<string>('popular');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
@@ -74,7 +74,7 @@ export function ShopContent({
     }
 
     // Filter by category buttons
-    if (categoryFilter !== "All") {
+    if (categoryFilter !== 'All') {
       filtered = filtered.filter((p) => p.category === categoryFilter);
     }
 
@@ -104,13 +104,13 @@ export function ShopContent({
 
     // Sort products
     switch (sortBy) {
-      case "price-low":
+      case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
         break;
-      case "price-high":
+      case 'price-high':
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case "newest":
+      case 'newest':
         filtered.reverse();
         break;
       default:
@@ -191,11 +191,11 @@ export function ShopContent({
             <h1 className="text-3xl font-bold">
               {searchQuery
                 ? `Search results for "${searchQuery}"`
-                : "Living Room Furniture"}
+                : 'Living Room Furniture'}
             </h1>
             {searchQuery && (
               <button
-                onClick={() => router.push("/shop")}
+                onClick={() => router.push('/shop')}
                 className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
                 title="Clear search"
               >
@@ -269,41 +269,41 @@ export function ShopContent({
         {!searchQuery && (
           <div className="flex gap-3 mb-6 flex-wrap">
             <button
-              onClick={() => setCategoryFilter("All")}
+              onClick={() => setCategoryFilter('All')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "All"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === 'All'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary/20 hover:bg-primary/30'
               }`}
             >
               All
             </button>
             <button
-              onClick={() => setCategoryFilter("Sofas")}
+              onClick={() => setCategoryFilter('Sofas')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Sofas"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === 'Sofas'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary/20 hover:bg-primary/30'
               }`}
             >
               Sofas
             </button>
             <button
-              onClick={() => setCategoryFilter("Chairs")}
+              onClick={() => setCategoryFilter('Chairs')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Chairs"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === 'Chairs'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary/20 hover:bg-primary/30'
               }`}
             >
               Chairs
             </button>
             <button
-              onClick={() => setCategoryFilter("Tables")}
+              onClick={() => setCategoryFilter('Tables')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === "Tables"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/20 hover:bg-primary/30"
+                categoryFilter === 'Tables'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary/20 hover:bg-primary/30'
               }`}
             >
               Tables
@@ -322,7 +322,7 @@ export function ShopContent({
             <p className="text-lg text-muted-foreground">
               {searchQuery
                 ? `No products found for "${searchQuery}". Try a different search term.`
-                : "No products found matching your filters."}
+                : 'No products found matching your filters.'}
             </p>
           </div>
         )}

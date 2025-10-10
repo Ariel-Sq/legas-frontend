@@ -1,52 +1,53 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Heart, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
-import { useCart } from "@/components/cart-provider"
-import { useWishlist } from "@/components/wishlist-provider"
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { useCart } from '@/components/cart-provider';
+import { useWishlist } from '@/components/wishlist-provider';
 
 interface AddToCartSectionProps {
   product: {
-    id: number
-    name: string
-    price: number
-    image: string
-    category: string
-    stock?: number
-  }
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    stock?: number;
+  };
 }
 
 export function AddToCartSection({ product }: AddToCartSectionProps) {
-  const [quantity, setQuantity] = useState(1)
-  const { addToCart, removeFromCart, updateQuantity, getCartItem, isInCart } = useCart()
-  const { toggleWishlist, isInWishlist } = useWishlist()
-  const cartItem = getCartItem(product.id)
-  const productInCart = isInCart(product.id)
-  const inWishlist = isInWishlist(product.id)
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart, removeFromCart, updateQuantity, getCartItem, isInCart } =
+    useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const cartItem = getCartItem(product.id);
+  const productInCart = isInCart(product.id);
+  const inWishlist = isInWishlist(product.id);
 
   useEffect(() => {
     if (cartItem) {
-      setQuantity(cartItem.quantity)
+      setQuantity(cartItem.quantity);
     }
-  }, [cartItem])
+  }, [cartItem]);
 
   const handleDecrement = () => {
     if (quantity > 1) {
-      setQuantity(quantity - 1)
+      setQuantity(quantity - 1);
     }
-  }
+  };
 
   const handleIncrement = () => {
     if (!product.stock || quantity < product.stock) {
-      setQuantity(quantity + 1)
+      setQuantity(quantity + 1);
     }
-  }
+  };
 
   const handleAddOrUpdateCart = () => {
     if (productInCart) {
       // Update quantity if product is already in cart
-      updateQuantity(product.id, quantity)
+      updateQuantity(product.id, quantity);
     } else {
       // Add new product to cart
       addToCart(
@@ -57,15 +58,15 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
           image: product.image,
           category: product.category,
         },
-        quantity,
-      )
+        quantity
+      );
     }
-  }
+  };
 
   const handleRemoveFromCart = () => {
-    removeFromCart(product.id)
-    setQuantity(1) // Reset quantity to 1 after removing
-  }
+    removeFromCart(product.id);
+    setQuantity(1); // Reset quantity to 1 after removing
+  };
 
   const handleToggleWishlist = () => {
     toggleWishlist({
@@ -74,11 +75,11 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
       price: product.price,
       image: product.image,
       category: product.category,
-    })
-  }
+    });
+  };
 
-  const isOutOfStock = product.stock !== undefined && product.stock === 0
-  const quantityChanged = cartItem && cartItem.quantity !== quantity
+  const isOutOfStock = product.stock !== undefined && product.stock === 0;
+  const quantityChanged = cartItem && cartItem.quantity !== quantity;
 
   return (
     <div className="space-y-4">
@@ -92,7 +93,9 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
           >
             <Minus className="h-4 w-4" />
           </button>
-          <span className="h-10 w-12 flex items-center justify-center border-x">{quantity}</span>
+          <span className="h-10 w-12 flex items-center justify-center border-x">
+            {quantity}
+          </span>
           <button
             onClick={handleIncrement}
             disabled={!!product.stock && quantity >= product.stock}
@@ -111,12 +114,17 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
               disabled={!quantityChanged}
               className="flex-1 h-12 text-base cursor-pointer"
               size="lg"
-              variant={quantityChanged ? "default" : "secondary"}
+              variant={quantityChanged ? 'default' : 'secondary'}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {quantityChanged ? "Update Cart" : "In Cart"}
+              {quantityChanged ? 'Update Cart' : 'In Cart'}
             </Button>
-            <Button onClick={handleRemoveFromCart} variant="destructive" size="lg" className="h-12 px-6 cursor-pointer">
+            <Button
+              onClick={handleRemoveFromCart}
+              variant="destructive"
+              size="lg"
+              className="h-12 px-6 cursor-pointer"
+            >
               <Trash2 className="mr-2 h-5 w-5" />
               Remove
             </Button>
@@ -130,7 +138,7 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
               size="lg"
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
             </Button>
             <Button
               onClick={handleToggleWishlist}
@@ -138,11 +146,13 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
               size="lg"
               className="h-12 w-12 p-0 cursor-pointer bg-transparent"
             >
-              <Heart className={`h-5 w-5 ${inWishlist ? "fill-primary text-primary" : ""}`} />
+              <Heart
+                className={`h-5 w-5 ${inWishlist ? 'fill-primary text-primary' : ''}`}
+              />
             </Button>
           </>
         )}
       </div>
     </div>
-  )
+  );
 }

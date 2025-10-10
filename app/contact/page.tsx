@@ -1,14 +1,14 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Mail, Phone, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { getContactInfo } from "@/lib/company"
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { getContactInfo } from '@/lib/company';
 
 export default async function ContactPage() {
-  const contactInfo = await getContactInfo()
+  const contactInfo = await getContactInfo();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -16,9 +16,12 @@ export default async function ContactPage() {
       <main className="flex-1">
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-6xl">
-            <h1 className="text-5xl font-bold mb-6 text-center">Get in Touch</h1>
+            <h1 className="text-5xl font-bold mb-6 text-center">
+              Get in Touch
+            </h1>
             <p className="text-xl text-muted-foreground text-center mb-12">
-              We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              We'd love to hear from you. Send us a message and we'll respond as
+              soon as possible.
             </p>
 
             <div className="grid md:grid-cols-2 gap-12">
@@ -34,7 +37,8 @@ export default async function ContactPage() {
                       <p className="text-muted-foreground">
                         {contactInfo.address.street}
                         <br />
-                        {contactInfo.address.city}, {contactInfo.address.state} {contactInfo.address.zip}
+                        {contactInfo.address.city}, {contactInfo.address.state}{' '}
+                        {contactInfo.address.zip}
                       </p>
                     </div>
                   </div>
@@ -45,7 +49,9 @@ export default async function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Phone</h3>
-                      <p className="text-muted-foreground">{contactInfo.phone}</p>
+                      <p className="text-muted-foreground">
+                        {contactInfo.phone}
+                      </p>
                     </div>
                   </div>
 
@@ -55,7 +61,9 @@ export default async function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">{contactInfo.email}</p>
+                      <p className="text-muted-foreground">
+                        {contactInfo.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -79,17 +87,31 @@ export default async function ContactPage() {
 
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" className="mt-2" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      className="mt-2"
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="subject">Subject</Label>
-                    <Input id="subject" placeholder="How can we help?" className="mt-2" />
+                    <Input
+                      id="subject"
+                      placeholder="How can we help?"
+                      className="mt-2"
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" placeholder="Tell us more about your inquiry..." rows={6} className="mt-2" />
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us more about your inquiry..."
+                      rows={6}
+                      className="mt-2"
+                    />
                   </div>
 
                   <Button type="submit" className="w-full" size="lg">
@@ -103,5 +125,5 @@ export default async function ContactPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useCart } from "@/components/cart-provider";
-import { CartItemRow } from "@/components/cart-item-row";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import { useCart } from '@/components/cart-provider';
+import { CartItemRow } from '@/components/cart-item-row';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { ShoppingBag } from 'lucide-react';
+import Link from 'next/link';
 
 export function CartContent() {
   const { items, itemCount, subtotal } = useCart();
@@ -44,7 +44,7 @@ export function CartContent() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Shopping Cart</h1>
           <p className="text-muted-foreground">
-            {itemCount} {itemCount === 1 ? "item" : "items"} in your cart
+            {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
           </p>
         </div>
 

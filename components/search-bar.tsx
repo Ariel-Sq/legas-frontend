@@ -1,29 +1,29 @@
-"use client"
+'use client';
 
-import { Search, X } from "lucide-react"
-import { useRouter, usePathname } from "next/navigation"
-import { useState, type FormEvent } from "react"
-import { useLanguage } from "@/components/language-provider"
+import { Search, X } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, type FormEvent } from 'react';
+import { useLanguage } from '@/components/language-provider';
 
 export function SearchBar() {
-  const [query, setQuery] = useState("")
-  const router = useRouter()
-  const pathname = usePathname()
-  const { t } = useLanguage()
+  const [query, setQuery] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const { t } = useLanguage();
 
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (query.trim()) {
-      router.push(`/shop?search=${encodeURIComponent(query.trim())}`)
+      router.push(`/shop?search=${encodeURIComponent(query.trim())}`);
     }
-  }
+  };
 
   const handleClear = () => {
-    setQuery("")
-    if (pathname === "/shop") {
-      router.push("/shop")
+    setQuery('');
+    if (pathname === '/shop') {
+      router.push('/shop');
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="relative hidden sm:block">
@@ -46,5 +46,5 @@ export function SearchBar() {
         </button>
       )}
     </form>
-  )
+  );
 }

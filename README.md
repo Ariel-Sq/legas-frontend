@@ -58,24 +58,24 @@ A modern, responsive ecommerce frontend built with Next.js for furniture and hom
 ## 🏗️ Project Structure
 
 \`\`\`
-├── app/                    # Next.js app directory
-│   ├── (auth)/            # Authentication pages
-│   ├── admin/             # Admin panel pages
-│   ├── cart/              # Shopping cart page
-│   ├── checkout/          # Checkout process
-│   ├── orders/            # Order history
-│   ├── product/           # Product detail pages
-│   ├── profile/           # User profile
-│   ├── shop/              # Product catalog
-│   └── wishlist/          # Wishlist page
-├── components/            # Reusable UI components
-│   ├── ui/               # Base UI components (Radix UI)
-│   └── ...               # Feature-specific components
-├── lib/                  # Utility functions and data
-│   ├── translations/     # Multi-language support
-│   └── ...               # API functions, types, etc.
-├── public/               # Static assets
-└── styles/               # Global styles
+├── app/ # Next.js app directory
+│ ├── (auth)/ # Authentication pages
+│ ├── admin/ # Admin panel pages
+│ ├── cart/ # Shopping cart page
+│ ├── checkout/ # Checkout process
+│ ├── orders/ # Order history
+│ ├── product/ # Product detail pages
+│ ├── profile/ # User profile
+│ ├── shop/ # Product catalog
+│ └── wishlist/ # Wishlist page
+├── components/ # Reusable UI components
+│ ├── ui/ # Base UI components (Radix UI)
+│ └── ... # Feature-specific components
+├── lib/ # Utility functions and data
+│ ├── translations/ # Multi-language support
+│ └── ... # API functions, types, etc.
+├── public/ # Static assets
+└── styles/ # Global styles
 \`\`\`
 
 ## 📱 Pages

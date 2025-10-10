@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { User, LogOut, Settings, Package } from "lucide-react"
-import Link from "next/link"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { User, LogOut, Settings, Package } from 'lucide-react';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,31 +10,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import type { User as UserType } from "@/lib/user"
+} from '@/components/ui/dropdown-menu';
+import type { User as UserType } from '@/lib/user';
 
 interface UserMenuProps {
-  user: UserType
+  user: UserType;
 }
 
 export function UserMenu({ user }: UserMenuProps) {
   const handleLogout = () => {
     // TODO: Implement OAuth logout
-    console.log("Logout clicked")
-    alert("Logout functionality will be implemented with OAuth")
-  }
+    console.log('Logout clicked');
+    alert('Logout functionality will be implemented with OAuth');
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+            <AvatarImage
+              src={user.avatar || '/placeholder.svg'}
+              alt={user.name}
+            />
             <AvatarFallback>
               {user.name
-                .split(" ")
+                .split(' ')
                 .map((n) => n[0])
-                .join("")}
+                .join('')}
             </AvatarFallback>
           </Avatar>
         </button>
@@ -43,7 +46,9 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -72,5 +77,5 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
