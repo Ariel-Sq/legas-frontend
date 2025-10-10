@@ -6,6 +6,9 @@ import { getProductById, getRelatedProducts } from "@/lib/data"
 import { Star, Truck } from "lucide-react"
 import { notFound } from "next/navigation"
 import { AddToCartSection } from "@/components/add-to-cart-section"
+import { ProductReviews } from "@/components/product-reviews"
+import { getProductReviews, getProductRatingSummary } from "@/lib/reviews"
+import { getCurrentUser } from "@/lib/user"
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const product = await getProductById(params.id)
@@ -16,6 +19,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
   const relatedProducts = await getRelatedProducts(product.id, product.category)
   const images = product.images || [product.image]
+
+  const reviews = await getProductReviews(params.id)
+  const ratingSummary = await getProductRatingSummary(params.id)
+  const user = await getCurrentUser()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -36,7 +43,23 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">{product.name}</h1>
 
                 {/* Rating */}
-                {product.rating && (
+                {ratingSummary ? (
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-5 w-5 ${
+                            i < Math.floor(ratingSummary.averageRating) ? "fill-primary text-primary" : "text-muted"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.totalReviews} reseñas)
+                    </span>
+                  </div>
+                ) : product.rating ? (
                   <div className="flex items-center gap-2 mb-4">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
@@ -50,7 +73,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
                       {product.rating} ({product.reviews} reviews)
                     </span>
                   </div>
-                )}
+                ) : null}
 
                 <p className="text-4xl font-bold text-primary mb-6">${product.price}</p>
               </div>
@@ -105,6 +128,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="mb-16">
+            <ProductReviews productId={params.id} reviews={reviews} ratingSummary={ratingSummary} userId={user?.id} />
           </div>
 
           {/* Related Products */}

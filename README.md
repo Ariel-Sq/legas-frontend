@@ -35,29 +35,29 @@ A modern, responsive ecommerce frontend built with Next.js for furniture and hom
 
 1. **Clone the repository**
 
-   ```bash
+   \`\`\`bash
    git clone https://github.com/your-username/ecommerce-frontend.git
    cd ecommerce-frontend
-   ```
+   \`\`\`
 
 2. **Install dependencies**
 
-   ```bash
+   \`\`\`bash
    pnpm install
-   ```
+   \`\`\`
 
 3. **Run the development server**
 
-   ```bash
+   \`\`\`bash
    pnpm dev
-   ```
+   \`\`\`
 
 4. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 🏗️ Project Structure
 
-```
+\`\`\`
 ├── app/                    # Next.js app directory
 │   ├── (auth)/            # Authentication pages
 │   ├── admin/             # Admin panel pages
@@ -76,7 +76,7 @@ A modern, responsive ecommerce frontend built with Next.js for furniture and hom
 │   └── ...               # API functions, types, etc.
 ├── public/               # Static assets
 └── styles/               # Global styles
-```
+\`\`\`
 
 ## 📱 Pages
 
