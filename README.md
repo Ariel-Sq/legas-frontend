@@ -1,30 +1,137 @@
-# Next.js app structure
+# Ecommerce Frontend
 
-_Automatically synced with your [v0.app](https://v0.app) deployments_
+A modern, responsive ecommerce frontend built with Next.js for furniture and home decor products. Features a complete shopping experience with product catalog, shopping cart, user authentication, admin panel, and multi-language support.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/gonzalo-smtv/v0-next-js-app-structure)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/B4dB098r5FU)
+![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.9-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-## Overview
+## 🚀 Features
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+- **Product Catalog**: Browse furniture and home decor products with detailed information
+- **Shopping Cart**: Add, remove, and manage cart items with persistent storage
+- **User Authentication**: Sign up, login, and manage user profiles
+- **Checkout Process**: Complete order flow with order confirmation
+- **Admin Panel**: Manage products, categories, and orders
+- **Wishlist**: Save favorite products for later
+- **Multi-language Support**: English and Spanish translations
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Dark/Light Theme**: Toggle between themes for better user experience
 
-## Deployment
+## 🛠️ Tech Stack
 
-Your project is live at:
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with custom components
+- **UI Components**: Radix UI primitives
+- **Forms**: React Hook Form with Zod validation
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **Deployment**: Vercel
+- **Package Manager**: pnpm
 
-**[https://vercel.com/gonzalo-smtv/v0-next-js-app-structure](https://vercel.com/gonzalo-smtv/v0-next-js-app-structure)**
+## 📦 Installation
 
-## Build your app
+1. **Clone the repository**
 
-Continue building your app on:
+   ```bash
+   git clone https://github.com/your-username/ecommerce-frontend.git
+   cd ecommerce-frontend
+   ```
 
-**[https://v0.app/chat/projects/B4dB098r5FU](https://v0.app/chat/projects/B4dB098r5FU)**
+2. **Install dependencies**
 
-## How It Works
+   ```bash
+   pnpm install
+   ```
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+3. **Run the development server**
+
+   ```bash
+   pnpm dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🏗️ Project Structure
+
+```
+├── app/                    # Next.js app directory
+│   ├── (auth)/            # Authentication pages
+│   ├── admin/             # Admin panel pages
+│   ├── cart/              # Shopping cart page
+│   ├── checkout/          # Checkout process
+│   ├── orders/            # Order history
+│   ├── product/           # Product detail pages
+│   ├── profile/           # User profile
+│   ├── shop/              # Product catalog
+│   └── wishlist/          # Wishlist page
+├── components/            # Reusable UI components
+│   ├── ui/               # Base UI components (Radix UI)
+│   └── ...               # Feature-specific components
+├── lib/                  # Utility functions and data
+│   ├── translations/     # Multi-language support
+│   └── ...               # API functions, types, etc.
+├── public/               # Static assets
+└── styles/               # Global styles
+```
+
+## 📱 Pages
+
+- **Home** (`/`): Hero section, featured products, new arrivals
+- **Shop** (`/shop`): Product catalog with filters and search
+- **Product Details** (`/product/[id]`): Detailed product view with gallery
+- **Cart** (`/cart`): Shopping cart management
+- **Checkout** (`/checkout`): Order checkout process
+- **Profile** (`/profile`): User account management
+- **Orders** (`/orders`): Order history and tracking
+- **Wishlist** (`/wishlist`): Saved products
+- **Admin** (`/admin`): Product and category management
+
+## 🎨 Components
+
+The application uses a component-based architecture with reusable UI components:
+
+- **Header/Navigation**: Site navigation with cart and user menu
+- **Product Cards**: Display products in grid/list layouts
+- **Filters**: Category, price, and material filters
+- **Forms**: Login, registration, and checkout forms
+- **Modals/Dialogs**: Product quick view, cart confirmation
+- **Admin Tables**: Data tables for managing products and orders
+
+## 🌐 Multi-language Support
+
+The application supports English and Spanish with translation files in `lib/translations/`. Language switching is available in the header.
+
+## 🔧 Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+
+## 🚀 Deployment
+
+The application is configured for deployment on Vercel with automatic deployments from the main branch.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Contact
+
+For questions or support, please open an issue on GitHub.
+
+---
+
+Built with ❤️ using Next.js and modern web technologies.
