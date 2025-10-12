@@ -2,6 +2,7 @@
 
 import type React from 'react';
 import { useState, useOptimistic, useTransition } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, ChevronRight, ChevronDown, Edit, Trash2 } from 'lucide-react';
+import {
+  Plus,
+  ChevronRight,
+  ChevronDown,
+  Edit,
+  Trash2,
+  ArrowLeft,
+} from 'lucide-react';
 import {
   getCategories,
   createCategory,
@@ -358,30 +366,38 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
               Gestiona la estructura de categorías de productos
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setEditingCategory(null);
-              setShowForm(!showForm);
-              if (!showForm) {
-                setFormData({
-                  name: '',
-                  slug: '',
-                  description: '',
-                  parentId: null,
-                  image: '',
-                  icon: '',
-                  is_active: true,
-                  meta_title: '',
-                  meta_description: '',
-                });
-              }
-            }}
-            disabled={isPending}
-            className="hover:cursor-pointer"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Categoría
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" asChild className="hover:cursor-pointer">
+              <Link href="/admin">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al Admin
+              </Link>
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingCategory(null);
+                setShowForm(!showForm);
+                if (!showForm) {
+                  setFormData({
+                    name: '',
+                    slug: '',
+                    description: '',
+                    parentId: null,
+                    image: '',
+                    icon: '',
+                    is_active: true,
+                    meta_title: '',
+                    meta_description: '',
+                  });
+                }
+              }}
+              disabled={isPending}
+              className="hover:cursor-pointer"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Categoría
+            </Button>
+          </div>
         </div>
 
         {/* Error Message */}

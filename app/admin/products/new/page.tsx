@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -287,16 +287,24 @@ export default function NewProductPage() {
       <main className="flex-1 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
-          <div className="mb-8 flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/admin">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Crear Producto</h1>
+                <p className="text-muted-foreground">Paso {step} de 4</p>
+              </div>
+            </div>
+            <Button variant="outline" asChild className="gap-2">
               <Link href="/admin">
-                <ArrowLeft className="h-5 w-5" />
+                <X className="h-4 w-4" />
+                Cancelar
               </Link>
             </Button>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Crear Producto</h1>
-              <p className="text-muted-foreground">Paso {step} de 4</p>
-            </div>
           </div>
 
           {/* Progress Steps */}
