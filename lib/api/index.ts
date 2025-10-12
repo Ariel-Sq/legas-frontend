@@ -11,9 +11,11 @@ export type { CreateProductTemplateDto } from './models/CreateProductTemplateDto
 export type { CreateReviewDto } from './models/CreateReviewDto';
 export { CreateUserDto } from './models/CreateUserDto';
 export type { MoveCategoryDto } from './models/MoveCategoryDto';
+export type { Order } from './models/Order';
 export type { ProductRatingSummary } from './models/ProductRatingSummary';
 export type { ProductVariation } from './models/ProductVariation';
-export type { Review } from './models/Review';
+export { Review } from './models/Review';
+export type { ReviewImage } from './models/ReviewImage';
 export type { UpdateCartItemDto } from './models/UpdateCartItemDto';
 export type { UpdateCategoryDto } from './models/UpdateCategoryDto';
 export type { UpdateProductDto } from './models/UpdateProductDto';
