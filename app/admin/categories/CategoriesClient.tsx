@@ -64,6 +64,37 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
     (state, categoryId: string) => removeCategoryFromTree(state, categoryId)
   );
 
+  // Helper function to recursively update a category in the tree
+  const updateCategoryInTree = (
+    tree: Category[],
+    categoryId: string,
+    updatedData: Partial<Category>
+  ): Category[] => {
+    return tree.map((cat) => {
+      if (cat.id === categoryId) {
+        return { ...cat, ...updatedData };
+      }
+      if (cat.children) {
+        return {
+          ...cat,
+          children: updateCategoryInTree(cat.children, categoryId, updatedData),
+        };
+      }
+      return cat;
+    });
+  };
+
+  const [optimisticUpdate, updateOptimisticCategory] = useOptimistic(
+    categories,
+    (
+      state,
+      {
+        categoryId,
+        updatedData,
+      }: { categoryId: string; updatedData: Partial<Category> }
+    ) => updateCategoryInTree(state, categoryId, updatedData)
+  );
+
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     slug: '',
@@ -124,8 +155,37 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
 
       try {
         if (editingCategory) {
-          // Update existing category
-          await updateCategory(editingCategory.id, formData);
+          // Calculate only changed fields for PATCH request
+          const changedFields: Partial<CategoryFormData> = {};
+          const originalData = {
+            name: editingCategory.name,
+            slug: editingCategory.slug,
+            description: editingCategory.description || '',
+            parentId: editingCategory.parentId,
+            image: editingCategory.image || '',
+            icon: editingCategory.icon || '',
+            is_active: editingCategory.is_active,
+            meta_title: editingCategory.meta_title || '',
+            meta_description: editingCategory.meta_description || '',
+          };
+
+          Object.keys(formData).forEach((key) => {
+            const formKey = key as keyof CategoryFormData;
+            if (formData[formKey] !== originalData[formKey]) {
+              (changedFields as any)[formKey] = formData[formKey];
+            }
+          });
+
+          // Update existing category with only changed fields
+          const updatedCategory = await updateCategory(
+            editingCategory.id,
+            changedFields
+          );
+          // Optimistic update for update
+          updateOptimisticCategory({
+            categoryId: editingCategory.id,
+            updatedData: updatedCategory,
+          });
           setEditingCategory(null);
         } else {
           // Create new category
@@ -178,7 +238,7 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
   };
 
   // Since getCategories now returns tree structure directly, use it as is
-  const categoryTree = editingCategory ? categories : optimisticDelete;
+  const categoryTree = editingCategory ? optimisticUpdate : optimisticDelete;
 
   const renderCategoryTree = (
     cats: (Category & { children?: Category[] })[],

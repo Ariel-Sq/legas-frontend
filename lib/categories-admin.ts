@@ -60,10 +60,11 @@ export async function createCategory(
 
 export async function updateCategory(
   id: string,
-  data: CategoryFormData
+  data: Partial<CategoryFormData>
 ): Promise<Category> {
+  console.log('%c data: ', 'color: orange', data);
   const resp = await fetch(`${BACKEND_URL}/api/categories/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
