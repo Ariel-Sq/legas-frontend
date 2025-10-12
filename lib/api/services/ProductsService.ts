@@ -2,16 +2,20 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ProductVariation } from '../models/ProductVariation';
 import type { UpdateProductDto } from '../models/UpdateProductDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ProductsService {
   /**
-   * @returns any
+   * Get all products with details
+   * @returns ProductVariation Products found
    * @throws ApiError
    */
-  public static productsControllerFindAllWithDetails(): CancelablePromise<any> {
+  public static productsControllerFindAllWithDetails(): CancelablePromise<
+    Array<ProductVariation>
+  > {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/products/with-details',
