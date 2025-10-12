@@ -18,12 +18,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
-  const handleLogout = () => {
-    // TODO: Implement OAuth logout
-    console.log('Logout clicked');
-    alert('Logout functionality will be implemented with OAuth');
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -71,7 +65,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+        <DropdownMenuItem className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

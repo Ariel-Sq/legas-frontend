@@ -1,4 +1,3 @@
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getCurrentUser } from '@/lib/user';
 import { getAllOrders } from '@/lib/orders';
@@ -54,7 +53,6 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
@@ -181,9 +179,7 @@ export default async function AdminPage() {
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {order.items.length} artículo(s) •{' '}
-                          {new Date(order.createdAt).toLocaleDateString(
-                            'es-ES'
-                          )}
+                          {new Date(order.date).toLocaleDateString('es-ES')}
                         </p>
                       </div>
                       <div className="text-right">

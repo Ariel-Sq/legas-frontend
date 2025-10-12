@@ -1,4 +1,3 @@
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { ShopContent } from '@/components/shop-content';
 import { getShopProducts, getFilterOptions } from '@/lib/data';
@@ -14,7 +13,6 @@ export default async function ShopPage({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <ShopContent
         products={products}
         filterOptions={filterOptions}

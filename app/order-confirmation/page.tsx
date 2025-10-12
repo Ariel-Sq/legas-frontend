@@ -8,7 +8,6 @@ import { CheckCircle2, Package, Truck, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getOrderById, type Order } from '@/lib/orders';
 
@@ -44,7 +43,6 @@ export default function OrderConfirmationPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col">
-        <Header />
         <main className="flex-grow">
           <div className="container mx-auto px-4 py-16">
             <div className="text-center">Loading...</div>
@@ -61,7 +59,6 @@ export default function OrderConfirmationPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8 md:py-16">
           {/* Success Message */}

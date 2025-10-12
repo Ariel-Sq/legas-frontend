@@ -1,6 +1,5 @@
 'use client';
 
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { useEffect, useState } from 'react';
 import { getUserOrders, type Order } from '@/lib/orders';
@@ -59,7 +58,6 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col">
-        <Header />
         <main className="flex-grow bg-background flex items-center justify-center">
           <p className="text-muted-foreground">Loading orders...</p>
         </main>
@@ -70,7 +68,6 @@ export default function OrdersPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <div className="mb-8">

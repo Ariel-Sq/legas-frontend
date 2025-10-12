@@ -3,7 +3,6 @@
 import type React from 'react';
 
 import { useCart } from '@/components/cart-provider';
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +77,6 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="flex min-h-screen flex-col">
-        <Header />
         <main className="flex-grow">
           <div className="container mx-auto px-4 py-16 text-center">
             <h1 className="mb-4 text-3xl font-bold">Your cart is empty</h1>
@@ -97,7 +95,6 @@ export default function CheckoutPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8">
           <h1 className="mb-8 text-3xl font-bold">Checkout</h1>

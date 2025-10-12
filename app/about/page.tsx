@@ -1,4 +1,3 @@
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import Image from 'next/image';
 import { getAboutContent } from '@/lib/company';
@@ -8,7 +7,6 @@ export default async function AboutPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <main className="flex-1">
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-4xl">

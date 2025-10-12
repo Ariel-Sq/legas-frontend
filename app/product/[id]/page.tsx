@@ -1,6 +1,5 @@
 import { ProductImageGallery } from '@/components/product-image-gallery';
 import { ProductCard } from '@/components/product-card';
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getProductById, getRelatedProducts } from '@/lib/data';
 import { Star, Truck } from 'lucide-react';
@@ -34,7 +33,6 @@ export default async function ProductPage({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Product Details Section */}

@@ -1,9 +1,7 @@
 'use client';
 
 import type React from 'react';
-
 import { useState, useEffect } from 'react';
-import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,7 +132,6 @@ export default function CategoriesAdminPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
