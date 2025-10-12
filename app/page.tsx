@@ -1,4 +1,4 @@
-import { getFeaturedProducts, getNewArrivals } from '@/lib/data';
+import { getFeaturedProducts, getNewArrivals } from '@/lib/products';
 import { HeroSection } from '@/components/hero-section';
 import { FeaturedProducts } from '@/components/featured-products';
 import { NewArrivals } from '@/components/new-arrivals';

@@ -1,5 +1,5 @@
 import { ProductDetailClient } from '@/components/product-detail-client';
-import { getProductTemplates, getRelatedProducts } from '@/lib/data';
+import { getProductTemplates, getRelatedProducts } from '@/lib/products';
 import { getProductReviews, getProductRatingSummary } from '@/lib/reviews';
 import { getCurrentUser } from '@/lib/user';
 import { notFound } from 'next/navigation';

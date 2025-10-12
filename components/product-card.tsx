@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import type { Product } from '@/lib/data';
+import type { Product } from '@/lib/products';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';

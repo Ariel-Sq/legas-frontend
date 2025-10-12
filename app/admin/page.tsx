@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/user';
 import { getAllOrders } from '@/lib/orders';
-import { getAllProducts } from '@/lib/data';
+import { getAllProducts } from '@/lib/products';
 import { redirect } from 'next/navigation';
 import { Package, DollarSign, ShoppingBag, Users } from 'lucide-react';
 import {

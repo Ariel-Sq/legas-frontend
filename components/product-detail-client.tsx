@@ -6,7 +6,11 @@ import { ProductCard } from '@/components/product-card';
 import { AddToCartSection } from '@/components/add-to-cart-section';
 import { ProductReviews } from '@/components/product-reviews';
 import { Star, Truck } from 'lucide-react';
-import type { ProductTemplate, ProductVariation, Product } from '@/lib/data';
+import type {
+  ProductTemplate,
+  ProductVariation,
+  Product,
+} from '@/lib/products';
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
 import type { User } from '@/lib/user';
 

@@ -3,7 +3,7 @@ import {
   getProductTemplates,
   getFilterOptions,
   ProductTemplate,
-} from '@/lib/data';
+} from '@/lib/products';
 
 // Convert templates to display products for shop
 function templatesToDisplayProducts(templates: ProductTemplate[]) {

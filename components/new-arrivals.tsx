@@ -1,4 +1,4 @@
-import type { Product } from '@/lib/data';
+import type { Product } from '@/lib/products';
 import { ProductCard } from './product-card';
 
 interface NewArrivalsProps {
