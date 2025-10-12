@@ -1,3 +1,5 @@
+import { BACKEND_URL } from '@/utils/environments';
+
 export interface Category {
   id: string;
   name: string;
@@ -55,7 +57,6 @@ export interface ProductTemplate {
   updated_at: string;
 }
 
-// Legacy interface for backward compatibility
 export interface Product {
   id: string;
   name: string;
@@ -74,12 +75,10 @@ export interface Product {
   templateId?: string; // For wishlist functionality
 }
 
-import { ProductTemplatesService } from './api';
-
 export async function getProductTemplates(): Promise<ProductTemplate[]> {
-  const resp =
-    await ProductTemplatesService.productTemplatesControllerFindAll();
-  return resp as ProductTemplate[];
+  const resp = await fetch(`${BACKEND_URL}/api/product-templates`);
+  const data: ProductTemplate[] = await resp.json();
+  return data;
 }
 
 export async function getProductTemplateById(

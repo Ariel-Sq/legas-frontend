@@ -8,8 +8,7 @@
     "dev": "next dev",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "format": "prettier --write .",
-    "start": "next start",
-    "generate-api": "npx dotenv-cli -e .env -- sh -c 'npx openapi-typescript-codegen -i $BACKEND_URL/api/docs-json -o ./lib/api --exportCore false && prettier --write .'"
+    "start": "next start"
   },
   "dependencies": {
     "@hookform/resolvers": "5.2.2",
@@ -79,7 +78,6 @@
     "eslint-plugin-prettier": "5.5.4",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.0.0",
-    "openapi-typescript-codegen": "0.29.0",
     "postcss": "8.5",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.14",
