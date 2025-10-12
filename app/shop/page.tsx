@@ -1,4 +1,3 @@
-import { Footer } from '@/components/footer';
 import { ShopContent } from '@/components/shop-content';
 import {
   getProductTemplates,
@@ -55,7 +54,6 @@ export default async function ShopPage({
         filterOptions={filterOptions}
         searchQuery={params.search}
       />
-      <Footer />
     </div>
   );
 }

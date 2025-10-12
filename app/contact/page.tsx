@@ -1,4 +1,3 @@
-import { Footer } from '@/components/footer';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -121,7 +120,6 @@ export default async function ContactPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

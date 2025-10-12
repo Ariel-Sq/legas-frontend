@@ -1,6 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/footer';
 import {
   Card,
   CardContent,
@@ -103,7 +102,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

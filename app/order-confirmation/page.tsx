@@ -1,5 +1,4 @@
 import { OrderConfirmationClient } from '@/components/order-confirmation-client';
-import { Footer } from '@/components/footer';
 import { getOrderById } from '@/lib/orders';
 import { redirect } from 'next/navigation';
 
@@ -26,7 +25,6 @@ export default async function OrderConfirmationPage({
   return (
     <div className="flex min-h-screen flex-col">
       <OrderConfirmationClient order={order} />
-      <Footer />
     </div>
   );
 }

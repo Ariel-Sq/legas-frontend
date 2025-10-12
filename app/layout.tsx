@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { WishlistProvider } from '@/components/wishlist-provider';
 import './globals.css';
 import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -41,6 +42,7 @@ export default function RootLayout({
               <Suspense fallback={null}>
                 <Header />
                 {children}
+                <Footer />
               </Suspense>
             </CartProvider>
           </WishlistProvider>

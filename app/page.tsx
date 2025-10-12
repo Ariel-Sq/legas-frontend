@@ -3,7 +3,6 @@ import { HeroSection } from '@/components/hero-section';
 import { FeaturedProducts } from '@/components/featured-products';
 import { NewArrivals } from '@/components/new-arrivals';
 import { CTASection } from '@/components/cta-section';
-import { Footer } from '@/components/footer';
 
 export default async function Home() {
   const [featuredProducts, newArrivals] = await Promise.all([
@@ -19,7 +18,6 @@ export default async function Home() {
         <NewArrivals products={newArrivals} />
         <CTASection />
       </main>
-      <Footer />
     </div>
   );
 }

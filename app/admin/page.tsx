@@ -1,4 +1,3 @@
-import { Footer } from '@/components/footer';
 import { getCurrentUser } from '@/lib/user';
 import { getAllOrders } from '@/lib/orders';
 import { getAllProducts } from '@/lib/data';
@@ -195,7 +194,6 @@ export default async function AdminPage() {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

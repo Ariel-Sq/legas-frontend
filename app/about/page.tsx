@@ -1,4 +1,3 @@
-import { Footer } from '@/components/footer';
 import Image from 'next/image';
 import { getAboutContent } from '@/lib/company';
 
@@ -45,7 +44,6 @@ export default async function AboutPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

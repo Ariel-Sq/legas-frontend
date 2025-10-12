@@ -1,5 +1,4 @@
 import { ProductDetailClient } from '@/components/product-detail-client';
-import { Footer } from '@/components/footer';
 import { getProductTemplates, getRelatedProducts } from '@/lib/data';
 import { getProductReviews, getProductRatingSummary } from '@/lib/reviews';
 import { getCurrentUser } from '@/lib/user';
@@ -14,29 +13,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // Find template containing this variation
   const templates = await getProductTemplates();
-  let foundTemplate = null;
-  let foundVariation = null;
+  const foundTemplate = templates.find((t) => t.id === id) || null;
 
-  // First check if it's a template ID
-  foundTemplate = templates.find((t) => t.id === id) || null;
-  if (foundTemplate) {
-    // If it's a template ID, use the first active variation
-    foundVariation =
-      foundTemplate.variations.find((v) => v.is_active) ||
-      foundTemplate.variations[0];
-  } else {
-    // Check if it's a variation ID
-    for (const temp of templates) {
-      const variation = temp.variations.find((v) => v.id === id);
-      if (variation) {
-        foundTemplate = temp;
-        foundVariation = variation;
-        break;
-      }
-    }
-  }
+  const foundVariation =
+    foundTemplate?.variations.find((v) => v.is_active) ||
+    foundTemplate?.variations[0];
 
-  if (!foundTemplate || !foundVariation) {
+  if (!foundVariation || !foundTemplate) {
     notFound();
   }
 
@@ -61,7 +44,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         initialRatingSummary={ratingSummary}
         initialUser={user}
       />
-      <Footer />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Footer } from '@/components/footer';
 import { getCurrentUser } from '@/lib/user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -147,7 +146,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

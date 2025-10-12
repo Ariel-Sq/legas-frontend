@@ -1,6 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/footer';
 import { useWishlist } from '@/components/wishlist-provider';
 import { useCart } from '@/components/cart-provider';
 import Image from 'next/image';
@@ -159,7 +158,6 @@ export default function WishlistPage() {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

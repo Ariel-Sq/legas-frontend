@@ -243,15 +243,6 @@ const mockProductTemplates: ProductTemplate[] = [
   },
 ];
 
-export async function getServerData() {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  return {
-    message: 'Hola, desde el servidor',
-    timestamp: new Date().toISOString(),
-  };
-}
-
 export async function getProductTemplates(): Promise<ProductTemplate[]> {
   await new Promise((resolve) => setTimeout(resolve, 100));
   return mockProductTemplates;

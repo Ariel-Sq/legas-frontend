@@ -2,7 +2,6 @@
 
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -343,7 +342,6 @@ export default function CategoriesAdminPage() {
           </CardContent>
         </Card>
       </main>
-      <Footer />
     </div>
   );
 }
