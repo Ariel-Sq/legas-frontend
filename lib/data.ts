@@ -1,3 +1,61 @@
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  parentId: string | null;
+  level: number;
+  image: string | null;
+  icon: string | null;
+  is_active: boolean;
+  sort_order: number;
+  meta_title: string | null;
+  meta_description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  path: string | null;
+  isMain: boolean;
+  sortOrder: number;
+  altText: string | null;
+  variation_id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductVariation {
+  id: string;
+  template_id: string;
+  sku: string;
+  name: string;
+  price: string; // Backend returns as string
+  stock: number;
+  attributes: Record<string, any>;
+  is_active: boolean;
+  sort_order: number;
+  images: ProductImage[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductTemplate {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  specifications: Record<string, any>;
+  categories: Category[];
+  is_active: boolean;
+  variations: ProductVariation[];
+  created_at: string;
+  updated_at: string;
+}
+
+// Legacy interface for backward compatibility
 export interface Product {
   id: string;
   name: string;
@@ -15,6 +73,175 @@ export interface Product {
   reviews?: number;
 }
 
+// Mock categories
+const mockCategories: Category[] = [
+  {
+    id: 'fc87140c-eee4-4d9c-883d-d7643f5940ed',
+    name: 'B',
+    slug: 'b',
+    description: null,
+    parentId: null,
+    level: 1,
+    image: null,
+    icon: null,
+    is_active: true,
+    sort_order: 0,
+    meta_title: null,
+    meta_description: null,
+    created_at: '2025-10-06T00:44:06.192Z',
+    updated_at: '2025-10-06T00:44:06.192Z',
+  },
+  {
+    id: '7d6c7e50-635f-4c0e-8ea7-b278295e5766',
+    name: 'A-3',
+    slug: 'a-3',
+    description: null,
+    parentId: 'ecbe29e1-13a8-4275-88e0-4ef45a1ecbbd',
+    level: 3,
+    image: null,
+    icon: null,
+    is_active: true,
+    sort_order: 0,
+    meta_title: null,
+    meta_description: null,
+    created_at: '2025-10-06T00:45:06.635Z',
+    updated_at: '2025-10-06T00:45:06.635Z',
+  },
+];
+
+// Mock product templates with variations
+const mockProductTemplates: ProductTemplate[] = [
+  {
+    id: '604cad7c-d7a9-42d0-a905-682f700d78a3',
+    name: 'Modern Sofa Collection',
+    slug: 'modern-sofa-collection',
+    description:
+      'Elegant and comfortable sofa perfect for modern living spaces. Available in multiple colors and configurations.',
+    specifications: {
+      height: '75cm',
+      width: '220cm',
+      depth: '95cm',
+      material: 'Premium fabric upholstery',
+      weight: '45kg',
+    },
+    categories: mockCategories,
+    is_active: true,
+    variations: [
+      {
+        id: '96c0f08d-b769-44f6-8e89-fbcdf7113d00',
+        template_id: '604cad7c-d7a9-42d0-a905-682f700d78a3',
+        sku: 'SOFA-RED-001',
+        name: 'Modern Sofa - Red',
+        price: '899.00',
+        stock: 5,
+        attributes: {
+          color: 'red',
+          size: 'standard',
+        },
+        is_active: true,
+        sort_order: 1,
+        images: [
+          {
+            id: '6ef23d29-abb4-41fc-a378-3b43cb006219',
+            url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
+            path: 'products/96c0f08d-b769-44f6-8e89-fbcdf7113d00/1759713296754_ggduqwc5hcp.jpg',
+            isMain: true,
+            sortOrder: 1,
+            altText: 'Modern Sofa in Red',
+            variation_id: '96c0f08d-b769-44f6-8e89-fbcdf7113d00',
+            createdAt: '2025-10-06T01:14:58.255Z',
+            updatedAt: '2025-10-06T01:14:58.255Z',
+          },
+          {
+            id: '4b846e3e-4009-4f10-bb36-a943bdd2ce7e',
+            url: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=800&fit=crop',
+            path: 'products/96c0f08d-b769-44f6-8e89-fbcdf7113d00/1759712790384_9z4w7lfq8vk.webp',
+            isMain: false,
+            sortOrder: 2,
+            altText: 'Red Sofa Detail View',
+            variation_id: '96c0f08d-b769-44f6-8e89-fbcdf7113d00',
+            createdAt: '2025-10-06T01:06:31.881Z',
+            updatedAt: '2025-10-06T01:14:56.769Z',
+          },
+        ],
+        created_at: '2025-10-06T01:06:29.304Z',
+        updated_at: '2025-10-06T01:06:29.304Z',
+      },
+      {
+        id: '536ea89e-5cf4-4073-87ba-8de58ae47c25',
+        template_id: '604cad7c-d7a9-42d0-a905-682f700d78a3',
+        sku: 'SOFA-WHITE-001',
+        name: 'Modern Sofa - White',
+        price: '899.00',
+        stock: 8,
+        attributes: {
+          color: 'white',
+          size: 'standard',
+        },
+        is_active: true,
+        sort_order: 2,
+        images: [
+          {
+            id: 'deb67ee7-a2a0-407c-b9e5-3095b06bcb20',
+            url: 'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800&h=800&fit=crop',
+            path: 'products/536ea89e-5cf4-4073-87ba-8de58ae47c25/1759712921625_texzjim9yuq.webp',
+            isMain: false,
+            sortOrder: 2,
+            altText: 'White Sofa Detail View',
+            variation_id: '536ea89e-5cf4-4073-87ba-8de58ae47c25',
+            createdAt: '2025-10-06T01:08:42.320Z',
+            updatedAt: '2025-10-06T01:08:42.320Z',
+          },
+          {
+            id: '12e26191-2fd4-42e5-b83d-88f2bb0eeeca',
+            url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
+            path: 'products/536ea89e-5cf4-4073-87ba-8de58ae47c25/1759712920467_trgudln2oo.webp',
+            isMain: true,
+            sortOrder: 1,
+            altText: 'Modern Sofa in White',
+            variation_id: '536ea89e-5cf4-4073-87ba-8de58ae47c25',
+            createdAt: '2025-10-06T01:08:41.195Z',
+            updatedAt: '2025-10-06T01:08:41.195Z',
+          },
+        ],
+        created_at: '2025-10-06T01:08:39.419Z',
+        updated_at: '2025-10-06T01:08:39.419Z',
+      },
+      {
+        id: '7c4f2a8e-9d1b-4e5f-8a2c-6b9f3d7e5a1c',
+        template_id: '604cad7c-d7a9-42d0-a905-682f700d78a3',
+        sku: 'SOFA-BLACK-001',
+        name: 'Modern Sofa - Black',
+        price: '949.00',
+        stock: 3,
+        attributes: {
+          color: 'black',
+          size: 'standard',
+        },
+        is_active: true,
+        sort_order: 3,
+        images: [
+          {
+            id: '8d5e6f7g-4h3i-2j1k-9l8m-7n6o5p4q3r2s',
+            url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
+            path: 'products/7c4f2a8e-9d1b-4e5f-8a2c-6b9f3d7e5a1c/main.jpg',
+            isMain: true,
+            sortOrder: 1,
+            altText: 'Modern Sofa in Black',
+            variation_id: '7c4f2a8e-9d1b-4e5f-8a2c-6b9f3d7e5a1c',
+            createdAt: '2025-10-06T01:10:00.000Z',
+            updatedAt: '2025-10-06T01:10:00.000Z',
+          },
+        ],
+        created_at: '2025-10-06T01:10:00.000Z',
+        updated_at: '2025-10-06T01:10:00.000Z',
+      },
+    ],
+    created_at: '2025-10-06T00:57:14.097Z',
+    updated_at: '2025-10-06T00:57:14.097Z',
+  },
+];
+
 export async function getServerData() {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -22,6 +249,18 @@ export async function getServerData() {
     message: 'Hola, desde el servidor',
     timestamp: new Date().toISOString(),
   };
+}
+
+export async function getProductTemplates(): Promise<ProductTemplate[]> {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return mockProductTemplates;
+}
+
+export async function getProductTemplateById(
+  id: string
+): Promise<ProductTemplate | null> {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return mockProductTemplates.find((template) => template.id === id) || null;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -107,96 +346,48 @@ export async function getNewArrivals(): Promise<Product[]> {
 export async function getShopProducts(): Promise<Product[]> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  return [
-    {
-      id: '1',
-      name: 'The Willow Sofa',
-      description: 'Comfortable three-seater sofa with premium upholstery',
-      price: 799,
-      image:
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
-      category: 'Sofas',
-      material: 'Oak',
-      color: 'Brown',
-    },
-    {
-      id: '2',
-      name: 'The Birch Armchair',
-      description: 'Elegant armchair perfect for reading corners',
-      price: 349,
-      image:
-        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&h=800&fit=crop',
-      category: 'Chairs',
-      material: 'Maple',
-      color: 'White',
-    },
-    {
-      id: '3',
-      name: 'The Cedar Coffee Table',
-      description: 'Modern coffee table with storage space',
-      price: 299,
-      image:
-        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&h=800&fit=crop',
-      category: 'Tables',
-      material: 'Walnut',
-      color: 'Brown',
-    },
-    {
-      id: '4',
-      name: 'The Aspen Side Table',
-      description: 'Compact side table for any room',
-      price: 149,
-      image:
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
-      category: 'Tables',
-      material: 'Oak',
-      color: 'Black',
-    },
-    {
-      id: '5',
-      name: 'The Redwood Dining Table',
-      description: 'Spacious dining table for family gatherings',
-      price: 599,
-      image:
-        'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=800&fit=crop',
-      category: 'Tables',
-      material: 'Walnut',
-      color: 'Brown',
-    },
-    {
-      id: '6',
-      name: 'The Pine Bookshelf',
-      description: 'Tall bookshelf with adjustable shelves',
-      price: 449,
-      image:
-        'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&h=800&fit=crop',
-      category: 'Storage',
-      material: 'Oak',
-      color: 'White',
-    },
-    {
-      id: '7',
-      name: 'The Maple Lounge Chair',
-      description: 'Comfortable lounge chair with ottoman',
-      price: 529,
-      image:
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&h=800&fit=crop',
-      category: 'Chairs',
-      material: 'Maple',
-      color: 'Brown',
-    },
-    {
-      id: '8',
-      name: 'The Oak Sectional',
-      description: 'Large sectional sofa for spacious living rooms',
-      price: 1299,
-      image:
-        'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=800&fit=crop',
-      category: 'Sofas',
-      material: 'Oak',
-      color: 'Black',
-    },
-  ];
+  // Flatten variations from templates into products
+  const products: Product[] = [];
+  for (const template of mockProductTemplates) {
+    for (const variation of template.variations) {
+      if (variation.is_active) {
+        const mainImage =
+          variation.images.find((img) => img.isMain) || variation.images[0];
+        products.push({
+          id: variation.id,
+          name: variation.name,
+          description: template.description || '',
+          price: parseFloat(variation.price),
+          image: mainImage?.url || '',
+          category: template.categories[0]?.name || 'Uncategorized',
+          material: variation.attributes?.material,
+          color: variation.attributes?.color,
+          images: variation.images.map((img) => img.url),
+          stock: variation.stock,
+        });
+      }
+    }
+  }
+
+  // Add legacy products if needed
+  if (products.length === 0) {
+    products.push(
+      {
+        id: '1',
+        name: 'The Willow Sofa',
+        description: 'Comfortable three-seater sofa with premium upholstery',
+        price: 799,
+        image:
+          'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
+        category: 'Sofas',
+        material: 'Oak',
+        color: 'Brown',
+      }
+      // ... other legacy products
+    );
+  }
+
+  return products;
 }
 
 export async function getFilterOptions() {
@@ -218,6 +409,38 @@ export async function getFilterOptions() {
 export async function getProductById(id: string): Promise<Product | null> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
+  // First try to find as variation id
+  for (const template of mockProductTemplates) {
+    const variation = template.variations.find((v) => v.id === id);
+    if (variation) {
+      // Return flattened product for backward compatibility
+      const mainImage =
+        variation.images.find((img) => img.isMain) || variation.images[0];
+      return {
+        id: variation.id,
+        name: variation.name,
+        description: template.description || '',
+        price: parseFloat(variation.price),
+        image: mainImage?.url || '',
+        category: template.categories[0]?.name || 'Uncategorized',
+        material: variation.attributes?.material,
+        color: variation.attributes?.color,
+        images: variation.images.map((img) => img.url),
+        fullDescription: template.description || '',
+        specifications: Object.entries(template.specifications || {}).map(
+          ([label, value]) => ({
+            label,
+            value: String(value),
+          })
+        ),
+        stock: variation.stock,
+        rating: 4.5, // Mock rating
+        reviews: 10, // Mock reviews
+      };
+    }
+  }
+
+  // Fallback to old products
   const allProducts = await getAllProducts();
   return allProducts.find((p) => p.id === id) || null;
 }
@@ -225,231 +448,41 @@ export async function getProductById(id: string): Promise<Product | null> {
 export async function getAllProducts(): Promise<Product[]> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  return [
-    {
-      id: '1',
-      name: 'The Willow Sofa',
-      description: 'Comfortable three-seater sofa with premium upholstery',
-      fullDescription:
-        'The Willow Sofa combines timeless design with modern comfort. Handcrafted from premium oak wood and upholstered in high-quality fabric, this three-seater sofa is perfect for any living room. The sturdy frame ensures durability while the plush cushions provide exceptional comfort for relaxation.',
-      price: 799,
-      image:
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
-      ],
-      category: 'Sofas',
-      material: 'Oak',
-      color: 'Brown',
-      specifications: [
-        { label: 'Dimensions', value: '85" W x 36" D x 32" H' },
-        { label: 'Material', value: 'Oak wood frame with fabric upholstery' },
-        { label: 'Weight', value: '120 lbs' },
-        { label: 'Seating Capacity', value: '3 people' },
-        { label: 'Assembly', value: 'Minimal assembly required' },
-      ],
-      stock: 12,
-      rating: 4.5,
-      reviews: 28,
-    },
-    {
-      id: '2',
-      name: 'The Birch Armchair',
-      description: 'Elegant armchair perfect for reading corners',
-      fullDescription:
-        'The Birch Armchair is a statement piece that combines elegance with functionality. Crafted from solid maple wood with a smooth white finish, this armchair features ergonomic design for maximum comfort during long reading sessions. The curved backrest and padded seat make it an ideal addition to any reading nook or living space.',
-      price: 349,
-      image:
-        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=800&h=800&fit=crop',
-      ],
-      category: 'Chairs',
-      material: 'Maple',
-      color: 'White',
-      specifications: [
-        { label: 'Dimensions', value: '28" W x 32" D x 35" H' },
-        { label: 'Material', value: 'Solid maple wood' },
-        { label: 'Weight', value: '35 lbs' },
-        { label: 'Finish', value: 'White lacquer' },
-        { label: 'Assembly', value: 'No assembly required' },
-      ],
-      stock: 8,
-      rating: 4.8,
-      reviews: 15,
-    },
-    {
-      id: '3',
-      name: 'The Cedar Coffee Table',
-      description: 'Modern coffee table with storage space',
-      fullDescription:
-        'The Cedar Coffee Table is a perfect blend of style and functionality. Made from rich walnut wood, this modern coffee table features a spacious tabletop and hidden storage compartment underneath. The clean lines and warm brown finish make it a versatile piece that complements any living room decor.',
-      price: 299,
-      image:
-        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1611269154421-4e27233ac5c7?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1565191999001-551c187427bb?w=800&h=800&fit=crop',
-      ],
-      category: 'Tables',
-      material: 'Walnut',
-      color: 'Brown',
-      specifications: [
-        { label: 'Dimensions', value: '48" W x 24" D x 18" H' },
-        { label: 'Material', value: 'Solid walnut wood' },
-        { label: 'Weight', value: '55 lbs' },
-        { label: 'Storage', value: 'Hidden compartment' },
-        { label: 'Assembly', value: 'Minimal assembly required' },
-      ],
-      stock: 15,
-      rating: 4.6,
-      reviews: 22,
-    },
-    {
-      id: '4',
-      name: 'The Aspen Side Table',
-      description: 'Compact side table for any room',
-      fullDescription:
-        'The Aspen Side Table is a compact and versatile piece perfect for any room in your home. Crafted from solid oak with a sleek black finish, this side table features a round tabletop and a lower shelf for additional storage. Its minimalist design makes it easy to integrate into various interior styles.',
-      price: 149,
-      image:
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&h=800&fit=crop',
-      ],
-      category: 'Tables',
-      material: 'Oak',
-      color: 'Black',
-      specifications: [
-        { label: 'Dimensions', value: '20" W x 20" D x 24" H' },
-        { label: 'Material', value: 'Solid oak wood' },
-        { label: 'Weight', value: '25 lbs' },
-        { label: 'Finish', value: 'Black stain' },
-        { label: 'Assembly', value: 'Easy assembly' },
-      ],
-      stock: 20,
-      rating: 4.4,
-      reviews: 18,
-    },
-    {
-      id: '5',
-      name: 'The Redwood Dining Table',
-      description: 'Spacious dining table for family gatherings',
-      fullDescription:
-        'The Redwood Dining Table is designed for memorable family gatherings. This spacious table is crafted from premium walnut wood with a rich brown finish. The solid construction ensures stability and durability, while the elegant design adds sophistication to your dining room. Seats up to 8 people comfortably.',
-      price: 599,
-      image:
-        'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=800&h=800&fit=crop',
-      ],
-      category: 'Tables',
-      material: 'Walnut',
-      color: 'Brown',
-      specifications: [
-        { label: 'Dimensions', value: '72" W x 36" D x 30" H' },
-        { label: 'Material', value: 'Solid walnut wood' },
-        { label: 'Weight', value: '95 lbs' },
-        { label: 'Seating Capacity', value: '6-8 people' },
-        { label: 'Assembly', value: 'Assembly required' },
-      ],
-      stock: 6,
-      rating: 4.9,
-      reviews: 35,
-    },
-    {
-      id: '6',
-      name: 'The Pine Bookshelf',
-      description: 'Tall bookshelf with adjustable shelves',
-      fullDescription:
-        'The Pine Bookshelf offers ample storage space for your book collection and decorative items. Made from solid oak with a clean white finish, this tall bookshelf features five adjustable shelves that can be customized to fit items of various sizes. The sturdy construction ensures it can hold heavy books with ease.',
-      price: 449,
-      image:
-        'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800&h=800&fit=crop',
-      ],
-      category: 'Storage',
-      material: 'Oak',
-      color: 'White',
-      specifications: [
-        { label: 'Dimensions', value: '36" W x 14" D x 72" H' },
-        { label: 'Material', value: 'Solid oak wood' },
-        { label: 'Weight', value: '75 lbs' },
-        { label: 'Shelves', value: '5 adjustable shelves' },
-        { label: 'Assembly', value: 'Assembly required' },
-      ],
-      stock: 10,
-      rating: 4.7,
-      reviews: 19,
-    },
-    {
-      id: '7',
-      name: 'The Maple Lounge Chair',
-      description: 'Comfortable lounge chair with ottoman',
-      fullDescription:
-        'The Maple Lounge Chair is the ultimate relaxation piece. This comfortable lounge chair comes with a matching ottoman, both crafted from solid maple wood with a warm brown finish. The ergonomic design and plush cushioning provide exceptional comfort, making it perfect for reading, watching TV, or simply unwinding after a long day.',
-      price: 529,
-      image:
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=800&h=800&fit=crop',
-      ],
-      category: 'Chairs',
-      material: 'Maple',
-      color: 'Brown',
-      specifications: [
-        { label: 'Dimensions', value: '32" W x 35" D x 40" H' },
-        { label: 'Material', value: 'Solid maple wood with cushions' },
-        { label: 'Weight', value: '65 lbs' },
-        { label: 'Includes', value: 'Matching ottoman' },
-        { label: 'Assembly', value: 'Minimal assembly required' },
-      ],
-      stock: 7,
-      rating: 4.8,
-      reviews: 24,
-    },
-    {
-      id: '8',
-      name: 'The Oak Sectional',
-      description: 'Large sectional sofa for spacious living rooms',
-      fullDescription:
-        'The Oak Sectional is designed for those who love to entertain. This large sectional sofa features a modular design that can be configured to fit your space perfectly. Crafted from solid oak with a sophisticated black finish, it offers ample seating for family and guests. The deep cushions and sturdy frame ensure both comfort and durability.',
-      price: 1299,
-      image:
-        'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=800&fit=crop',
-      images: [
-        'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800&h=800&fit=crop',
-      ],
-      category: 'Sofas',
-      material: 'Oak',
-      color: 'Black',
-      specifications: [
-        { label: 'Dimensions', value: '120" W x 85" D x 32" H' },
-        { label: 'Material', value: 'Solid oak frame with fabric upholstery' },
-        { label: 'Weight', value: '185 lbs' },
-        { label: 'Seating Capacity', value: '5-6 people' },
-        { label: 'Assembly', value: 'Professional assembly recommended' },
-      ],
-      stock: 4,
-      rating: 4.9,
-      reviews: 42,
-    },
-  ];
+  // Flatten variations from templates into products
+  const products: Product[] = [];
+  for (const template of mockProductTemplates) {
+    for (const variation of template.variations) {
+      if (variation.is_active) {
+        const mainImage =
+          variation.images.find((img) => img.isMain) || variation.images[0];
+        products.push({
+          id: variation.id,
+          name: variation.name,
+          description: template.description || '',
+          fullDescription: template.description || '',
+          price: parseFloat(variation.price),
+          image: mainImage?.url || '',
+          images: variation.images
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((img) => img.url),
+          category: template.categories[0]?.name || 'Uncategorized',
+          material: variation.attributes?.material,
+          color: variation.attributes?.color,
+          specifications: Object.entries(template.specifications || {}).map(
+            ([label, value]) => ({
+              label,
+              value: String(value),
+            })
+          ),
+          stock: variation.stock,
+          rating: 4.5, // Mock rating
+          reviews: 10, // Mock reviews
+        });
+      }
+    }
+  }
+
+  return products;
 }
 
 export async function getRelatedProducts(

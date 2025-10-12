@@ -14,6 +14,9 @@ interface ShopProductCardProps {
     name: string;
     price: number;
     image: string;
+    variations?: any[];
+    minPrice?: number;
+    maxPrice?: number;
   };
 }
 
@@ -75,9 +78,20 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
         </div>
         <div className="mt-2">
           <p className="text-base font-medium">{product.name}</p>
-          <p className="text-sm font-medium text-muted-foreground">
-            ${product.price}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              {product.minPrice &&
+              product.maxPrice &&
+              product.minPrice !== product.maxPrice
+                ? `$${product.minPrice} - $${product.maxPrice}`
+                : `$${product.price}`}
+            </p>
+            {product.variations && product.variations.length > 1 && (
+              <span className="text-xs text-muted-foreground">
+                {product.variations.length} options
+              </span>
+            )}
+          </div>
         </div>
       </Link>
     </div>
