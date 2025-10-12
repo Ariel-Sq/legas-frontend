@@ -9,7 +9,9 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ProductTemplatesService {
   /**
-   * @returns any
+   * Get all product templates
+   * Retrieves all product templates
+   * @returns any Product templates retrieved successfully
    * @throws ApiError
    */
   public static productTemplatesControllerFindAll(): CancelablePromise<any> {
@@ -19,8 +21,10 @@ export class ProductTemplatesService {
     });
   }
   /**
+   * Create a product template
+   * Creates a new product template
    * @param requestBody
-   * @returns any
+   * @returns any Product template created successfully
    * @throws ApiError
    */
   public static productTemplatesControllerCreate(
@@ -34,9 +38,11 @@ export class ProductTemplatesService {
     });
   }
   /**
-   * @param id
+   * Update a product template
+   * Updates an existing product template
+   * @param id Product template ID
    * @param requestBody
-   * @returns any
+   * @returns any Product template updated successfully
    * @throws ApiError
    */
   public static productTemplatesControllerUpdate(
@@ -51,10 +57,15 @@ export class ProductTemplatesService {
       },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        404: `Product template not found`,
+      },
     });
   }
   /**
-   * @param id
+   * Delete a product template
+   * Removes a product template
+   * @param id Product template ID
    * @returns void
    * @throws ApiError
    */
@@ -66,6 +77,9 @@ export class ProductTemplatesService {
       url: '/api/product-templates/{id}',
       path: {
         id: id,
+      },
+      errors: {
+        404: `Product template not found`,
       },
     });
   }

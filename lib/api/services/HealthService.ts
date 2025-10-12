@@ -7,14 +7,15 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class HealthService {
   /**
-   * @returns any The Health Check is successful
+   * Health check
+   * Checks the health status of the application and its dependencies
+   * @returns any Application is healthy
    * @throws ApiError
    */
   public static healthControllerCheck(): CancelablePromise<{
     status?: string;
-    info?: Record<string, Record<string, any>> | null;
-    error?: Record<string, Record<string, any>> | null;
-    details?: Record<string, Record<string, any>>;
+    version?: string;
+    checks?: Record<string, any>;
   }> {
     return __request(OpenAPI, {
       method: 'GET',

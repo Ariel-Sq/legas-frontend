@@ -10,7 +10,9 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class CategoriesService {
   /**
-   * @returns any
+   * Get category tree
+   * Retrieves the complete category hierarchy as a tree structure
+   * @returns any Category tree retrieved successfully
    * @throws ApiError
    */
   public static categoriesControllerGetCategoryTree(): CancelablePromise<any> {
@@ -93,7 +95,9 @@ export class CategoriesService {
     });
   }
   /**
-   * @param id
+   * Delete a category
+   * Removes a specific category by ID
+   * @param id Category ID to delete
    * @returns void
    * @throws ApiError
    */
@@ -106,9 +110,14 @@ export class CategoriesService {
       path: {
         id: id,
       },
+      errors: {
+        404: `Category not found`,
+      },
     });
   }
   /**
+   * Delete all categories
+   * Removes all categories from the system
    * @returns void
    * @throws ApiError
    */

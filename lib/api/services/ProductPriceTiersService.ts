@@ -26,7 +26,9 @@ export class ProductPriceTiersService {
     });
   }
   /**
-   * @returns any
+   * Get all product price tiers
+   * Retrieves all product price tiers
+   * @returns any Product price tiers retrieved successfully
    * @throws ApiError
    */
   public static productPriceTiersControllerFindAll(): CancelablePromise<any> {
@@ -36,8 +38,10 @@ export class ProductPriceTiersService {
     });
   }
   /**
-   * @param variationId
-   * @returns any
+   * Get price tiers by product variation
+   * Retrieves all price tiers for a specific product variation
+   * @param variationId Product variation ID
+   * @returns any Price tiers retrieved successfully
    * @throws ApiError
    */
   public static productPriceTiersControllerFindByVariation(
@@ -78,8 +82,10 @@ export class ProductPriceTiersService {
     });
   }
   /**
-   * @param id
-   * @returns any
+   * Get a product price tier by ID
+   * Retrieves a specific product price tier
+   * @param id Product price tier ID
+   * @returns any Product price tier retrieved successfully
    * @throws ApiError
    */
   public static productPriceTiersControllerFindOne(
@@ -91,12 +97,17 @@ export class ProductPriceTiersService {
       path: {
         id: id,
       },
+      errors: {
+        404: `Product price tier not found`,
+      },
     });
   }
   /**
-   * @param id
+   * Update a product price tier
+   * Updates an existing product price tier
+   * @param id Product price tier ID
    * @param requestBody
-   * @returns any
+   * @returns any Product price tier updated successfully
    * @throws ApiError
    */
   public static productPriceTiersControllerUpdate(
@@ -111,11 +122,16 @@ export class ProductPriceTiersService {
       },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        404: `Product price tier not found`,
+      },
     });
   }
   /**
-   * @param id
-   * @returns any
+   * Delete a product price tier
+   * Removes a product price tier
+   * @param id Product price tier ID
+   * @returns any Product price tier deleted successfully
    * @throws ApiError
    */
   public static productPriceTiersControllerRemove(
@@ -126,6 +142,9 @@ export class ProductPriceTiersService {
       url: '/api/product-price-tiers/{id}',
       path: {
         id: id,
+      },
+      errors: {
+        404: `Product price tier not found`,
       },
     });
   }
