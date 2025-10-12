@@ -19,10 +19,10 @@ import { Plus, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import {
   getCategories,
   createCategory,
-  buildCategoryTree,
   type Category,
   type CategoryFormData,
 } from '@/lib/categories-admin';
+import { flattenCategories } from '@/utils';
 
 interface CategoriesClientProps {
   initialCategories: Category[];
@@ -43,13 +43,12 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
     name: '',
     slug: '',
     description: '',
-    parent_id: null,
-    image_url: '',
+    parentId: null,
+    image: '',
     icon: '',
     is_active: true,
     meta_title: '',
     meta_description: '',
-    meta_keywords: '',
   });
 
   const loadCategories = async () => {
@@ -65,13 +64,12 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
       setError('');
 
       // Add optimistic update
-      const tempId = Date.now();
+      const tempId = Date.now().toString();
       const optimisticCategory: Category = {
         id: tempId,
         ...formData,
-        level: formData.parent_id ? 1 : 0, // Simplified level calculation
-        mpath: formData.parent_id ? `1.${tempId}` : `${tempId}`,
         sort_order: categories.length + 1,
+        children: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -87,13 +85,12 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
           name: '',
           slug: '',
           description: '',
-          parent_id: null,
-          image_url: '',
+          parentId: null,
+          image: '',
           icon: '',
           is_active: true,
           meta_title: '',
           meta_description: '',
-          meta_keywords: '',
         });
       } catch (err) {
         setError('Failed to create category. Please try again.');
@@ -111,7 +108,8 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
     });
   };
 
-  const categoryTree = buildCategoryTree(optimisticCategories);
+  // Since getCategories now returns tree structure directly, use it as is
+  const categoryTree = optimisticCategories;
 
   const renderCategoryTree = (
     cats: (Category & { children?: Category[] })[],
@@ -227,11 +225,11 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
                     <div>
                       <Label htmlFor="parent">Categoría Padre</Label>
                       <Select
-                        value={formData.parent_id?.toString() || 'none'}
+                        value={formData.parentId || 'none'}
                         onValueChange={(value) =>
                           setFormData({
                             ...formData,
-                            parent_id: value === 'none' ? null : Number(value),
+                            parentId: value === 'none' ? null : value,
                           })
                         }
                         disabled={isPending}
@@ -243,9 +241,9 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
                           <SelectItem value="none">
                             Sin categoría padre (Raíz)
                           </SelectItem>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {'  '.repeat(cat.level)}
+                          {flattenCategories(categories).map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {'  '.repeat(cat.level || 1)}
                               {cat.icon} {cat.name}
                             </SelectItem>
                           ))}
@@ -259,12 +257,12 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
                     <div>
                       <Label htmlFor="image_url">URL de Imagen</Label>
                       <Input
-                        id="image_url"
-                        value={formData.image_url}
+                        id="image"
+                        value={formData.image}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            image_url: e.target.value,
+                            image: e.target.value,
                           })
                         }
                         placeholder="/placeholder.svg?height=100&width=100"
@@ -314,22 +312,6 @@ export function CategoriesClient({ initialCategories }: CategoriesClientProps) {
                           })
                         }
                         rows={2}
-                        disabled={isPending}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="meta_keywords">Meta Keywords (SEO)</Label>
-                      <Input
-                        id="meta_keywords"
-                        value={formData.meta_keywords}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            meta_keywords: e.target.value,
-                          })
-                        }
-                        placeholder="palabra1, palabra2, palabra3"
                         disabled={isPending}
                       />
                     </div>
