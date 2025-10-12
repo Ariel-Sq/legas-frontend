@@ -6,7 +6,6 @@ import { Analytics } from '@vercel/analytics/next';
 import { Suspense } from 'react';
 import { CartProvider } from '@/components/cart-provider';
 import { ThemeProvider } from '@/components/theme-provider';
-import { LanguageProvider } from '@/components/language-provider';
 import { WishlistProvider } from '@/components/wishlist-provider';
 import './globals.css';
 
@@ -17,9 +16,9 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Woodland - Handcrafted Wooden Furniture',
+  title: 'Woodland - Muebles de Madera Artesanales',
   description:
-    'Discover handcrafted wooden furniture that brings warmth, beauty, and character to your home.',
+    'Descubre muebles de madera artesanales que aportan calidez, belleza y carácter a tu hogar.',
   generator: 'v0.app',
 };
 
@@ -29,20 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body className={`font-sans ${workSans.variable} ${GeistMono.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
         >
-          <LanguageProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <Suspense fallback={null}>{children}</Suspense>
-              </CartProvider>
-            </WishlistProvider>
-          </LanguageProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <Suspense fallback={null}>{children}</Suspense>
+            </CartProvider>
+          </WishlistProvider>
         </ThemeProvider>
         <Analytics />
       </body>

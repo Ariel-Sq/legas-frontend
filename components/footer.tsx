@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useLanguage } from '@/components/language-provider';
 
 export function Footer() {
-  const { t } = useLanguage();
-
   return (
     <footer className="bg-muted/30 border-t border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -27,11 +24,11 @@ export function Footer() {
               href="/shipping"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              {t.footer.shipping} & {t.footer.returns}
+              Envíos & Devoluciones
             </Link>
           </div>
           <p className="text-sm text-muted-foreground text-center md:text-right">
-            © 2025 Woodland. {t.footer.rights}
+            © 2025 Woodland. Todos los derechos reservados
           </p>
         </div>
       </div>

@@ -12,17 +12,15 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useLanguage } from '@/components/language-provider';
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
-  const { t } = useLanguage();
 
   const navItems = [
-    { href: '/', label: t.header.home, icon: Home },
-    { href: '/shop', label: t.header.shop, icon: ShoppingBag },
-    { href: '/about', label: t.header.about, icon: Info },
-    { href: '/contact', label: t.header.contact, icon: Mail },
+    { href: '/', label: 'Inicio', icon: Home },
+    { href: '/shop', label: 'Tienda', icon: ShoppingBag },
+    { href: '/about', label: 'Nosotros', icon: Info },
+    { href: '/contact', label: 'Contacto', icon: Mail },
   ];
 
   return (
