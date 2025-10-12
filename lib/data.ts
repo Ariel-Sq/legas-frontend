@@ -71,6 +71,7 @@ export interface Product {
   stock?: number;
   rating?: number;
   reviews?: number;
+  templateId?: string; // For wishlist functionality
 }
 
 // Mock categories
@@ -364,6 +365,7 @@ export async function getShopProducts(): Promise<Product[]> {
           color: variation.attributes?.color,
           images: variation.images.map((img) => img.url),
           stock: variation.stock,
+          templateId: template.id, // Add template ID for wishlist
         });
       }
     }
@@ -477,6 +479,7 @@ export async function getAllProducts(): Promise<Product[]> {
           stock: variation.stock,
           rating: 4.5, // Mock rating
           reviews: 10, // Mock reviews
+          templateId: template.id, // Add template ID for wishlist
         });
       }
     }

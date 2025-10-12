@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ProductImageGallery } from '@/components/product-image-gallery';
 import { ProductCard } from '@/components/product-card';
 import { AddToCartSection } from '@/components/add-to-cart-section';
@@ -40,35 +40,42 @@ export function ProductDetailClient({
   };
 
   // Get images for selected variation
-  const variationImages = selectedVariation.images
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((img) => img.url);
+  const variationImages = useMemo(
+    () =>
+      selectedVariation.images
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((img) => img.url),
+    [selectedVariation.images]
+  );
 
   // Convert variation to product format for compatibility
-  const selectedProduct: Product = {
-    id: selectedVariation.id,
-    name: selectedVariation.name,
-    description: initialTemplate.description || '',
-    price: parseFloat(selectedVariation.price),
-    image:
-      selectedVariation.images.find((img) => img.isMain)?.url ||
-      selectedVariation.images[0]?.url ||
-      '',
-    category: initialTemplate.categories[0]?.name || 'Uncategorized',
-    material: selectedVariation.attributes?.material,
-    color: selectedVariation.attributes?.color,
-    images: variationImages,
-    fullDescription: initialTemplate.description || '',
-    specifications: Object.entries(initialTemplate.specifications || {}).map(
-      ([label, value]) => ({
-        label,
-        value: String(value),
-      })
-    ),
-    stock: selectedVariation.stock,
-    rating: 4.5, // Mock rating
-    reviews: 10, // Mock reviews
-  };
+  const selectedProduct = useMemo(
+    (): Product => ({
+      id: selectedVariation.id,
+      name: selectedVariation.name,
+      description: initialTemplate.description || '',
+      price: parseFloat(selectedVariation.price),
+      image:
+        selectedVariation.images.find((img) => img.isMain)?.url ||
+        selectedVariation.images[0]?.url ||
+        '',
+      category: initialTemplate.categories[0]?.name || 'Uncategorized',
+      material: selectedVariation.attributes?.material,
+      color: selectedVariation.attributes?.color,
+      images: variationImages,
+      fullDescription: initialTemplate.description || '',
+      specifications: Object.entries(initialTemplate.specifications || {}).map(
+        ([label, value]) => ({
+          label,
+          value: String(value),
+        })
+      ),
+      stock: selectedVariation.stock,
+      rating: 4.5, // Mock rating
+      reviews: 10, // Mock reviews
+    }),
+    [selectedVariation, initialTemplate, variationImages]
+  );
 
   return (
     <main className="flex-grow bg-background">
@@ -165,17 +172,15 @@ export function ProductDetailClient({
             {/* Quantity Selector */}
             <AddToCartSection
               product={{
-                id: Number(selectedVariation.id),
-                name: selectedVariation.name,
-                price: parseFloat(selectedVariation.price),
-                image:
-                  selectedVariation.images.find((img) => img.isMain)?.url ||
-                  selectedVariation.images[0]?.url ||
-                  '',
-                category:
-                  initialTemplate.categories[0]?.name || 'Uncategorized',
-                stock: selectedVariation.stock,
+                id: Number(selectedProduct.id),
+                name: selectedProduct.name,
+                price: selectedProduct.price,
+                image: selectedProduct.image,
+                category: selectedProduct.category,
+                stock: selectedProduct.stock,
               }}
+              wishlistId={Number(initialTemplate.id)} // Use template ID for wishlist
+              key={selectedProduct.id} // Force re-render when variation changes
             />
 
             {/* Shipping Info */}

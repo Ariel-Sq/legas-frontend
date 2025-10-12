@@ -15,16 +15,21 @@ interface AddToCartSectionProps {
     category: string;
     stock?: number;
   };
+  wishlistId?: number; // Optional separate ID for wishlist (defaults to product.id)
 }
 
-export function AddToCartSection({ product }: AddToCartSectionProps) {
+export function AddToCartSection({
+  product,
+  wishlistId,
+}: AddToCartSectionProps) {
   const [quantity, setQuantity] = useState(1);
   const { addToCart, removeFromCart, updateQuantity, getCartItem, isInCart } =
     useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const cartItem = getCartItem(product.id);
   const productInCart = isInCart(product.id);
-  const inWishlist = isInWishlist(product.id);
+  const wishlistItemId = wishlistId ?? product.id;
+  const inWishlist = isInWishlist(wishlistItemId);
 
   useEffect(() => {
     if (cartItem) {
@@ -70,7 +75,7 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
 
   const handleToggleWishlist = () => {
     toggleWishlist({
-      id: product.id,
+      id: wishlistItemId,
       name: product.name,
       price: product.price,
       image: product.image,
