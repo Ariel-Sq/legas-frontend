@@ -94,7 +94,10 @@ export function ProductDetailClient({
           <div className="space-y-6">
             <div>
               <p className="text-sm text-muted-foreground mb-2">
-                {initialTemplate.categories[0]?.name || 'Uncategorized'}
+                {initialTemplate.categories
+                  .sort((a, b) => a.level - b.level)
+                  .map((cat) => cat.name)
+                  .join(' > ')}
               </p>
               <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
                 {selectedVariation.name}

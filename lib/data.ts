@@ -78,8 +78,8 @@ export interface Product {
 const mockCategories: Category[] = [
   {
     id: 'fc87140c-eee4-4d9c-883d-d7643f5940ed',
-    name: 'B',
-    slug: 'b',
+    name: 'Sofas',
+    slug: 'sofas',
     description: null,
     parentId: null,
     level: 1,
@@ -94,8 +94,8 @@ const mockCategories: Category[] = [
   },
   {
     id: '7d6c7e50-635f-4c0e-8ea7-b278295e5766',
-    name: 'A-3',
-    slug: 'a-3',
+    name: 'Modernos A-3',
+    slug: 'modernos-a-3',
     description: null,
     parentId: 'ecbe29e1-13a8-4275-88e0-4ef45a1ecbbd',
     level: 3,
