@@ -14,7 +14,14 @@ import {
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, X, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  ArrowLeft,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -36,6 +43,9 @@ export default function EditProductPage() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [specifications, setSpecifications] = useState<
+    Array<{ id: string; key: string; value: string }>
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -81,6 +91,15 @@ export default function EditProductPage() {
             is_active: template.is_active,
           });
           setSelectedCategories(template.categories.map((cat) => cat.id));
+          // Convert specifications object to array format for editing
+          const specsArray = template.specifications
+            ? Object.entries(template.specifications).map(([key, value]) => ({
+                id: `spec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${key}`,
+                key,
+                value: String(value),
+              }))
+            : [];
+          setSpecifications(specsArray);
         }
       } catch (error) {
         console.error('Error loading template:', error);
@@ -209,6 +228,45 @@ export default function EditProductPage() {
       );
     });
   };
+
+  // Specifications management
+  const addSpecification = () => {
+    const newId = `spec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setSpecifications((prev) => [...prev, { id: newId, key: '', value: '' }]);
+  };
+
+  const removeSpecification = (id: string) => {
+    setSpecifications((prev) => prev.filter((spec) => spec.id !== id));
+  };
+
+  const updateSpecification = (
+    id: string,
+    field: 'key' | 'value',
+    newValue: string
+  ) => {
+    setSpecifications((prev) =>
+      prev.map((spec) =>
+        spec.id === id ? { ...spec, [field]: newValue } : spec
+      )
+    );
+  };
+
+  // Update templateData when specifications change
+  useEffect(() => {
+    const specsObject = specifications.reduce(
+      (acc, spec) => {
+        if (spec.key.trim()) {
+          acc[spec.key] = spec.value;
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+    setTemplateData((prev) => ({
+      ...prev,
+      specifications: specsObject,
+    }));
+  }, [specifications]);
 
   const handleSubmitTemplate = async () => {
     if (!templateId) return;
@@ -421,6 +479,85 @@ export default function EditProductPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Specifications Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-medium">
+                    Especificaciones del Producto
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addSpecification}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Agregar Especificación
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Modifica las características técnicas del producto (material,
+                  dimensiones, color, etc.)
+                </p>
+
+                {specifications.length === 0 ? (
+                  <div className="text-center py-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="text-gray-400 dark:text-gray-500 mb-2">
+                      <Plus className="h-8 w-8 mx-auto" />
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No hay especificaciones agregadas
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                      Haz clic en "Agregar Especificación" para comenzar
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {specifications.map((spec) => (
+                      <div key={spec.id} className="flex gap-3 items-center">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Nombre de la especificación (ej: Material)"
+                            value={spec.key}
+                            onChange={(e) =>
+                              updateSpecification(
+                                spec.id,
+                                'key',
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Valor (ej: Madera de roble)"
+                            value={spec.value}
+                            onChange={(e) =>
+                              updateSpecification(
+                                spec.id,
+                                'value',
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeSpecification(spec.id)}
+                          className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center space-x-2">
