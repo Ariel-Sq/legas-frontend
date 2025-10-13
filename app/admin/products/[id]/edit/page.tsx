@@ -124,7 +124,68 @@ export default function EditProductPage() {
     });
   };
 
-  // Category selection handlers
+  // Helper function to find a category by ID in the tree
+  const findCategoryById = (
+    categoryId: string,
+    categories: Category[]
+  ): Category | null => {
+    for (const category of categories) {
+      if (category.id === categoryId) return category;
+      if (category.children) {
+        const found = findCategoryById(categoryId, category.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to get all parent IDs of a category
+  const getParentIds = (
+    categoryId: string,
+    categories: Category[]
+  ): string[] => {
+    const parents: string[] = [];
+    const category = findCategoryById(categoryId, categories);
+
+    if (category?.parentId) {
+      parents.push(category.parentId);
+      // Recursively get grandparents
+      const grandparents = getParentIds(category.parentId, categories);
+      parents.push(...grandparents);
+    }
+
+    return parents;
+  };
+
+  // Helper function to get all children in the same branch as a category
+  const getChildrenInBranch = (
+    categoryId: string,
+    categories: Category[]
+  ): string[] => {
+    const category = findCategoryById(categoryId, categories);
+    if (!category) return [];
+
+    const children: string[] = [];
+
+    // If this category has children, get all descendants in this branch
+    if (category.children) {
+      const getAllDescendants = (cats: Category[]): string[] => {
+        const descendants: string[] = [];
+        for (const cat of cats) {
+          descendants.push(cat.id);
+          if (cat.children) {
+            descendants.push(...getAllDescendants(cat.children));
+          }
+        }
+        return descendants;
+      };
+      children.push(...getAllDescendants(category.children));
+    }
+
+    return children;
+  };
+
+  // Category selection handlers with hierarchical logic
   const handleCategoryToggle = (
     categoryId: string,
     event?: React.MouseEvent
@@ -134,17 +195,112 @@ export default function EditProductPage() {
       event.stopPropagation();
     }
 
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((catId) => catId !== categoryId)
-        : [...prev, categoryId]
-    );
+    setSelectedCategories((prev) => {
+      const isCurrentlySelected = prev.includes(categoryId);
+      const category = findCategoryById(categoryId, categories);
+
+      if (isCurrentlySelected) {
+        // Deselecting a category
+        let newSelection = prev.filter((id) => id !== categoryId);
+
+        // Check if parents should remain selected
+        const parentIds = getParentIds(categoryId, categories);
+        for (const parentId of parentIds) {
+          const parent = findCategoryById(parentId, categories);
+          if (parent?.children) {
+            // Check if parent has other selected children
+            const hasOtherSelectedChildren = parent.children.some(
+              (child) =>
+                newSelection.includes(child.id) ||
+                child.children?.some((grandchild) =>
+                  newSelection.includes(grandchild.id)
+                )
+            );
+            if (!hasOtherSelectedChildren) {
+              newSelection = newSelection.filter((id) => id !== parentId);
+            }
+          }
+        }
+
+        return newSelection;
+      } else {
+        // Selecting a category
+        let newSelection = [...prev];
+
+        // Get all categories in the same branch (including descendants)
+        const branchCategories = getChildrenInBranch(categoryId, categories);
+
+        // Remove all categories in the same branch from selection
+        newSelection = newSelection.filter(
+          (id) => !branchCategories.includes(id) && id !== categoryId
+        );
+
+        // Add the selected category
+        newSelection.push(categoryId);
+
+        // Add all parents
+        const parentIds = getParentIds(categoryId, categories);
+        newSelection.push(
+          ...parentIds.filter((id) => !newSelection.includes(id))
+        );
+
+        return newSelection;
+      }
+    });
 
     setTemplateData((prev) => {
-      const newCategoryIds = prev.category_ids.includes(categoryId)
-        ? prev.category_ids.filter((id) => id !== categoryId)
-        : [...prev.category_ids, categoryId];
-      return { ...prev, category_ids: newCategoryIds };
+      const isCurrentlySelected = prev.category_ids.includes(categoryId);
+      const category = findCategoryById(categoryId, categories);
+
+      if (isCurrentlySelected) {
+        // Deselecting a category
+        let newCategoryIds = prev.category_ids.filter(
+          (id) => id !== categoryId
+        );
+
+        // Check if parents should remain selected
+        const parentIds = getParentIds(categoryId, categories);
+        for (const parentId of parentIds) {
+          const parent = findCategoryById(parentId, categories);
+          if (parent?.children) {
+            // Check if parent has other selected children
+            const hasOtherSelectedChildren = parent.children.some(
+              (child) =>
+                newCategoryIds.includes(child.id) ||
+                child.children?.some((grandchild) =>
+                  newCategoryIds.includes(grandchild.id)
+                )
+            );
+            if (!hasOtherSelectedChildren) {
+              newCategoryIds = newCategoryIds.filter((id) => id !== parentId);
+            }
+          }
+        }
+
+        return { ...prev, category_ids: newCategoryIds };
+      } else {
+        // Selecting a category
+        let newCategoryIds = [...prev.category_ids];
+
+        // Get all categories in the same branch (including descendants)
+        const branchCategories = getChildrenInBranch(categoryId, categories);
+
+        // Remove all categories in the same branch from selection
+        newCategoryIds = newCategoryIds.filter(
+          (id) => !branchCategories.includes(id) && id !== categoryId
+        );
+
+        // Add the selected category
+        newCategoryIds.push(categoryId);
+
+        // Add all parents
+        const parentIds = getParentIds(categoryId, categories);
+        newCategoryIds.push(
+          ...parentIds.filter((id) => !newCategoryIds.includes(id))
+        );
+
+        return { ...prev, category_ids: newCategoryIds };
+      }
     });
   };
 
@@ -187,7 +343,10 @@ export default function EditProductPage() {
             <Checkbox
               id={`category-${category.id}`}
               checked={isSelected}
-              onCheckedChange={() => handleCategoryToggle(category.id)}
+              onCheckedChange={(checked) => {
+                const event = { stopPropagation: () => {} } as React.MouseEvent;
+                handleCategoryToggle(category.id, event);
+              }}
             />
 
             {/* Category info */}
