@@ -169,9 +169,11 @@ export default function ProductsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar Template
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/products/${template.id}/edit`}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar Template
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Layers className="h-4 w-4 mr-2" />
@@ -225,9 +227,11 @@ export default function ProductsPage() {
                             <Layers className="h-4 w-4 mr-2" />
                             Variaciones
                           </Button>
-                          <Button size="sm" className="flex-1">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
+                          <Button size="sm" className="flex-1" asChild>
+                            <Link href={`/admin/products/${template.id}/edit`}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </Link>
                           </Button>
                         </div>
                       </div>
