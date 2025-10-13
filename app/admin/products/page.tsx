@@ -4,13 +4,6 @@ import { useState, useEffect, useOptimistic, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -127,10 +120,15 @@ export default function ProductsPage() {
             </div>
           )}
 
-          {/* Templates Grid */}
+          {/* Templates List */}
           {optimisticTemplates.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center p-12">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Templates de Productos (0)
+                </h2>
+              </div>
+              <div className="flex flex-col items-center justify-center p-12">
                 <Package className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
                   No hay productos aún
@@ -142,103 +140,123 @@ export default function ProductsPage() {
                 <Button asChild>
                   <Link href="/admin/products/new">Crear Primer Template</Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optimisticTemplates.map((template) => (
-                <Card key={template.id} className="relative">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg line-clamp-2">
-                          {template.name}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Templates de Productos ({optimisticTemplates.length})
+                  </h2>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {optimisticTemplates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
+                            {template.name}
+                          </h3>
+                          <Badge
+                            variant={
+                              template.is_active ? 'default' : 'secondary'
+                            }
+                            className="text-xs"
+                          >
+                            {template.is_active ? 'Activo' : 'Inactivo'}
+                          </Badge>
+                        </div>
+
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                           {template.description || 'Sin descripción'}
-                        </CardDescription>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/products/${template.id}/edit`}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar Template
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Layers className="h-4 w-4 mr-2" />
-                            Ver Variaciones
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDelete(template.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Estado:</span>
-                        <Badge
-                          variant={template.is_active ? 'default' : 'secondary'}
-                        >
-                          {template.is_active ? 'Activo' : 'Inactivo'}
-                        </Badge>
-                      </div>
+                        </p>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Slug:</span>
-                        <span className="font-mono text-xs">
-                          {template.slug}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Variaciones:
-                        </span>
-                        <span className="font-medium">
-                          {template.variations?.length || 0}
-                        </span>
-                      </div>
-
-                      <div className="pt-3 border-t">
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Layers className="h-4 w-4 mr-2" />
-                            Variaciones
-                          </Button>
-                          <Button size="sm" className="flex-1" asChild>
-                            <Link href={`/admin/products/${template.id}/edit`}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar
-                            </Link>
-                          </Button>
+                        <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              {template.slug}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Layers className="h-4 w-4" />
+                            <span>
+                              {template.variations?.length || 0} variaciones
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-400">
+                              Creado:{' '}
+                              {new Date(
+                                template.created_at
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="gap-2"
+                        >
+                          <Link
+                            href={`/admin/products/${template.id}/variations`}
+                          >
+                            <Layers className="h-4 w-4" />
+                            Variaciones
+                          </Link>
+                        </Button>
+                        <Button size="sm" asChild className="gap-2">
+                          <Link href={`/admin/products/${template.id}/edit`}>
+                            <Edit className="h-4 w-4" />
+                            Editar
+                          </Link>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href={`/admin/products/${template.id}/edit`}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar Template
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Layers className="h-4 w-4 mr-2" />
+                              Ver Variaciones
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleDelete(template.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
