@@ -1,53 +1,19 @@
-// Product Template Types (matching database schema)
-export interface ProductTemplate {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  short_description: string;
-  category_id: number;
-  brand?: string;
-  specifications?: Record<string, any>; // JSONB
-  meta_title?: string;
-  meta_description?: string;
-  meta_keywords?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+'use server';
 
-export interface ProductVariation {
-  id: number;
-  product_template_id: number;
-  sku: string;
-  name: string;
-  price: number;
-  compare_at_price?: number;
-  cost_price?: number;
-  stock_quantity: number;
-  low_stock_threshold?: number;
-  attributes?: Record<string, any>; // JSONB - e.g., {color: "red", size: "M"}
-  weight?: number;
-  dimensions?: Record<string, any>; // JSONB - e.g., {length: 10, width: 5, height: 3}
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { BACKEND_URL } from '@/utils/environments';
 
-export interface ProductImage {
-  id: number;
-  product_variation_id: number;
-  image_url: string;
-  alt_text?: string;
-  title?: string;
-  sort_order: number;
-  is_main: boolean;
-  created_at: string;
-}
+// Import types from products.ts
+import type {
+  ProductTemplate,
+  ProductVariation,
+  ProductImage,
+  Category,
+} from '@/lib/products';
 
+// Additional types for admin functionality
 export interface ProductPriceTier {
-  id: number;
-  product_variation_id: number;
+  id: string;
+  product_variation_id: string;
   min_quantity: number;
   max_quantity?: number;
   price: number;
@@ -55,7 +21,10 @@ export interface ProductPriceTier {
   updated_at: string;
 }
 
-// Form data types for creating products
+// Re-export types for compatibility
+export type { ProductTemplate, ProductVariation, ProductImage, Category };
+
+// Admin-specific types for form data
 export interface ProductTemplateFormData {
   name: string;
   slug: string;
@@ -98,89 +67,214 @@ export interface ProductPriceTierFormData {
   price: number;
 }
 
-// TODO: Connect to real API
+// Product Template CRUD operations
 export async function createProductTemplate(
   data: ProductTemplateFormData
 ): Promise<ProductTemplate> {
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const resp = await fetch(`${BACKEND_URL}/api/product-templates`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
 
-  const template: ProductTemplate = {
-    id: Date.now(),
-    ...data,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  if (!resp.ok) {
+    throw new Error('Failed to create product template');
+  }
 
-  // TODO: Save to database via API
-  console.log('[v0] Creating product template:', template);
-
-  return template;
+  const newTemplate: ProductTemplate = await resp.json();
+  return newTemplate;
 }
 
+export async function updateProductTemplate(
+  id: string,
+  data: Partial<ProductTemplateFormData>
+): Promise<ProductTemplate> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-templates/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to update product template');
+  }
+
+  const updatedTemplate: ProductTemplate = await resp.json();
+  return updatedTemplate;
+}
+
+export async function deleteProductTemplate(id: string): Promise<void> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-templates/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to delete product template');
+  }
+}
+
+// Product Variation CRUD operations
 export async function createProductVariation(
-  templateId: number,
+  templateId: string,
   data: ProductVariationFormData
 ): Promise<ProductVariation> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const resp = await fetch(
+    `${BACKEND_URL}/api/product-templates/${templateId}/variations`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
-  const variation: ProductVariation = {
-    id: Date.now(),
-    product_template_id: templateId,
-    ...data,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  if (!resp.ok) {
+    throw new Error('Failed to create product variation');
+  }
 
-  console.log('[v0] Creating product variation:', variation);
-
-  return variation;
+  const newVariation: ProductVariation = await resp.json();
+  return newVariation;
 }
 
+export async function updateProductVariation(
+  id: string,
+  data: Partial<ProductVariationFormData>
+): Promise<ProductVariation> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-variations/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to update product variation');
+  }
+
+  const updatedVariation: ProductVariation = await resp.json();
+  return updatedVariation;
+}
+
+export async function deleteProductVariation(id: string): Promise<void> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-variations/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to delete product variation');
+  }
+}
+
+// Product Image CRUD operations
 export async function createProductImage(
-  variationId: number,
+  variationId: string,
   data: ProductImageFormData
 ): Promise<ProductImage> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const resp = await fetch(
+    `${BACKEND_URL}/api/product-variations/${variationId}/images`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
-  const image: ProductImage = {
-    id: Date.now(),
-    product_variation_id: variationId,
-    ...data,
-    created_at: new Date().toISOString(),
-  };
+  if (!resp.ok) {
+    throw new Error('Failed to create product image');
+  }
 
-  console.log('[v0] Creating product image:', image);
-
-  return image;
+  const newImage: ProductImage = await resp.json();
+  return newImage;
 }
 
+export async function updateProductImage(
+  id: string,
+  data: Partial<ProductImageFormData>
+): Promise<ProductImage> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-images/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to update product image');
+  }
+
+  const updatedImage: ProductImage = await resp.json();
+  return updatedImage;
+}
+
+export async function deleteProductImage(id: string): Promise<void> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-images/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to delete product image');
+  }
+}
+
+// Product Price Tier CRUD operations
 export async function createProductPriceTier(
-  variationId: number,
+  variationId: string,
   data: ProductPriceTierFormData
 ): Promise<ProductPriceTier> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const resp = await fetch(
+    `${BACKEND_URL}/api/product-variations/${variationId}/price-tiers`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
-  const priceTier: ProductPriceTier = {
-    id: Date.now(),
-    product_variation_id: variationId,
-    ...data,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  if (!resp.ok) {
+    throw new Error('Failed to create product price tier');
+  }
 
-  console.log('[v0] Creating price tier:', priceTier);
-
-  return priceTier;
+  const newPriceTier: ProductPriceTier = await resp.json();
+  return newPriceTier;
 }
 
-// Mock categories for now
-export async function getCategories() {
-  return [
-    { id: 1, name: 'Sofas' },
-    { id: 2, name: 'Chairs' },
-    { id: 3, name: 'Tables' },
-    { id: 4, name: 'Beds' },
-    { id: 5, name: 'Storage' },
-  ];
+export async function updateProductPriceTier(
+  id: string,
+  data: Partial<ProductPriceTierFormData>
+): Promise<ProductPriceTier> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-price-tiers/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to update product price tier');
+  }
+
+  const updatedPriceTier: ProductPriceTier = await resp.json();
+  return updatedPriceTier;
+}
+
+export async function deleteProductPriceTier(id: string): Promise<void> {
+  const resp = await fetch(`${BACKEND_URL}/api/product-price-tiers/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!resp.ok) {
+    throw new Error('Failed to delete product price tier');
+  }
 }

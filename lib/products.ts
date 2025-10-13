@@ -1,3 +1,5 @@
+'use server';
+
 import { BACKEND_URL } from '@/utils/environments';
 
 export interface Category {

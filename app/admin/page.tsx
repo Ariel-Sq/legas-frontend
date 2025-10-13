@@ -70,7 +70,7 @@ export default async function AdminPage() {
                   <Link href="/admin/categories">Gestionar Categorías</Link>
                 </Button>
                 <Button asChild size="lg">
-                  <Link href="/admin/products/new">Crear Producto</Link>
+                  <Link href="/admin/products">Gestionar Productos</Link>
                 </Button>
               </div>
             </div>
