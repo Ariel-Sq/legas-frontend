@@ -33,7 +33,7 @@ import { getCategories, type Category } from '@/lib/categories-admin';
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
@@ -44,12 +44,8 @@ export default function NewProductPage() {
     name: '',
     slug: '',
     description: '',
-    short_description: '',
-    category_id: 1,
+    category_ids: [],
     specifications: {},
-    meta_title: '',
-    meta_description: '',
-    meta_keywords: '',
     is_active: true,
   });
 
@@ -91,16 +87,24 @@ export default function NewProductPage() {
       event.stopPropagation();
     }
 
-    const id = parseInt(categoryId);
     setSelectedCategories((prev) =>
-      prev.includes(id) ? prev.filter((catId) => catId !== id) : [...prev, id]
+      prev.includes(categoryId)
+        ? prev.filter((catId) => catId !== categoryId)
+        : [...prev, categoryId]
     );
+
+    setTemplateData((prev) => {
+      const newCategoryIds = prev.category_ids.includes(categoryId)
+        ? prev.category_ids.filter((id) => id !== categoryId)
+        : [...prev.category_ids, categoryId];
+      return { ...prev, category_ids: newCategoryIds };
+    });
   };
 
   const renderCategoryTree = (cats: Category[], depth = 0) => {
     return cats.map((category) => {
       const hasChildren = category.children && category.children.length > 0;
-      const isSelected = selectedCategories.includes(parseInt(category.id));
+      const isSelected = selectedCategories.includes(category.id);
       const isExpanded = expandedCategories.has(category.id);
 
       return (
@@ -257,22 +261,7 @@ export default function NewProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="short_description">Descripción Corta *</Label>
-                <Input
-                  id="short_description"
-                  value={templateData.short_description}
-                  onChange={(e) =>
-                    setTemplateData({
-                      ...templateData,
-                      short_description: e.target.value,
-                    })
-                  }
-                  placeholder="Descripción breve del producto"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Descripción Completa *</Label>
+                <Label htmlFor="description">Descripción *</Label>
                 <Textarea
                   id="description"
                   value={templateData.description}
@@ -322,8 +311,7 @@ export default function NewProductPage() {
                             cats: Category[]
                           ): string => {
                             for (const cat of cats) {
-                              if (parseInt(cat.id) === categoryId)
-                                return cat.name;
+                              if (cat.id === categoryId) return cat.name;
                               if (cat.children) {
                                 const found = findCategoryName(cat.children);
                                 if (found) return found;
@@ -337,9 +325,6 @@ export default function NewProductPage() {
                               {categoryName}
                               <button
                                 type="button"
-                                // onClick={() =>
-                                //   handleCategoryToggle(categoryId.toString())
-                                // }
                                 className="ml-2 hover:text-destructive"
                               >
                                 <X className="h-3 w-3" />
@@ -350,57 +335,6 @@ export default function NewProductPage() {
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* SEO Section */}
-              <div className="border-t pt-6 space-y-6">
-                <h3 className="text-lg font-semibold">SEO (Opcional)</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_title">Meta Title</Label>
-                  <Input
-                    id="meta_title"
-                    value={templateData.meta_title}
-                    onChange={(e) =>
-                      setTemplateData({
-                        ...templateData,
-                        meta_title: e.target.value,
-                      })
-                    }
-                    placeholder="Título para motores de búsqueda"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_description">Meta Description</Label>
-                  <Textarea
-                    id="meta_description"
-                    value={templateData.meta_description}
-                    onChange={(e) =>
-                      setTemplateData({
-                        ...templateData,
-                        meta_description: e.target.value,
-                      })
-                    }
-                    placeholder="Descripción para motores de búsqueda"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_keywords">Meta Keywords</Label>
-                  <Input
-                    id="meta_keywords"
-                    value={templateData.meta_keywords}
-                    onChange={(e) =>
-                      setTemplateData({
-                        ...templateData,
-                        meta_keywords: e.target.value,
-                      })
-                    }
-                    placeholder="palabras, clave, separadas, por, comas"
-                  />
                 </div>
               </div>
 

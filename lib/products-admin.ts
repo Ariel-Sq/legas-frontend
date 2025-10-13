@@ -29,13 +29,8 @@ export interface ProductTemplateFormData {
   name: string;
   slug: string;
   description: string;
-  short_description: string;
-  category_id: number;
-  brand?: string;
+  category_ids: string[];
   specifications?: Record<string, any>;
-  meta_title?: string;
-  meta_description?: string;
-  meta_keywords?: string;
   is_active: boolean;
 }
 
