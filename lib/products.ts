@@ -15,20 +15,20 @@ export interface Category {
   sort_order: number;
   meta_title: string | null;
   meta_description: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface ProductImage {
   id: string;
   url: string;
-  path: string | null;
   isMain: boolean;
   sortOrder: number;
   altText: string | null;
-  variation_id: string;
-  createdAt: string;
-  updatedAt: string;
+}
+
+export interface PriceTier {
+  min_quantity: number;
+  price: string;
+  is_active: boolean;
 }
 
 export interface ProductVariation {
@@ -36,14 +36,14 @@ export interface ProductVariation {
   template_id: string;
   sku: string;
   name: string;
-  price: string; // Backend returns as string
+  price: string;
   stock: number;
   attributes: Record<string, any>;
   is_active: boolean;
   sort_order: number;
   images: ProductImage[];
-  created_at: string;
-  updated_at: string;
+  priceTiers: PriceTier[]; // TODO: Implement price tiers in the UI
+  reviews: any[]; // TODO: Define review structure and implement reviews in the UI
 }
 
 export interface ProductTemplate {
@@ -55,8 +55,6 @@ export interface ProductTemplate {
   categories: Category[];
   is_active: boolean;
   variations: ProductVariation[];
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Product {
@@ -142,8 +140,6 @@ export async function getShopProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
   const productTemplates = await getProductTemplates();
 
   // First try to find as variation id
@@ -317,7 +313,7 @@ export async function getNewArrivals(): Promise<Product[]> {
   ];
 }
 
-export async function getFilterOptions() {
+export async function getFilterOptions(maxPrice: number) {
   await new Promise((resolve) => setTimeout(resolve, 50));
 
   return {
@@ -329,6 +325,6 @@ export async function getFilterOptions() {
       { name: 'Brown', hex: '#8b4513' },
       { name: 'Natural', hex: '#a0522d' },
     ],
-    priceRange: { min: 0, max: 2000 },
+    priceRange: { min: 0, max: maxPrice },
   };
 }
