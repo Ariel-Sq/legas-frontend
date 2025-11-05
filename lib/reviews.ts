@@ -203,30 +203,3 @@ export async function markReviewHelpful(reviewId: string): Promise<void> {
     review.helpfulCount++;
   }
 }
-
-// Get all reviews (for admin)
-export async function getAllReviews(): Promise<Review[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return mockReviews;
-}
-
-// Update review status (for admin)
-export async function updateReviewStatus(
-  reviewId: string,
-  status: 'approved' | 'rejected'
-): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  const review = mockReviews.find((r) => r.id === reviewId);
-  if (review) {
-    review.status = status;
-  }
-}
-
-// Delete review (for admin)
-export async function deleteReview(reviewId: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  const index = mockReviews.findIndex((r) => r.id === reviewId);
-  if (index !== -1) {
-    mockReviews.splice(index, 1);
-  }
-}

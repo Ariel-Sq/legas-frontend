@@ -3,7 +3,6 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
-  isAdmin: boolean;
   phone?: string;
   address?: {
     street: string;
@@ -24,7 +23,6 @@ const mockUser: User = {
   name: 'John Doe',
   email: 'john@example.com',
   avatar: '/user-profile-photo.png',
-  isAdmin: true,
   phone: '+1 (555) 123-4567',
   address: {
     street: '123 Oak Street',

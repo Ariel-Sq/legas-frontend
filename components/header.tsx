@@ -32,7 +32,7 @@ export async function Header() {
               </svg>
               <h1 className="text-2xl font-bold">Woodland</h1>
             </Link>
-            <HeaderNav isAdmin={user.isAdmin} />
+            <HeaderNav />
           </div>
           <div className="flex items-center gap-4">
             <SearchBar />

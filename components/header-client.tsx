@@ -1,10 +1,6 @@
 import Link from 'next/link';
 
-interface HeaderNavProps {
-  isAdmin: boolean;
-}
-
-export function HeaderNav({ isAdmin }: HeaderNavProps) {
+export function HeaderNav() {
   return (
     <nav className="hidden md:flex items-center gap-8">
       <Link
@@ -25,14 +21,6 @@ export function HeaderNav({ isAdmin }: HeaderNavProps) {
       >
         Contacto
       </Link>
-      {isAdmin && (
-        <Link
-          href="/admin"
-          className="text-sm font-medium hover:text-primary transition-colors"
-        >
-          Admin
-        </Link>
-      )}
     </nav>
   );
 }

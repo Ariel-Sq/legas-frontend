@@ -85,18 +85,6 @@ export async function getUserOrders(): Promise<Order[]> {
   return [];
 }
 
-// Get all orders (admin only)
-export async function getAllOrders(): Promise<Order[]> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  if (typeof window !== 'undefined') {
-    return getOrdersFromStorage();
-  }
-
-  return [];
-}
-
 // Helper to get orders from localStorage
 function getOrdersFromStorage(): Order[] {
   if (typeof window === 'undefined') return [];
