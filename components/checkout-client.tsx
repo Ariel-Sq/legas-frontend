@@ -6,20 +6,37 @@ import { useCart } from '@/components/cart-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createOrder } from '@/lib/orders';
+import Script from 'next/script';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { createCheckoutPreference } from '@/lib/checkout';
+import {
+  ArrowLeft,
+  CreditCard,
+  MapPin,
+  CheckCircle,
+  Package,
+  Loader2,
+} from 'lucide-react';
+
+declare global {
+  interface Window {
+    MercadoPago: any;
+  }
+}
 
 export function CheckoutClient() {
-  const { items, subtotal, clearCart } = useCart();
-  const router = useRouter();
-  const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>(
-    'standard'
-  );
+  const { items, subtotal } = useCart();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  const [currentStep, setCurrentStep] = useState(1);
+  const [preferenceId, setPreferenceId] = useState('');
+  const [isCreatingPreference, setIsCreatingPreference] = useState(false);
+  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -30,8 +47,7 @@ export function CheckoutClient() {
     phone: '',
   });
 
-  const shippingCost =
-    shippingMethod === 'express' ? 50 : subtotal >= 500 ? 0 : 25;
+  const shippingCost = subtotal >= 500 ? 0 : 25;
   const total = subtotal + shippingCost;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,199 +57,224 @@ export function CheckoutClient() {
     }));
   };
 
-  const handlePlaceOrder = async () => {
-    const order = await createOrder({
-      items: items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image,
-      })),
-      shipping: {
-        name: formData.fullName,
-        email: formData.email,
-        address: formData.address,
-        city: formData.city,
-        postalCode: formData.postalCode,
-        country: formData.country,
-        phone: formData.phone,
-        method: shippingMethod,
-        cost: shippingCost,
-      },
-      subtotal,
-      shippingCost,
-      total,
-    });
-
-    clearCart();
-
-    router.push(`/order-confirmation?orderId=${order.id}`);
+  const handleShippingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentStep(2);
   };
+
+  useEffect(() => {
+    if (currentStep !== 2) return;
+
+    const setupPayment = async () => {
+      setIsCreatingPreference(true);
+      setError('');
+      try {
+        const id = await createCheckoutPreference(userId);
+        setPreferenceId(id);
+      } catch (err: any) {
+        setError(err.message || 'Error setting up payment');
+      } finally {
+        setIsCreatingPreference(false);
+      }
+    };
+
+    setupPayment();
+  }, [currentStep, userId]);
+
+  useEffect(() => {
+    if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
+      return;
+
+    const mp = new window.MercadoPago(
+      process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!,
+      { locale: 'es-AR' }
+    );
+
+    mp.checkout({
+      preference: { id: preferenceId },
+      render: {
+        container: '#payment-form',
+        label: 'Pagar con MercadoPago',
+      },
+    });
+  }, [preferenceId]);
 
   if (items.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-grow">
-          <div className="container mx-auto px-4 py-16 text-center">
-            <h1 className="mb-4 text-3xl font-bold">Your cart is empty</h1>
-            <p className="mb-8 text-muted-foreground">
-              Add some products to your cart before checking out.
-            </p>
-            <Button asChild>
-              <Link href="/shop">Continue Shopping</Link>
-            </Button>
-          </div>
-        </main>
-      </div>
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h1 className="mb-4 text-3xl font-bold">Your cart is empty</h1>
+          <p className="mb-8 text-muted-foreground">
+            Add some products to your cart before checking out.
+          </p>
+          <Button asChild>
+            <Link href="/shop">Continue Shopping</Link>
+          </Button>
+        </div>
+      </main>
     );
   }
 
   return (
     <div className="flex min-h-screen flex-col">
+      <Script src="https://sdk.mercadopago.com/js/v2" />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
+          <div className="mb-8">
+            <Link href="/cart">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Cart
+              </Button>
+            </Link>
+            <h1 className="text-3xl font-bold mt-4 mb-2">Checkout</h1>
+
+            <div className="flex items-center gap-4 mb-8">
+              <div
+                className={`flex items-center gap-2 ${currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                >
+                  {currentStep > 1 ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    '1'
+                  )}
+                </div>
+                <span className="font-medium">Shipping</span>
+              </div>
+              <div className="flex-1 h-px bg-border" />
+              <div
+                className={`flex items-center gap-2 ${currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                >
+                  2
+                </div>
+                <span className="font-medium">Payment</span>
+              </div>
+            </div>
+          </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-8">
-              <div className="rounded-lg border bg-card p-6">
-                <h2 className="mb-4 text-xl font-semibold">
-                  Shipping Information
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      placeholder="John Doe"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john@example.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      id="address"
-                      placeholder="123 Main St"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      placeholder="New York"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="postalCode">Postal Code</Label>
-                    <Input
-                      id="postalCode"
-                      placeholder="10001"
-                      value={formData.postalCode}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      placeholder="United States"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+              {currentStep === 1 && (
+                <div className="rounded-lg border bg-card p-6">
+                  <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Shipping Information
+                  </h2>
+                  <form
+                    onSubmit={handleShippingSubmit}
+                    className="grid gap-4 sm:grid-cols-2"
+                  >
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        placeholder="John Doe"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        placeholder="123 Main St"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        placeholder="Buenos Aires"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Input
+                        id="postalCode"
+                        placeholder="1000"
+                        value={formData.postalCode}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        placeholder="Argentina"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+54 11 1234-5678"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Button type="submit" className="w-full" size="lg">
+                        Continue to Payment
+                      </Button>
+                    </div>
+                  </form>
                 </div>
-              </div>
+              )}
 
-              <div className="rounded-lg border bg-card p-6">
-                <h2 className="mb-4 text-xl font-semibold">Shipping Method</h2>
-                <RadioGroup
-                  value={shippingMethod}
-                  onValueChange={(value) =>
-                    setShippingMethod(value as 'standard' | 'express')
-                  }
-                  className="space-y-3"
-                >
-                  <label
-                    htmlFor="standard"
-                    className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-accent"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="standard" id="standard" />
-                      <div>
-                        <div className="font-medium">Standard Shipping</div>
-                        <div className="text-sm text-muted-foreground">
-                          5-7 business days
-                        </div>
-                      </div>
+              {currentStep === 2 && (
+                <div className="rounded-lg border bg-card p-6">
+                  <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Payment Method
+                  </h2>
+                  {isCreatingPreference && (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      <span className="ml-3 text-muted-foreground">
+                        Setting up payment...
+                      </span>
                     </div>
-                    <div className="font-semibold">
-                      {subtotal >= 500 ? 'FREE' : '$25'}
+                  )}
+                  {error && (
+                    <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4">
+                      {error}
                     </div>
-                  </label>
-
-                  <label
-                    htmlFor="express"
-                    className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-accent has-[:checked]:border-primary has-[:checked]:bg-accent"
+                  )}
+                  <div id="payment-form"></div>
+                  <Button
+                    variant="ghost"
+                    className="mt-4"
+                    onClick={() => setCurrentStep(1)}
                   >
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="express" id="express" />
-                      <div>
-                        <div className="font-medium">Express Shipping</div>
-                        <div className="text-sm text-muted-foreground">
-                          2-3 business days
-                        </div>
-                      </div>
-                    </div>
-                    <div className="font-semibold">$50</div>
-                  </label>
-                </RadioGroup>
-              </div>
-
-              <div className="rounded-lg border bg-card p-6">
-                <h2 className="mb-4 text-xl font-semibold">Payment Method</h2>
-                <Button
-                  className="w-full bg-[#00b1ea] hover:bg-[#009dd1] text-white font-semibold py-6"
-                  size="lg"
-                >
-                  <svg
-                    className="mr-2 h-6 w-6"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 9.75c-.68 2.992-2.664 4.594-5.25 4.594-1.031 0-1.969-.313-2.719-.906l-.656 2.625h-1.5l1.594-6.375h1.5l-.094.375c.656-.563 1.5-.938 2.469-.938 1.406 0 2.344.75 2.344 2.063 0 .281-.031.562-.094.843h-4.5c-.094.469.188.938.844.938.656 0 1.219-.375 1.5-.938h1.562zm-4.5-1.313c-.469 0-.844.188-1.125.469l-.281 1.125h2.25c.031-.188.063-.375.063-.563 0-.563-.375-.938-.906-.938z" />
-                  </svg>
-                  Pay with MercadoPago
-                </Button>
-                <p className="mt-2 text-sm text-muted-foreground text-center">
-                  Secure payment processing
-                </p>
-              </div>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Shipping
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="lg:col-span-1">
@@ -288,17 +329,11 @@ export function CheckoutClient() {
                   </div>
                 </div>
 
-                <Button
-                  className="w-full mt-6"
-                  size="lg"
-                  onClick={handlePlaceOrder}
-                >
-                  Place Order
-                </Button>
-
-                <p className="mt-4 text-xs text-muted-foreground text-center">
-                  By placing your order, you agree to our terms and conditions.
-                </p>
+                {subtotal > 0 && subtotal < 500 && (
+                  <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
+                    Add ${(500 - subtotal).toFixed(2)} more for free shipping!
+                  </p>
+                )}
               </div>
             </div>
           </div>
