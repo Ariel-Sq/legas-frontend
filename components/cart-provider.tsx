@@ -96,9 +96,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     OptimisticAction
   >(serverItems, optimisticReducer);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userId = session?.user?.id;
-  const prevUserIdRef = useRef<string | undefined>(undefined);
+  const prevUserIdRef = useRef<string | undefined>('__initial__' as any);
 
   const { itemCount, subtotal } = calcTotals(optimisticItems);
 
@@ -107,7 +107,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (prevUserIdRef.current === userId && !loading) return;
+    if (status === 'loading') return;
+    if (prevUserIdRef.current === userId) return;
     prevUserIdRef.current = userId;
 
     setLoading(true);
@@ -115,7 +116,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       applyCartData(data);
       setLoading(false);
     });
-  }, [userId]);
+  }, [userId, status]);
 
   const addToCart = useCallback(
     (
