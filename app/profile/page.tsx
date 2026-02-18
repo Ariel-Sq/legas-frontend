@@ -1,4 +1,6 @@
-import { getCurrentUser } from '@/lib/user';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +14,21 @@ import {
 } from '@/components/ui/card';
 
 export default async function ProfilePage() {
-  const user = await getCurrentUser();
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect('/');
+  }
+
+  const user = session.user;
+  const name = user.name || '';
+  const initials = name
+    ? name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+    : '';
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -20,10 +36,10 @@ export default async function ProfilePage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-2">
-              My Profile
+              Mi Perfil
             </h1>
             <p className="text-muted-foreground">
-              Manage your account information
+              Administra la información de tu cuenta
             </p>
           </div>
 
@@ -31,27 +47,21 @@ export default async function ProfilePage() {
             {/* Profile Picture Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Profile Picture</CardTitle>
-                <CardDescription>Update your profile photo</CardDescription>
+                <CardTitle>Foto de Perfil</CardTitle>
+                <CardDescription>Tu foto de perfil</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center gap-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={user.avatar || '/placeholder.svg'}
-                    alt={user.name}
-                  />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  {user.image && (
+                    <AvatarImage src={user.image} alt={name} />
+                  )}
+                  <AvatarFallback className="text-2xl">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer bg-transparent"
-                  >
-                    Change Photo
-                  </Button>
-                  <p className="text-sm text-muted-foreground">
-                    JPG, PNG or GIF. Max size 2MB.
-                  </p>
+                  <p className="text-sm font-medium">{name}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
               </CardContent>
             </Card>
@@ -59,16 +69,18 @@ export default async function ProfilePage() {
             {/* Personal Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Update your personal details</CardDescription>
+                <CardTitle>Información Personal</CardTitle>
+                <CardDescription>
+                  Actualiza tus datos personales
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">Nombre Completo</Label>
                     <Input
                       id="name"
-                      defaultValue={user.name}
+                      defaultValue={name}
                       className="cursor-pointer"
                     />
                   </div>
@@ -77,70 +89,73 @@ export default async function ProfilePage() {
                     <Input
                       id="email"
                       type="email"
-                      defaultValue={user.email}
+                      defaultValue={user.email || ''}
                       className="cursor-pointer"
+                      disabled
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Teléfono</Label>
                     <Input
                       id="phone"
                       type="tel"
-                      defaultValue={user.phone}
+                      defaultValue={user.phoneNumber || ''}
                       className="cursor-pointer"
                     />
                   </div>
                 </div>
-                <Button className="cursor-pointer">Save Changes</Button>
+                <Button className="cursor-pointer">Guardar Cambios</Button>
               </CardContent>
             </Card>
 
             {/* Shipping Address */}
             <Card>
               <CardHeader>
-                <CardTitle>Default Shipping Address</CardTitle>
+                <CardTitle>Dirección de Envío</CardTitle>
                 <CardDescription>
-                  This address will be used for checkout
+                  Esta dirección se usará para el checkout
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="street">Street Address</Label>
+                    <Label htmlFor="street">Dirección</Label>
                     <Input
                       id="street"
-                      defaultValue={user.address?.street}
+                      defaultValue={user.address || ''}
                       className="cursor-pointer"
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city">Ciudad</Label>
                       <Input
                         id="city"
-                        defaultValue={user.address?.city}
+                        defaultValue={user.city || ''}
                         className="cursor-pointer"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Label htmlFor="postalCode">Código Postal</Label>
                       <Input
                         id="postalCode"
-                        defaultValue={user.address?.postalCode}
+                        defaultValue={user.zipCode || ''}
                         className="cursor-pointer"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="country">Country</Label>
+                      <Label htmlFor="country">País</Label>
                       <Input
                         id="country"
-                        defaultValue={user.address?.country}
+                        defaultValue={user.country || ''}
                         className="cursor-pointer"
                       />
                     </div>
                   </div>
                 </div>
-                <Button className="cursor-pointer">Update Address</Button>
+                <Button className="cursor-pointer">
+                  Actualizar Dirección
+                </Button>
               </CardContent>
             </Card>
           </div>

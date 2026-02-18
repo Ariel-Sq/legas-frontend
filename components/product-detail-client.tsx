@@ -12,7 +12,13 @@ import type {
   Product,
 } from '@/lib/products';
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
-import type { User } from '@/lib/user';
+
+interface ProductUser {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+}
 
 interface ProductDetailClientProps {
   initialTemplate: ProductTemplate;
@@ -20,7 +26,7 @@ interface ProductDetailClientProps {
   initialRelatedProducts: Product[];
   initialReviews: Review[];
   initialRatingSummary: ProductRatingSummary | null;
-  initialUser: User | null;
+  initialUser: ProductUser | null;
 }
 
 export function ProductDetailClient({

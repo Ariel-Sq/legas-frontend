@@ -1,7 +1,8 @@
 import { ProductDetailClient } from '@/components/product-detail-client';
 import { getProductTemplates, getRelatedProducts } from '@/lib/products';
 import { getProductReviews, getProductRatingSummary } from '@/lib/reviews';
-import { getCurrentUser } from '@/lib/user';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { notFound } from 'next/navigation';
 
 interface ProductPageProps {
@@ -29,10 +30,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
     foundTemplate.categories[0]?.name || 'Uncategorized'
   );
 
-  // Load reviews
+  // Load reviews and session
   const reviews = await getProductReviews(id);
   const ratingSummary = await getProductRatingSummary(id);
-  const user = await getCurrentUser();
+  const session = await getServerSession(authOptions);
+
+  const user = session?.user
+    ? {
+        id: session.user.id || '',
+        name: session.user.name || '',
+        email: session.user.email || '',
+        image: session.user.image,
+      }
+    : null;
 
   return (
     <div className="flex flex-col min-h-screen">

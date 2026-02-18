@@ -1,15 +1,12 @@
 import Link from 'next/link';
-import { UserMenu } from '@/components/user-menu';
+import { AuthSection } from '@/components/auth-section';
 import { SearchBar } from '@/components/search-bar';
 import { MobileNav } from '@/components/mobile-nav';
-import { getCurrentUser } from '@/lib/user';
 import { CartButton } from '@/components/cart-button';
 import { HeaderNav } from '@/components/header-client';
 import { WishlistButton } from '@/components/wishlist-button';
 
-export async function Header() {
-  const user = await getCurrentUser();
-
+export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +35,7 @@ export async function Header() {
             <SearchBar />
             <WishlistButton />
             <CartButton />
-            <UserMenu user={user} />
+            <AuthSection />
             <MobileNav />
           </div>
         </div>

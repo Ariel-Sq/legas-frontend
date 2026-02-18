@@ -8,14 +8,19 @@ import {
 // Convert templates to display products for shop
 function templatesToDisplayProducts(templates: ProductTemplate[]) {
   return templates
-    .filter((template) => template.is_active)
+    .filter(
+      (template) =>
+        template.is_active &&
+        template.variations &&
+        template.variations.length > 0
+    )
     .map((template) => {
       // Use the first active variation as default for display
       const defaultVariation =
         template.variations.find((v) => v.is_active) || template.variations[0];
       const mainImage =
-        defaultVariation.images.find((img) => img.isMain) ||
-        defaultVariation.images[0];
+        defaultVariation.images?.find((img) => img.isMain) ||
+        defaultVariation.images?.[0];
 
       return {
         id: template.id, // Use template ID for navigation

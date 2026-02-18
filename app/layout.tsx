@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { CartProvider } from '@/components/cart-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { WishlistProvider } from '@/components/wishlist-provider';
+import { AuthProvider } from '@/lib/auth-context';
 import './globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
@@ -37,15 +38,17 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
         >
-          <WishlistProvider>
-            <CartProvider>
-              <Suspense fallback={null}>
-                <Header />
-                {children}
-                <Footer />
-              </Suspense>
-            </CartProvider>
-          </WishlistProvider>
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <Suspense fallback={null}>
+                  <Header />
+                  {children}
+                  <Footer />
+                </Suspense>
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
         </ThemeProvider>
         <Analytics />
       </body>

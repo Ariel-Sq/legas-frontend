@@ -11,37 +11,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { User as UserType } from '@/lib/user';
+import { signOut, useSession } from 'next-auth/react';
 
-interface UserMenuProps {
-  user: UserType;
-}
+export function UserMenu() {
+  const { data: session } = useSession();
+  const user = session?.user;
+  const name = user?.name || '';
+  const initials = name
+    ? name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+    : '';
 
-export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarImage
-              src={user.avatar || '/placeholder.svg'}
-              alt={user.name}
-            />
-            <AvatarFallback>
-              {user.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </AvatarFallback>
+            {user?.image && (
+              <AvatarImage src={user.image} alt={name} />
+            )}
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-sm font-medium leading-none">{name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -49,25 +50,28 @@ export function UserMenu({ user }: UserMenuProps) {
         <Link href="/profile">
           <DropdownMenuItem className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>Perfil</span>
           </DropdownMenuItem>
         </Link>
         <Link href="/orders">
           <DropdownMenuItem className="cursor-pointer">
             <Package className="mr-2 h-4 w-4" />
-            <span>Orders</span>
+            <span>Pedidos</span>
           </DropdownMenuItem>
         </Link>
         <Link href="/settings">
           <DropdownMenuItem className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <span>Configuración</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => signOut({ callbackUrl: '/' })}
+        >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>Cerrar sesión</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
