@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isPending, startTransition] = useTransition();
   const { data: session } = useSession();
   const userId = session?.user?.id;
-  const initialLoadDone = useRef(false);
+  const prevUserIdRef = useRef<string | undefined>(undefined);
 
   function applyCartData(data: CartData) {
     setItems(data.items);
@@ -62,9 +62,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (initialLoadDone.current) return;
-    initialLoadDone.current = true;
+    if (prevUserIdRef.current === userId && !loading) return;
+    prevUserIdRef.current = userId;
 
+    setLoading(true);
     fetchCart(userId).then((data) => {
       applyCartData(data);
       setLoading(false);
