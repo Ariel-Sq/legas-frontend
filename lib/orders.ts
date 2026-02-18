@@ -4,7 +4,7 @@ export interface Order {
   date: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered';
   items: {
-    id: number;
+    id: string;
     name: string;
     price: number;
     quantity: number;

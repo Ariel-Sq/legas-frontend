@@ -18,14 +18,15 @@ export default function WishlistPage() {
     getCartItem,
   } = useCart();
   const [cartStates, setCartStates] = useState<
-    Record<number, { inCart: boolean; quantity: number }>
+    Record<string, { inCart: boolean; quantity: number }>
   >({});
 
   useEffect(() => {
-    const states: Record<number, { inCart: boolean; quantity: number }> = {};
+    const states: Record<string, { inCart: boolean; quantity: number }> = {};
     items.forEach((item) => {
-      const cartItem = getCartItem(item.id);
-      states[item.id] = {
+      const id = String(item.id);
+      const cartItem = getCartItem(id);
+      states[id] = {
         inCart: !!cartItem,
         quantity: cartItem?.quantity || 1,
       };
@@ -34,15 +35,14 @@ export default function WishlistPage() {
   }, [items, cartItems, getCartItem]);
 
   const handleAddToCart = (item: (typeof items)[0]) => {
-    const cartItem = getCartItem(item.id);
+    const id = String(item.id);
+    const cartItem = getCartItem(id);
     if (cartItem) {
-      // Item already in cart, update quantity
-      updateQuantity(item.id, cartItem.quantity + 1);
+      updateQuantity(id, cartItem.quantity + 1);
     } else {
-      // Add new item to cart
       addToCart(
         {
-          id: item.id,
+          id,
           name: item.name,
           price: item.price,
           image: item.image,
@@ -54,7 +54,7 @@ export default function WishlistPage() {
   };
 
   const handleRemoveFromCart = (itemId: number) => {
-    removeFromCart(itemId);
+    removeFromCart(String(itemId));
   };
 
   return (
@@ -89,7 +89,7 @@ export default function WishlistPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => {
-                const cartState = cartStates[item.id] || {
+                const cartState = cartStates[String(item.id)] || {
                   inCart: false,
                   quantity: 1,
                 };

@@ -21,7 +21,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
   };
 
   const handleIncrease = () => {
-    updateQuantity(item.id, item.quantity + 1);
+    if (!item.stock || item.quantity < item.stock) {
+      updateQuantity(item.id, item.quantity + 1);
+    }
   };
 
   const handleRemove = () => {
@@ -30,7 +32,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   return (
     <div className="flex gap-4 py-6 border-b border-border">
-      {/* Product Image */}
       <Link href={`/product/${item.id}`} className="flex-shrink-0">
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-muted">
           <Image
@@ -42,7 +43,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
         </div>
       </Link>
 
-      {/* Product Info */}
       <div className="flex-grow flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex-grow">
           <Link href={`/product/${item.id}`}>
@@ -50,13 +50,14 @@ export function CartItemRow({ item }: CartItemRowProps) {
               {item.name}
             </h3>
           </Link>
-          <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
+          {item.category && (
+            <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
+          )}
           <p className="text-lg font-semibold text-primary mt-2">
             ${item.price}
           </p>
         </div>
 
-        {/* Quantity Controls */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 border border-border rounded-lg">
             <Button
@@ -75,13 +76,13 @@ export function CartItemRow({ item }: CartItemRowProps) {
               variant="ghost"
               size="icon"
               onClick={handleIncrease}
+              disabled={!!item.stock && item.quantity >= item.stock}
               className="h-10 w-10 cursor-pointer"
             >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Remove Button */}
           <Button
             variant="ghost"
             size="icon"
@@ -92,7 +93,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
           </Button>
         </div>
 
-        {/* Subtotal */}
         <div className="text-right md:w-24">
           <p className="font-semibold text-lg">
             ${(item.price * item.quantity).toFixed(2)}

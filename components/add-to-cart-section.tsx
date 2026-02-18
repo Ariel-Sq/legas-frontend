@@ -8,14 +8,14 @@ import { useWishlist } from '@/components/wishlist-provider';
 
 interface AddToCartSectionProps {
   product: {
-    id: number;
+    id: string;
     name: string;
     price: number;
     image: string;
     category: string;
     stock?: number;
   };
-  wishlistId?: number; // Optional separate ID for wishlist (defaults to product.id)
+  wishlistId?: number;
 }
 
 export function AddToCartSection({
@@ -28,8 +28,8 @@ export function AddToCartSection({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const cartItem = getCartItem(product.id);
   const productInCart = isInCart(product.id);
-  const wishlistItemId = wishlistId ?? product.id;
-  const inWishlist = isInWishlist(wishlistItemId);
+  const wishlistItemId = wishlistId ?? 0;
+  const inWishlist = wishlistItemId ? isInWishlist(wishlistItemId) : false;
 
   useEffect(() => {
     if (cartItem) {

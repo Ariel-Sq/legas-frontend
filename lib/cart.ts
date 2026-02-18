@@ -1,90 +1,190 @@
-// Cart types and utility functions
+'use server';
+
+import { cookies } from 'next/headers';
+import { BACKEND_URL } from '@/utils/environments';
+
+// --- Types ---
+
+interface BackendCartItem {
+  id: string;
+  cartId: string;
+  productVariationId: string;
+  quantity: number;
+  price: number;
+  productVariation: {
+    id: string;
+    template_id: string;
+    sku: string;
+    name: string;
+    price: string;
+    stock: number;
+    attributes: Record<string, any>;
+    is_active: boolean;
+    images: Array<{ id: string; url: string; isMain?: boolean }>;
+  };
+}
+
+interface BackendCart {
+  id: string;
+  userId: string | null;
+  sessionId: string | null;
+  items: BackendCartItem[];
+  totalItems: number;
+  totalPrice: number;
+}
 
 export interface CartItem {
-  id: number;
+  id: string;
+  cartItemId: string;
   name: string;
   price: number;
   image: string;
   quantity: number;
   category: string;
+  stock: number;
 }
 
-export interface Cart {
+export interface CartData {
   items: CartItem[];
-  total: number;
   itemCount: number;
+  subtotal: number;
 }
 
-// Calculate cart totals
-export function calculateCartTotals(items: CartItem[]): {
-  total: number;
-  itemCount: number;
-} {
-  const itemCount = items.length;
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+// --- Helpers ---
 
-  return { total, itemCount };
-}
-
-// Add item to cart
-export function addToCart(
-  currentItems: CartItem[],
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  },
-  quantity = 1
-): CartItem[] {
-  const existingItem = currentItems.find((item) => item.id === product.id);
-
-  if (existingItem) {
-    // Update quantity if item already exists
-    return currentItems.map((item) =>
-      item.id === product.id
-        ? { ...item, quantity: item.quantity + quantity }
-        : item
-    );
+async function getSessionId(): Promise<string> {
+  const cookieStore = await cookies();
+  let sessionId = cookieStore.get('woodland-session-id')?.value;
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    cookieStore.set('woodland-session-id', sessionId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+    });
   }
-
-  // Add new item
-  return [
-    ...currentItems,
-    {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity,
-      category: product.category,
-    },
-  ];
+  return sessionId;
 }
 
-// Remove item from cart
-export function removeFromCart(
-  currentItems: CartItem[],
-  productId: number
-): CartItem[] {
-  return currentItems.filter((item) => item.id !== productId);
-}
-
-// Update item quantity
-export function updateCartItemQuantity(
-  currentItems: CartItem[],
-  productId: number,
-  quantity: number
-): CartItem[] {
-  if (quantity <= 0) {
-    return removeFromCart(currentItems, productId);
+function buildHeaders(userId?: string, sessionId?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (userId) {
+    headers['x-user-id'] = userId;
+  } else if (sessionId) {
+    headers['x-session-id'] = sessionId;
   }
+  return headers;
+}
 
-  return currentItems.map((item) =>
-    item.id === productId ? { ...item, quantity } : item
-  );
+function mapBackendCart(cart: BackendCart): CartData {
+  const items: CartItem[] = cart.items.map((item) => {
+    const mainImage =
+      item.productVariation?.images?.find((img) => img.isMain) ||
+      item.productVariation?.images?.[0];
+    const unitPrice =
+      item.quantity > 0 ? Number(item.price) / item.quantity : Number(item.productVariation?.price ?? 0);
+
+    return {
+      id: item.productVariationId,
+      cartItemId: item.id,
+      name: item.productVariation?.name || 'Product',
+      price: unitPrice,
+      image: mainImage?.url || '',
+      quantity: item.quantity,
+      category: '',
+      stock: item.productVariation?.stock ?? 0,
+    };
+  });
+
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  return { items, itemCount, subtotal };
+}
+
+function emptyCart(): CartData {
+  return { items: [], itemCount: 0, subtotal: 0 };
+}
+
+// --- Server Actions ---
+
+export async function fetchCart(userId?: string): Promise<CartData> {
+  try {
+    const sessionId = await getSessionId();
+    const res = await fetch(`${BACKEND_URL}/api/cart`, {
+      headers: buildHeaders(userId, sessionId),
+      cache: 'no-store',
+    });
+    if (!res.ok) return emptyCart();
+    const cart: BackendCart = await res.json();
+    return mapBackendCart(cart);
+  } catch {
+    return emptyCart();
+  }
+}
+
+export async function addToCartAction(
+  productId: string,
+  quantity: number,
+  userId?: string
+): Promise<CartData> {
+  const sessionId = await getSessionId();
+  const res = await fetch(`${BACKEND_URL}/api/cart/items`, {
+    method: 'POST',
+    headers: buildHeaders(userId, sessionId),
+    body: JSON.stringify({ productId, quantity }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to add to cart');
+  }
+  const cart: BackendCart = await res.json();
+  return mapBackendCart(cart);
+}
+
+export async function updateCartItemAction(
+  cartItemId: string,
+  quantity: number,
+  userId?: string
+): Promise<CartData> {
+  const sessionId = await getSessionId();
+  const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
+    method: 'PATCH',
+    headers: buildHeaders(userId, sessionId),
+    body: JSON.stringify({ quantity }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to update cart');
+  }
+  const cart: BackendCart = await res.json();
+  return mapBackendCart(cart);
+}
+
+export async function removeFromCartAction(
+  cartItemId: string,
+  userId?: string
+): Promise<CartData> {
+  const sessionId = await getSessionId();
+  const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
+    method: 'DELETE',
+    headers: buildHeaders(userId, sessionId),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to remove from cart');
+  }
+  const cart: BackendCart = await res.json();
+  return mapBackendCart(cart);
+}
+
+export async function clearCartAction(userId?: string): Promise<void> {
+  const sessionId = await getSessionId();
+  await fetch(`${BACKEND_URL}/api/cart/clear`, {
+    method: 'DELETE',
+    headers: buildHeaders(userId, sessionId),
+  });
 }

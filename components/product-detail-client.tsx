@@ -185,15 +185,15 @@ export function ProductDetailClient({
             {/* Quantity Selector */}
             <AddToCartSection
               product={{
-                id: Number(selectedProduct.id),
+                id: selectedProduct.id,
                 name: selectedProduct.name,
                 price: selectedProduct.price,
                 image: selectedProduct.image,
                 category: selectedProduct.category,
                 stock: selectedProduct.stock,
               }}
-              wishlistId={Number(initialTemplate.id)} // Use template ID for wishlist
-              key={selectedProduct.id} // Force re-render when variation changes
+              wishlistId={Number(initialTemplate.id)}
+              key={selectedProduct.id}
             />
 
             {/* Shipping Info */}
