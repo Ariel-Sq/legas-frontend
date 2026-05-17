@@ -29,6 +29,7 @@ interface Product {
   category: string;
   material?: string;
   color?: string;
+  createdAt?: string;
 }
 
 interface FilterOptions {
@@ -58,7 +59,7 @@ export function ShopContent({
     filterOptions.priceRange.max,
   ]);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
-  const [sortBy, setSortBy] = useState<string>('popular');
+  const [sortBy, setSortBy] = useState<string>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
@@ -111,7 +112,11 @@ export function ShopContent({
         filtered.sort((a, b) => b.price - a.price);
         break;
       case 'newest':
-        filtered.reverse();
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime()
+        );
         break;
       default:
         break;
@@ -251,17 +256,14 @@ export function ShopContent({
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="popular" className="cursor-pointer">
-                  Most Popular
+                <SelectItem value="newest" className="cursor-pointer">
+                  Newest Arrivals
                 </SelectItem>
                 <SelectItem value="price-low" className="cursor-pointer">
                   Price: Low to High
                 </SelectItem>
                 <SelectItem value="price-high" className="cursor-pointer">
                   Price: High to Low
-                </SelectItem>
-                <SelectItem value="newest" className="cursor-pointer">
-                  Newest Arrivals
                 </SelectItem>
               </SelectContent>
             </Select>

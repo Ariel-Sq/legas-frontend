@@ -56,6 +56,8 @@ export interface ProductTemplate {
   is_active: boolean;
   is_featured: boolean;
   variations: ProductVariation[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {

@@ -30,6 +30,7 @@ function templatesToDisplayProducts(templates: ProductTemplate[]) {
         category: template.categories[0]?.name || 'Uncategorized',
         material: defaultVariation.attributes?.material,
         color: defaultVariation.attributes?.color,
+        createdAt: template.created_at,
         // Add variation info for display
         variations: template.variations.filter((v) => v.is_active),
         minPrice: Math.min(

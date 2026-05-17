@@ -40,10 +40,34 @@ export function ProductDetailClient({
   const [selectedVariation, setSelectedVariation] =
     useState<ProductVariation>(initialVariation);
 
-  // Group variations by attribute type
-  const colorVariations = initialTemplate.variations.filter(
-    (v) => v.attributes?.color && v.is_active
-  );
+  const activeVariations = initialTemplate.variations.filter((v) => v.is_active);
+
+  // Pick attribute keys whose values differ across variations — these are what
+  // the buyer needs to choose between. e.g. two t-shirts both color=white but
+  // sizes M/L → label by size; two laptops both ram=16GB but colors differ →
+  // label by color. Stable order: by first appearance.
+  const distinguishingKeys = (() => {
+    const seen = new Set<string>();
+    const ordered: string[] = [];
+    for (const v of activeVariations) {
+      for (const k of Object.keys(v.attributes || {})) {
+        if (!seen.has(k)) {
+          seen.add(k);
+          ordered.push(k);
+        }
+      }
+    }
+    return ordered.filter((k) => {
+      const values = new Set(activeVariations.map((v) => v.attributes?.[k]));
+      return values.size > 1;
+    });
+  })();
+
+  const labelForVariation = (v: ProductVariation) =>
+    distinguishingKeys
+      .map((k) => v.attributes?.[k])
+      .filter((val) => val !== undefined && val !== null && val !== '')
+      .join(' · ');
 
   const handleVariationChange = (variation: ProductVariation) => {
     setSelectedVariation(variation);
@@ -140,22 +164,26 @@ export function ProductDetailClient({
               </p>
             </div>
 
-            {/* Color Selection */}
-            {colorVariations.length > 1 && (
+            {/* Variation Selection */}
+            {activeVariations.length > 1 && (
               <div className="space-y-3">
-                <label className="text-sm font-medium">Color:</label>
-                <div className="flex gap-2">
-                  {colorVariations.map((variation) => (
+                <label className="text-sm font-medium capitalize">
+                  {distinguishingKeys.length > 0
+                    ? `${distinguishingKeys.join(' / ')}:`
+                    : 'Options:'}
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {activeVariations.map((variation) => (
                     <button
                       key={variation.id}
                       onClick={() => handleVariationChange(variation)}
-                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors capitalize ${
                         selectedVariation.id === variation.id
                           ? 'border-primary bg-primary text-primary-foreground'
                           : 'border-muted hover:border-primary/50'
                       }`}
                     >
-                      {variation.attributes?.color}
+                      {labelForVariation(variation) || variation.sku}
                     </button>
                   ))}
                 </div>
