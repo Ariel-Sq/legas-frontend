@@ -54,6 +54,7 @@ export interface ProductTemplate {
   specifications: Record<string, any>;
   categories: Category[];
   is_active: boolean;
+  is_featured: boolean;
   variations: ProductVariation[];
 }
 
@@ -75,8 +76,25 @@ export interface Product {
   templateId?: string; // For wishlist functionality
 }
 
-export async function getProductTemplates(): Promise<ProductTemplate[]> {
-  const resp = await fetch(`${BACKEND_URL}/api/product-templates`);
+export interface ListProductTemplatesParams {
+  sort?: 'created_at' | 'updated_at' | 'name';
+  order?: 'asc' | 'desc';
+  limit?: number;
+  featured?: boolean;
+}
+
+export async function getProductTemplates(
+  params?: ListProductTemplatesParams
+): Promise<ProductTemplate[]> {
+  const qs = params
+    ? '?' +
+      new URLSearchParams(
+        Object.entries(params)
+          .filter(([, v]) => v !== undefined)
+          .map(([k, v]) => [k, String(v)])
+      ).toString()
+    : '';
+  const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`);
   const data: ProductTemplate[] = await resp.json();
   return data;
 }
@@ -234,83 +252,62 @@ export async function getRelatedProducts(
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  const templates = await getProductTemplates({
+    featured: true,
+    limit: 3,
+  });
 
-  return [
-    {
-      id: '1',
-      name: 'Artisan Dining Table',
-      description: 'Handcrafted dining table for family gatherings.',
-      price: 1250,
-      image:
-        'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=800&fit=crop',
-      category: 'featured',
-    },
-    {
-      id: '2',
-      name: 'Rustic Bed Frame',
-      description:
-        "Comfortable and stylish bed frame for a good night's sleep.",
-      price: 980,
-      image:
-        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&h=800&fit=crop',
-      category: 'featured',
-    },
-    {
-      id: '3',
-      name: 'Modern Bookshelf',
-      description: 'Elegant bookshelf to organize your collection.',
-      price: 650,
-      image:
-        'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&h=800&fit=crop',
-      category: 'featured',
-    },
-  ];
+  const products: Product[] = [];
+  for (const template of templates) {
+    const variation = template.variations.find((v) => v.is_active);
+    if (!variation) continue;
+    const mainImage =
+      variation.images.find((img) => img.isMain) || variation.images[0];
+    products.push({
+      id: variation.id,
+      name: variation.name,
+      description: template.description || '',
+      price: parseFloat(variation.price),
+      image: mainImage?.url || '',
+      category: template.categories[0]?.name || 'featured',
+      material: variation.attributes?.material,
+      color: variation.attributes?.color,
+      images: variation.images.map((img) => img.url),
+      stock: variation.stock,
+      templateId: template.id,
+    });
+  }
+  return products;
 }
 
 export async function getNewArrivals(): Promise<Product[]> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  const templates = await getProductTemplates({
+    sort: 'created_at',
+    order: 'desc',
+    limit: 4,
+  });
 
-  return [
-    {
-      id: '4',
-      name: 'Minimalist Coffee Table',
-      description: 'Sleek coffee table for modern living rooms.',
-      price: 490,
-      image:
-        'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&h=800&fit=crop',
-      category: 'new-arrival',
-    },
-    {
-      id: '5',
-      name: 'Scandinavian Chair',
-      description: 'Comfortable chair with a Scandinavian design.',
-      price: 320,
-      image:
-        'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&h=800&fit=crop',
-      category: 'new-arrival',
-    },
-    {
-      id: '6',
-      name: 'Contemporary Desk',
-      description: 'Functional desk for home offices.',
-      price: 850,
-      image:
-        'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&h=800&fit=crop',
-      category: 'new-arrival',
-    },
-    {
-      id: '7',
-      name: 'Oakwood Sideboard',
-      description: 'Spacious and stylish storage solution.',
-      price: 1100,
-      image:
-        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&h=800&fit=crop',
-      category: 'new-arrival',
-    },
-  ];
+  const products: Product[] = [];
+  for (const template of templates) {
+    const variation = template.variations.find((v) => v.is_active);
+    if (!variation) continue;
+    const mainImage =
+      variation.images.find((img) => img.isMain) || variation.images[0];
+    products.push({
+      id: variation.id,
+      name: variation.name,
+      description: template.description || '',
+      price: parseFloat(variation.price),
+      image: mainImage?.url || '',
+      category: template.categories[0]?.name || 'Uncategorized',
+      material: variation.attributes?.material,
+      color: variation.attributes?.color,
+      images: variation.images.map((img) => img.url),
+      stock: variation.stock,
+      templateId: template.id,
+    });
+  }
+  return products;
 }
 
 export async function getFilterOptions(maxPrice: number) {
