@@ -49,8 +49,7 @@ export default async function ShopPage({
 }) {
   const templates = await getProductTemplates();
   const products = templatesToDisplayProducts(templates);
-  const maxPrice = Math.max(...products.map((p) => p.price));
-  const filterOptions = await getFilterOptions(maxPrice);
+  const filterOptions = await getFilterOptions(templates);
   const params = await searchParams;
 
   return (

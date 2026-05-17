@@ -191,7 +191,9 @@ export function ShopContent({
             <h1 className="text-3xl font-bold">
               {searchQuery
                 ? `Search results for "${searchQuery}"`
-                : 'Living Room Furniture'}
+                : categoryFilter !== 'All'
+                  ? categoryFilter
+                  : 'All Products'}
             </h1>
             {searchQuery && (
               <button
@@ -266,48 +268,21 @@ export function ShopContent({
           </div>
         </div>
 
-        {!searchQuery && (
+        {!searchQuery && filterOptions.categories.length > 0 && (
           <div className="flex gap-3 mb-6 flex-wrap">
-            <button
-              onClick={() => setCategoryFilter('All')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === 'All'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setCategoryFilter('Sofas')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === 'Sofas'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
-            >
-              Sofas
-            </button>
-            <button
-              onClick={() => setCategoryFilter('Chairs')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === 'Chairs'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
-            >
-              Chairs
-            </button>
-            <button
-              onClick={() => setCategoryFilter('Tables')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                categoryFilter === 'Tables'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-primary/20 hover:bg-primary/30'
-              }`}
-            >
-              Tables
-            </button>
+            {['All', ...filterOptions.categories].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                  categoryFilter === cat
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-primary/20 hover:bg-primary/30'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         )}
 

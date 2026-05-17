@@ -310,18 +310,51 @@ export async function getNewArrivals(): Promise<Product[]> {
   return products;
 }
 
-export async function getFilterOptions(maxPrice: number) {
-  await new Promise((resolve) => setTimeout(resolve, 50));
+const COLOR_HEX: Record<string, string> = {
+  white: '#ffffff',
+  black: '#000000',
+  brown: '#8b4513',
+  natural: '#a0522d',
+  silver: '#c0c0c0',
+  gray: '#808080',
+  grey: '#808080',
+  red: '#e11d48',
+  blue: '#2563eb',
+  green: '#16a34a',
+  yellow: '#facc15',
+  beige: '#f5f5dc',
+};
+
+export async function getFilterOptions(templates: ProductTemplate[]) {
+  const categories = new Set<string>();
+  const materials = new Set<string>();
+  const colors = new Map<string, string>();
+  let maxPrice = 0;
+
+  for (const t of templates) {
+    for (const c of t.categories || []) {
+      if (c?.name) categories.add(c.name);
+    }
+    for (const v of t.variations || []) {
+      if (!v.is_active) continue;
+      const price = parseFloat(v.price);
+      if (Number.isFinite(price) && price > maxPrice) maxPrice = price;
+      const mat = v.attributes?.material;
+      if (typeof mat === 'string' && mat.trim()) materials.add(mat);
+      const col = v.attributes?.color;
+      if (typeof col === 'string' && col.trim()) {
+        const key = col.toLowerCase();
+        if (!colors.has(col)) {
+          colors.set(col, COLOR_HEX[key] ?? key);
+        }
+      }
+    }
+  }
 
   return {
-    categories: ['Sofas', 'Chairs', 'Tables', 'Beds', 'Storage'],
-    materials: ['Oak', 'Maple', 'Walnut', 'Pine'],
-    colors: [
-      { name: 'White', hex: '#ffffff' },
-      { name: 'Black', hex: '#000000' },
-      { name: 'Brown', hex: '#8b4513' },
-      { name: 'Natural', hex: '#a0522d' },
-    ],
-    priceRange: { min: 0, max: maxPrice },
+    categories: Array.from(categories).sort(),
+    materials: Array.from(materials).sort(),
+    colors: Array.from(colors, ([name, hex]) => ({ name, hex })),
+    priceRange: { min: 0, max: Math.ceil(maxPrice) },
   };
 }
