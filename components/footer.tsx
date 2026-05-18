@@ -12,13 +12,13 @@ export function Footer() {
               href="/privacy"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Privacy Policy
+              Política de Privacidad
             </Link>
             <Link
               href="/terms"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Terms of Service
+              Términos del Servicio
             </Link>
             <Link
               href="/shipping"

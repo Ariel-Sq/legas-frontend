@@ -24,12 +24,12 @@ export function CartContent() {
                 <ShoppingBag className="w-12 h-12 text-muted-foreground" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
+            <h1 className="text-3xl font-bold mb-4">Tu carrito está vacío</h1>
             <p className="text-muted-foreground mb-8">
-              Looks like you haven't added any items to your cart yet.
+              Todavía no agregaste productos a tu carrito.
             </p>
             <Button asChild size="lg" className="cursor-pointer">
-              <Link href="/shop">Continue Shopping</Link>
+              <Link href="/shop">Seguir comprando</Link>
             </Button>
           </div>
         </div>
@@ -42,9 +42,9 @@ export function CartContent() {
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Shopping Cart</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Carrito de compras</h1>
           <p className="text-muted-foreground">
-            {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
+            {itemCount} {itemCount === 1 ? 'producto' : 'productos'} en tu carrito
           </p>
         </div>
 
@@ -67,60 +67,53 @@ export function CartContent() {
                 asChild
                 className="cursor-pointer bg-transparent"
               >
-                <Link href="/shop">Continue Shopping</Link>
+                <Link href="/shop">Seguir comprando</Link>
               </Button>
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>Resumen del pedido</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Subtotal */}
                 <div className="flex justify-between text-base">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-medium">${subtotal.toFixed(2)}</span>
                 </div>
 
-                {/* Shipping */}
                 <div className="flex justify-between text-base">
-                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-muted-foreground">Envío</span>
                   <span className="font-medium">
                     {shippingCost === 0 ? (
-                      <span className="text-green-600">Free</span>
+                      <span className="text-green-600">Gratis</span>
                     ) : (
                       `$${shippingCost.toFixed(2)}`
                     )}
                   </span>
                 </div>
 
-                {/* Free Shipping Notice */}
                 {subtotal > 0 && subtotal < 500 && (
                   <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
-                    Add ${(500 - subtotal).toFixed(2)} more to get free
-                    shipping!
+                    Agregá ${(500 - subtotal).toFixed(2)} más para que tu envío sea
+                    gratis.
                   </div>
                 )}
 
                 <Separator />
 
-                {/* Total */}
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
                   <span className="text-primary">${finalTotal.toFixed(2)}</span>
                 </div>
 
-                {/* Checkout Button */}
                 <Button size="lg" className="w-full cursor-pointer" asChild>
-                  <Link href="/checkout">Proceed to Checkout</Link>
+                  <Link href="/checkout">Ir a pagar</Link>
                 </Button>
 
-                {/* Security Notice */}
                 <p className="text-xs text-center text-muted-foreground">
-                  Secure checkout powered by Stripe
+                  Pago seguro procesado por Mercado Pago
                 </p>
               </CardContent>
             </Card>

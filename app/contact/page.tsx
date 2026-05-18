@@ -14,23 +14,25 @@ export default async function ContactPage() {
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-6xl">
             <h1 className="text-5xl font-bold mb-6 text-center">
-              Get in Touch
+              Hablemos
             </h1>
             <p className="text-xl text-muted-foreground text-center mb-12">
-              We'd love to hear from you. Send us a message and we'll respond as
-              soon as possible.
+              Nos encantaría saber de vos. Mandanos un mensaje y te respondemos
+              a la brevedad.
             </p>
 
             <div className="grid md:grid-cols-2 gap-12">
               <div>
-                <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+                <h2 className="text-2xl font-bold mb-6">
+                  Información de contacto
+                </h2>
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <div className="p-3 rounded-lg bg-primary/20">
                       <MapPin className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Address</h3>
+                      <h3 className="font-semibold mb-1">Dirección</h3>
                       <p className="text-muted-foreground">
                         {contactInfo.address.street}
                         <br />
@@ -45,7 +47,7 @@ export default async function ContactPage() {
                       <Phone className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Phone</h3>
+                      <h3 className="font-semibold mb-1">Teléfono</h3>
                       <p className="text-muted-foreground">
                         {contactInfo.phone}
                       </p>
@@ -66,7 +68,7 @@ export default async function ContactPage() {
                 </div>
 
                 <div className="mt-8">
-                  <h3 className="font-semibold mb-4">Business Hours</h3>
+                  <h3 className="font-semibold mb-4">Horarios de atención</h3>
                   <div className="space-y-2 text-muted-foreground">
                     <p>{contactInfo.businessHours.weekdays}</p>
                     <p>{contactInfo.businessHours.saturday}</p>
@@ -78,8 +80,12 @@ export default async function ContactPage() {
               <div>
                 <form className="space-y-6">
                   <div>
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" placeholder="Your name" className="mt-2" />
+                    <Label htmlFor="name">Nombre</Label>
+                    <Input
+                      id="name"
+                      placeholder="Tu nombre"
+                      className="mt-2"
+                    />
                   </div>
 
                   <div>
@@ -87,32 +93,32 @@ export default async function ContactPage() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder="tu@email.com"
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject">Asunto</Label>
                     <Input
                       id="subject"
-                      placeholder="How can we help?"
+                      placeholder="¿En qué te podemos ayudar?"
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="message">Message</Label>
+                    <Label htmlFor="message">Mensaje</Label>
                     <Textarea
                       id="message"
-                      placeholder="Tell us more about your inquiry..."
+                      placeholder="Contanos más sobre tu consulta..."
                       rows={6}
                       className="mt-2"
                     />
                   </div>
 
                   <Button type="submit" className="w-full" size="lg">
-                    Send Message
+                    Enviar mensaje
                   </Button>
                 </form>
               </div>

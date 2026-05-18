@@ -180,7 +180,7 @@ export function ProductDetailClient({
                   ${unitPrice.toFixed(2)}
                   <span className="text-base font-normal text-muted-foreground">
                     {' '}
-                    / unit
+                    / unidad
                   </span>
                 </p>
                 {quantity > 1 && (
@@ -191,7 +191,7 @@ export function ProductDetailClient({
                     </span>
                     {matchedTier && (
                       <span className="ml-2 text-primary">
-                        (you save ${((basePrice - unitPrice) * quantity).toFixed(2)})
+                        (ahorrás ${((basePrice - unitPrice) * quantity).toFixed(2)})
                       </span>
                     )}
                   </p>
@@ -202,7 +202,7 @@ export function ProductDetailClient({
             {/* Volume Pricing */}
             {activeTiers.length > 0 && (
               <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
-                <p className="text-sm font-semibold">Volume discounts</p>
+                <p className="text-sm font-semibold">Descuento por cantidad</p>
                 <ul className="space-y-1 text-sm">
                   {(() => {
                     const rows: {
@@ -239,7 +239,7 @@ export function ProductDetailClient({
                             row.key === 'base' ? '' : 'text-primary'
                           }
                         >
-                          ${row.price.toFixed(2)} / unit
+                          ${row.price.toFixed(2)} / unidad
                         </span>
                       </li>
                     ));
@@ -254,7 +254,7 @@ export function ProductDetailClient({
                 <label className="text-sm font-medium capitalize">
                   {distinguishingKeys.length > 0
                     ? `${distinguishingKeys.join(' / ')}:`
-                    : 'Options:'}
+                    : 'Opciones:'}
                 </label>
                 <div className="flex gap-2 flex-wrap">
                   {activeVariations.map((variation) => (
@@ -288,8 +288,8 @@ export function ProductDetailClient({
                 />
                 <span className="text-sm text-muted-foreground">
                   {selectedVariation.stock > 0
-                    ? `${selectedVariation.stock} in stock`
-                    : 'Out of stock'}
+                    ? `${selectedVariation.stock} en stock`
+                    : 'Sin stock'}
                 </span>
               </div>
             </div>
@@ -314,9 +314,9 @@ export function ProductDetailClient({
             <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
               <Truck className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Free Shipping</p>
+                <p className="font-medium text-sm">Envío gratis</p>
                 <p className="text-sm text-muted-foreground">
-                  On orders over $500. Delivery in 5-7 business days.
+                  En compras superiores a $500.000. Entrega en 5 a 7 días hábiles.
                 </p>
               </div>
             </div>
@@ -324,7 +324,7 @@ export function ProductDetailClient({
             {/* Specifications */}
             {Object.keys(initialTemplate.specifications || {}).length > 0 && (
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Specifications</h3>
+                <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
                 <dl className="space-y-3">
                   {Object.entries(initialTemplate.specifications || {}).map(
                     ([label, value]) => (
@@ -354,7 +354,7 @@ export function ProductDetailClient({
         {/* Related Products */}
         {initialRelatedProducts.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <h2 className="text-2xl font-bold mb-6">Productos relacionados</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {initialRelatedProducts.map((relatedProduct) => (
                 <ProductCard

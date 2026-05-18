@@ -53,7 +53,7 @@ export function ProductCard({
               className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background ${
                 isHovered ? 'opacity-100' : 'opacity-0'
               }`}
-              aria-label="Add to wishlist"
+              aria-label="Agregar a favoritos"
               onClick={handleWishlistClick}
             >
               <Heart
@@ -95,7 +95,7 @@ export function ProductCard({
             className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
-            aria-label="Add to wishlist"
+            aria-label="Agregar a favoritos"
             onClick={handleWishlistClick}
           >
             <Heart

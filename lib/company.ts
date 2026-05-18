@@ -39,74 +39,67 @@ export interface FooterLinks {
   href: string;
 }
 
-// Simulate async data fetching
-const delay = () => new Promise((resolve) => setTimeout(resolve, 100));
-
 export async function getCompanyInfo(): Promise<CompanyInfo> {
-  await delay();
   return {
     name: 'Woodland',
-    tagline: 'Crafting timeless furniture pieces since 1995',
+    tagline: 'Creando muebles atemporales desde 1995',
     foundedYear: 1995,
   };
 }
 
 export async function getAboutContent(): Promise<AboutContent> {
-  await delay();
   return {
-    title: 'About Woodland',
-    subtitle: 'Crafting timeless furniture pieces since 1995',
+    title: 'Sobre Woodland',
+    subtitle: 'Creando muebles atemporales desde 1995',
     workshopImage:
       'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=1200&h=600&fit=crop',
     paragraphs: [
-      'At Woodland, we believe that furniture is more than just functional pieces. Each item we create tells a story of craftsmanship, dedication, and a deep respect for natural materials.',
-      'Our journey began in a small workshop where our founder, inspired by the beauty of natural wood, started creating handcrafted furniture. Today, we continue that tradition, combining time-honored techniques with modern design sensibilities.',
-      'Every piece of furniture is carefully crafted by skilled artisans who take pride in their work. We source our wood from sustainable forests and use eco-friendly finishes to ensure that our furniture is not only beautiful but also environmentally responsible.',
+      'En Woodland creemos que un mueble es mucho más que un objeto funcional. Cada pieza que fabricamos cuenta una historia de oficio, dedicación y un profundo respeto por los materiales nobles.',
+      'Empezamos en un pequeño taller, inspirados por la belleza de la madera natural y la idea de hacer muebles a mano que duraran generaciones. Hoy seguimos esa tradición, combinando técnicas artesanales con un diseño contemporáneo.',
+      'Cada mueble lo arman artesanos con experiencia, que se enorgullecen de su trabajo. Usamos madera de bosques manejados de forma sostenible y terminaciones ecológicas para que cada pieza sea hermosa y, además, responsable con el ambiente.',
     ],
     statistics: [
       {
-        label: 'Years of Experience',
+        label: 'Años de experiencia',
         value: '28+',
-        description: 'Years of Experience',
+        description: 'Años de experiencia',
       },
       {
-        label: 'Happy Customers',
+        label: 'Clientes felices',
         value: '5000+',
-        description: 'Happy Customers',
+        description: 'Clientes felices',
       },
       {
-        label: 'Sustainable Materials',
+        label: 'Materiales sostenibles',
         value: '100%',
-        description: 'Sustainable Materials',
+        description: 'Materiales sostenibles',
       },
     ],
   };
 }
 
 export async function getContactInfo(): Promise<ContactInfo> {
-  await delay();
   return {
     address: {
-      street: '123 Woodland Avenue',
-      city: 'Portland',
-      state: 'OR',
-      zip: '97201',
+      street: 'Av. Corrientes 1234',
+      city: 'Buenos Aires',
+      state: 'CABA',
+      zip: 'C1043',
     },
-    phone: '+1 (555) 123-4567',
-    email: 'hello@woodland.com',
+    phone: '+54 11 5555-1234',
+    email: 'hola@woodland.com',
     businessHours: {
-      weekdays: 'Monday - Friday: 9:00 AM - 6:00 PM',
-      saturday: 'Saturday: 10:00 AM - 4:00 PM',
-      sunday: 'Sunday: Closed',
+      weekdays: 'Lunes a Viernes: 9:00 a 18:00',
+      saturday: 'Sábados: 10:00 a 14:00',
+      sunday: 'Domingos: Cerrado',
     },
   };
 }
 
 export async function getFooterLinks(): Promise<FooterLinks[]> {
-  await delay();
   return [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Shipping & Returns', href: '/shipping' },
+    { label: 'Política de Privacidad', href: '/privacy' },
+    { label: 'Términos del Servicio', href: '/terms' },
+    { label: 'Envíos & Devoluciones', href: '/shipping' },
   ];
 }

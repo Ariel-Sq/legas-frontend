@@ -195,19 +195,19 @@ export function ShopContent({
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-bold">
               {searchQuery
-                ? `Search results for "${searchQuery}"`
+                ? `Resultados para "${searchQuery}"`
                 : categoryFilter !== 'All'
                   ? categoryFilter
-                  : 'All Products'}
+                  : 'Todos los productos'}
             </h1>
             {searchQuery && (
               <button
                 onClick={() => router.push('/shop')}
                 className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
-                title="Clear search"
+                title="Limpiar búsqueda"
               >
                 <X className="h-4 w-4" />
-                Clear
+                Limpiar
               </button>
             )}
           </div>
@@ -219,7 +219,7 @@ export function ShopContent({
                   className="lg:hidden cursor-pointer relative bg-transparent"
                 >
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
-                  Filters
+                  Filtros
                   {activeFiltersCount > 0 && (
                     <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                       {activeFiltersCount}
@@ -229,7 +229,7 @@ export function ShopContent({
               </SheetTrigger>
               <SheetContent side="left" className="w-80 overflow-y-auto p-6">
                 <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+                  <SheetTitle>Filtros</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
                   <ShopFilters
@@ -249,21 +249,21 @@ export function ShopContent({
             </Sheet>
 
             <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
-              Sort by:
+              Ordenar por:
             </span>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-[180px] cursor-pointer">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest" className="cursor-pointer">
-                  Newest Arrivals
+                  Más recientes
                 </SelectItem>
                 <SelectItem value="price-low" className="cursor-pointer">
-                  Price: Low to High
+                  Precio: menor a mayor
                 </SelectItem>
                 <SelectItem value="price-high" className="cursor-pointer">
-                  Price: High to Low
+                  Precio: mayor a menor
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -282,7 +282,7 @@ export function ShopContent({
                     : 'bg-primary/20 hover:bg-primary/30'
                 }`}
               >
-                {cat}
+                {cat === 'All' ? 'Todos' : cat}
               </button>
             ))}
           </div>
@@ -298,8 +298,8 @@ export function ShopContent({
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground">
               {searchQuery
-                ? `No products found for "${searchQuery}". Try a different search term.`
-                : 'No products found matching your filters.'}
+                ? `No encontramos productos para "${searchQuery}". Probá con otra búsqueda.`
+                : 'No hay productos que coincidan con los filtros.'}
             </p>
           </div>
         )}

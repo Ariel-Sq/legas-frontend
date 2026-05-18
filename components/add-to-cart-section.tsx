@@ -98,7 +98,7 @@ export function AddToCartSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium">Quantity:</span>
+        <span className="text-sm font-medium">Cantidad:</span>
         <div className="flex items-center border rounded-lg">
           <button
             onClick={handleDecrement}
@@ -131,7 +131,7 @@ export function AddToCartSection({
               variant={quantityChanged ? 'default' : 'secondary'}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {quantityChanged ? 'Update Cart' : 'In Cart'}
+              {quantityChanged ? 'Actualizar carrito' : 'En el carrito'}
             </Button>
             <Button
               onClick={handleRemoveFromCart}
@@ -140,7 +140,7 @@ export function AddToCartSection({
               className="h-12 px-6 cursor-pointer"
             >
               <Trash2 className="mr-2 h-5 w-5" />
-              Remove
+              Quitar
             </Button>
           </>
         ) : (
@@ -152,7 +152,7 @@ export function AddToCartSection({
               size="lg"
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              {isOutOfStock ? 'Sin stock' : 'Agregar al carrito'}
             </Button>
             <Button
               onClick={handleToggleWishlist}

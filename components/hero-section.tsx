@@ -41,7 +41,7 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6">
               <p className="text-white text-2xl font-bold tracking-tight">
-                Crafted for Comfort
+                Hecho para tu comodidad
               </p>
             </div>
           </div>

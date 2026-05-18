@@ -38,10 +38,10 @@ export function ShopFilters({
 }: ShopFiltersProps) {
   return (
     <div className="space-y-8">
-      {!hideTitle && <h2 className="text-2xl font-bold">Filters</h2>}
+      {!hideTitle && <h2 className="text-2xl font-bold">Filtros</h2>}
 
       <div>
-        <h3 className="text-lg font-bold mb-4">Price Range</h3>
+        <h3 className="text-lg font-bold mb-4">Rango de precio</h3>
         <div className="space-y-4">
           <Slider
             min={filterOptions.priceRange.min}
@@ -61,7 +61,7 @@ export function ShopFilters({
       </div>
 
       <div>
-        <h3 className="text-lg font-bold mb-4">Category</h3>
+        <h3 className="text-lg font-bold mb-4">Categoría</h3>
         <div className="space-y-3">
           {filterOptions.categories.map((category) => (
             <div key={category} className="flex items-center gap-x-3">
@@ -115,7 +115,7 @@ export function ShopFilters({
                 selectedColor === color.name ? 'ring-2 ring-primary' : ''
               }`}
               style={{ backgroundColor: color.hex }}
-              aria-label={`Filter by ${color.name}`}
+              aria-label={`Filtrar por ${color.name}`}
             />
           ))}
         </div>
