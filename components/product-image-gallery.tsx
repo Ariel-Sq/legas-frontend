@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -17,13 +17,35 @@ export function ProductImageGallery({
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
-  const handlePrevious = () => {
-    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  // Reset when the image set changes (e.g. variation switched). Without this,
+  // the index can fall outside the new images array and render a placeholder.
+  useEffect(() => {
+    setSelectedImage((prev) => (prev < images.length ? prev : 0));
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handlePrevious = useCallback(() => {
+    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  const handleNext = useCallback(() => {
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
+
+  // Keyboard navigation in the zoom dialog. Escape is handled by the Dialog.
+  useEffect(() => {
+    if (!isZoomOpen || images.length <= 1) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isZoomOpen, images.length, handlePrevious, handleNext]);
 
   return (
     <>
@@ -39,6 +61,11 @@ export function ProductImageGallery({
             fill
             className="object-cover"
           />
+          {images.length > 1 && (
+            <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full pointer-events-none">
+              {selectedImage + 1} / {images.length}
+            </div>
+          )}
         </div>
 
         {/* Thumbnails */}
