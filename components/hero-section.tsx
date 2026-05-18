@@ -29,7 +29,7 @@ export function HeroSection() {
             </Link>
           </div>
         </div>
-        <Link href="/product/1" className="block group cursor-pointer">
+        <Link href="/shop" className="block group cursor-pointer">
           <div className="relative h-64 md:h-auto md:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl group-hover:shadow-3xl transition-shadow duration-300">
             <div
               className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"

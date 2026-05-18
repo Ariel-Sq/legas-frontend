@@ -27,6 +27,7 @@ export interface ProductImage {
 
 export interface PriceTier {
   min_quantity: number;
+  max_quantity: number | null;
   price: string;
   is_active: boolean;
 }
@@ -42,7 +43,7 @@ export interface ProductVariation {
   is_active: boolean;
   sort_order: number;
   images: ProductImage[];
-  priceTiers: PriceTier[]; // TODO: Implement price tiers in the UI
+  priceTiers: PriceTier[];
   reviews: any[]; // TODO: Define review structure and implement reviews in the UI
 }
 
@@ -242,15 +243,24 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 export async function getRelatedProducts(
-  productId: string,
+  templateId: string,
   category: string
 ): Promise<Product[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
   const allProducts = await getAllProducts();
-  return allProducts
-    .filter((p) => p.id !== productId && p.category === category)
-    .slice(0, 4);
+  // Dedupe by templateId: show only one card per template (the first active
+  // variation) so the current product's siblings (e.g. T-Shirt M when viewing
+  // T-Shirt L) don't masquerade as "related". Card id is the template id so
+  // the link points at /product/<templateId> (the route expects template ids).
+  const seen = new Set<string>([templateId]);
+  const related: Product[] = [];
+  for (const p of allProducts) {
+    if (p.category !== category) continue;
+    if (!p.templateId || seen.has(p.templateId)) continue;
+    seen.add(p.templateId);
+    related.push({ ...p, id: p.templateId });
+    if (related.length >= 4) break;
+  }
+  return related;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -266,8 +276,8 @@ export async function getFeaturedProducts(): Promise<Product[]> {
     const mainImage =
       variation.images.find((img) => img.isMain) || variation.images[0];
     products.push({
-      id: variation.id,
-      name: variation.name,
+      id: template.id,
+      name: template.name,
       description: template.description || '',
       price: parseFloat(variation.price),
       image: mainImage?.url || '',
@@ -296,8 +306,8 @@ export async function getNewArrivals(): Promise<Product[]> {
     const mainImage =
       variation.images.find((img) => img.isMain) || variation.images[0];
     products.push({
-      id: variation.id,
-      name: variation.name,
+      id: template.id,
+      name: template.name,
       description: template.description || '',
       price: parseFloat(variation.price),
       image: mainImage?.url || '',

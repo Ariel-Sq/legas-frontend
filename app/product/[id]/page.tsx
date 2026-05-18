@@ -26,7 +26,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // Load related products
   const relatedProducts = await getRelatedProducts(
-    foundVariation.id,
+    foundTemplate.id,
     foundTemplate.categories[0]?.name || 'Uncategorized'
   );
 
