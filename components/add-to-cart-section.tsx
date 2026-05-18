@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '@/components/cart-provider';
@@ -16,13 +16,22 @@ interface AddToCartSectionProps {
     stock?: number;
   };
   wishlistId?: number;
+  quantity?: number;
+  onQuantityChange?: (quantity: number) => void;
 }
 
 export function AddToCartSection({
   product,
   wishlistId,
+  quantity: controlledQuantity,
+  onQuantityChange,
 }: AddToCartSectionProps) {
-  const [quantity, setQuantity] = useState(1);
+  const [internalQuantity, setInternalQuantity] = useState(1);
+  const quantity = controlledQuantity ?? internalQuantity;
+  const setQuantity = (next: number) => {
+    setInternalQuantity(next);
+    onQuantityChange?.(next);
+  };
   const { addToCart, removeFromCart, updateQuantity, getCartItem, isInCart } =
     useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();

@@ -39,8 +39,24 @@ export function ProductDetailClient({
 }: ProductDetailClientProps) {
   const [selectedVariation, setSelectedVariation] =
     useState<ProductVariation>(initialVariation);
+  const [quantity, setQuantity] = useState(1);
 
   const activeVariations = initialTemplate.variations.filter((v) => v.is_active);
+
+  const activeTiers = (selectedVariation.priceTiers ?? [])
+    .filter((t) => t.is_active)
+    .sort((a, b) => a.min_quantity - b.min_quantity);
+
+  const basePrice = parseFloat(selectedVariation.price);
+  const matchedTier = [...activeTiers]
+    .reverse()
+    .find(
+      (t) =>
+        quantity >= t.min_quantity &&
+        (t.max_quantity == null || quantity <= t.max_quantity)
+    );
+  const unitPrice = matchedTier ? parseFloat(matchedTier.price) : basePrice;
+  const lineTotal = unitPrice * quantity;
 
   // Pick attribute keys whose values differ across variations — these are what
   // the buyer needs to choose between. e.g. two t-shirts both color=white but
@@ -159,10 +175,78 @@ export function ProductDetailClient({
                 </div>
               ) : null}
 
-              <p className="text-4xl font-bold text-primary mb-6">
-                ${selectedVariation.price}
-              </p>
+              <div className="mb-6">
+                <p className="text-4xl font-bold text-primary">
+                  ${unitPrice.toFixed(2)}
+                  <span className="text-base font-normal text-muted-foreground">
+                    {' '}
+                    / unit
+                  </span>
+                </p>
+                {quantity > 1 && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {quantity} × ${unitPrice.toFixed(2)} ={' '}
+                    <span className="font-semibold text-foreground">
+                      ${lineTotal.toFixed(2)}
+                    </span>
+                    {matchedTier && (
+                      <span className="ml-2 text-primary">
+                        (you save ${((basePrice - unitPrice) * quantity).toFixed(2)})
+                      </span>
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
+
+            {/* Volume Pricing */}
+            {activeTiers.length > 0 && (
+              <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm font-semibold">Volume discounts</p>
+                <ul className="space-y-1 text-sm">
+                  {(() => {
+                    const rows: {
+                      key: string;
+                      label: string;
+                      price: number;
+                      isActive: boolean;
+                    }[] = [
+                      {
+                        key: 'base',
+                        label: `1–${activeTiers[0].min_quantity - 1}`,
+                        price: basePrice,
+                        isActive: !matchedTier,
+                      },
+                      ...activeTiers.map((t) => ({
+                        key: `${t.min_quantity}-${t.max_quantity ?? '∞'}`,
+                        label: `${t.min_quantity}${t.max_quantity ? `–${t.max_quantity}` : '+'}`,
+                        price: parseFloat(t.price),
+                        isActive: matchedTier?.min_quantity === t.min_quantity,
+                      })),
+                    ];
+                    return rows.map((row) => (
+                      <li
+                        key={row.key}
+                        className={`flex justify-between rounded px-2 py-0.5 ${
+                          row.isActive
+                            ? 'bg-primary/15 font-semibold text-primary'
+                            : ''
+                        }`}
+                      >
+                        <span>{row.label}</span>
+                        <span
+                          className={
+                            row.key === 'base' ? '' : 'text-primary'
+                          }
+                        >
+                          ${row.price.toFixed(2)} / unit
+                        </span>
+                      </li>
+                    ));
+                  })()}
+                </ul>
+              </div>
+            )}
 
             {/* Variation Selection */}
             {activeVariations.length > 1 && (
@@ -215,12 +299,14 @@ export function ProductDetailClient({
               product={{
                 id: selectedProduct.id,
                 name: selectedProduct.name,
-                price: selectedProduct.price,
+                price: unitPrice,
                 image: selectedProduct.image,
                 category: selectedProduct.category,
                 stock: selectedProduct.stock,
               }}
               wishlistId={Number(initialTemplate.id)}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
               key={selectedProduct.id}
             />
 
