@@ -17,9 +17,13 @@ import Image from 'next/image';
 
 interface OrdersClientProps {
   initialOrders: Order[];
+  isAuthenticated?: boolean;
 }
 
-export function OrdersClient({ initialOrders }: OrdersClientProps) {
+export function OrdersClient({
+  initialOrders,
+  isAuthenticated = false,
+}: OrdersClientProps) {
   const [orders] = useState<Order[]>(initialOrders);
 
   const getStatusIcon = (status: Order['status']) => {
@@ -64,6 +68,21 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
             Mirá y seguí el historial de tus compras
           </p>
         </div>
+
+        {!isAuthenticated && (
+          <Card className="mb-6 border-primary/40 bg-primary/5">
+            <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Estás viendo solo los pedidos hechos con este navegador.
+                Iniciá sesión para verlos siempre, incluso si cambiás de
+                dispositivo.
+              </p>
+              <Button asChild size="sm" className="cursor-pointer">
+                <Link href="/api/auth/signin">Iniciar sesión</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {orders.length === 0 ? (
           <Card>

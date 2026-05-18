@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { createCheckoutPreference } from '@/lib/checkout';
 import {
+  AlertTriangle,
   ArrowLeft,
   CreditCard,
   MapPin,
@@ -165,6 +166,38 @@ export function CheckoutClient() {
               </Button>
             </Link>
             <h1 className="text-3xl font-bold mt-4 mb-2">Finalizar compra</h1>
+
+            {!userId && (
+              <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+                <AlertTriangle className="h-5 w-5 mt-0.5 text-amber-500 flex-shrink-0" />
+                <div className="text-sm space-y-1">
+                  <p className="font-medium text-foreground">
+                    Estás comprando sin cuenta
+                  </p>
+                  <p className="text-muted-foreground">
+                    Tu pedido va a quedar asociado solo a este navegador.
+                    Si borrás cookies o cambiás de dispositivo, no vas a
+                    poder ver el estado en{' '}
+                    <Link href="/orders" className="underline">
+                      Mis pedidos
+                    </Link>
+                    . Igual te vamos a contactar por WhatsApp con el
+                    teléfono que dejes acá abajo, así que cualquier
+                    coordinación o duda la resolvemos por ahí.
+                  </p>
+                  <p className="text-muted-foreground pt-1">
+                    Te conviene{' '}
+                    <Link
+                      href="/api/auth/signin"
+                      className="text-primary underline font-medium"
+                    >
+                      iniciar sesión con Google
+                    </Link>{' '}
+                    para tener todo tu historial siempre a mano.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-4 mb-8">
               <div

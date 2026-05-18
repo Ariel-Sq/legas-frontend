@@ -1,12 +1,20 @@
 import { OrdersClient } from '@/components/orders-client';
 import { getUserOrders } from '@/lib/orders';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export default async function OrdersPage() {
-  const orders = await getUserOrders();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  const orders = await getUserOrders(userId);
+  const isAuthenticated = !!userId;
 
   return (
     <div className="flex min-h-screen flex-col">
-      <OrdersClient initialOrders={orders} />
+      <OrdersClient
+        initialOrders={orders}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   );
 }
