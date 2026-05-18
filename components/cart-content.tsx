@@ -5,14 +5,11 @@ import { CartItemRow } from '@/components/cart-item-row';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
 
 export function CartContent() {
   const { items, itemCount, subtotal } = useCart();
-
-  const shippingCost = subtotal > 0 ? (subtotal >= 500 ? 0 : 50) : 0;
-  const finalTotal = subtotal + shippingCost;
 
   if (items.length === 0) {
     return (
@@ -78,34 +75,16 @@ export function CartContent() {
                 <CardTitle>Resumen del pedido</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between text-base">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <div className="flex justify-between text-lg font-semibold">
+                  <span>Total</span>
+                  <span className="text-primary">${subtotal.toFixed(2)}</span>
                 </div>
-
-                <div className="flex justify-between text-base">
-                  <span className="text-muted-foreground">Envío</span>
-                  <span className="font-medium">
-                    {shippingCost === 0 ? (
-                      <span className="text-green-600">Gratis</span>
-                    ) : (
-                      `$${shippingCost.toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-
-                {subtotal > 0 && subtotal < 500 && (
-                  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
-                    Agregá ${(500 - subtotal).toFixed(2)} más para que tu envío sea
-                    gratis.
-                  </div>
-                )}
 
                 <Separator />
 
-                <div className="flex justify-between text-lg font-semibold">
-                  <span>Total</span>
-                  <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                  <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>El envío se coordina con el vendedor después de la compra.</span>
                 </div>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>

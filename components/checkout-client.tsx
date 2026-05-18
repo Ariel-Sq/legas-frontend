@@ -79,8 +79,7 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  const shippingCost = subtotal >= 500 ? 0 : 25;
-  const total = subtotal + shippingCost;
+  const total = subtotal;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -89,8 +88,13 @@ export function CheckoutClient() {
     }));
   };
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
+  const phoneValid = formData.phone.trim().length >= 6;
+  const canContinueToPayment = emailValid && phoneValid;
+
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canContinueToPayment) return;
     setCurrentStep(2);
   };
 
@@ -203,22 +207,44 @@ export function CheckoutClient() {
                     onSubmit={handleShippingSubmit}
                     className="grid gap-4 sm:grid-cols-2"
                   >
+                    <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                      Solo necesitamos tu email y teléfono para coordinar el
+                      envío. El resto es opcional.
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="email">
+                        Email <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="juan@ejemplo.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        aria-invalid={!emailValid && formData.email.length > 0}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="phone">
+                        Teléfono <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+54 11 1234-5678"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        required
+                        aria-invalid={!phoneValid && formData.phone.length > 0}
+                      />
+                    </div>
                     <div className="sm:col-span-2">
                       <Label htmlFor="fullName">Nombre completo</Label>
                       <Input
                         id="fullName"
                         placeholder="Juan Pérez"
                         value={formData.fullName}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="juan@ejemplo.com"
-                        value={formData.email}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -249,7 +275,7 @@ export function CheckoutClient() {
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div>
+                    <div className="sm:col-span-2">
                       <Label htmlFor="country">País</Label>
                       <Input
                         id="country"
@@ -258,18 +284,13 @@ export function CheckoutClient() {
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="phone">Teléfono</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+54 11 1234-5678"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                      />
-                    </div>
                     <div className="sm:col-span-2">
-                      <Button type="submit" className="w-full" size="lg">
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        size="lg"
+                        disabled={!canContinueToPayment}
+                      >
                         Continuar al pago
                       </Button>
                     </div>
@@ -342,30 +363,15 @@ export function CheckoutClient() {
                 <Separator className="my-4" />
 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Envío</span>
-                    <span className="font-medium">
-                      {shippingCost === 0
-                        ? 'GRATIS'
-                        : `$${shippingCost.toFixed(2)}`}
-                    </span>
-                  </div>
-                  <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
 
-                {subtotal > 0 && subtotal < 500 && (
-                  <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                    Agregá ${(500 - subtotal).toFixed(2)} más para envío gratis.
-                  </p>
-                )}
+                <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
+                  El envío se coordina con el vendedor después de la compra.
+                </p>
               </div>
             </div>
           </div>

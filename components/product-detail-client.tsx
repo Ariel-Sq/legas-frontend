@@ -311,13 +311,12 @@ export function ProductDetailClient({
               key={selectedProduct.id}
             />
 
-            {/* Shipping Info */}
             <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
               <Truck className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Envío gratis</p>
+                <p className="font-medium text-sm">Envío</p>
                 <p className="text-sm text-muted-foreground">
-                  En compras superiores a $500.000. Entrega en 5 a 7 días hábiles.
+                  Se coordina con el vendedor después de la compra.
                 </p>
               </div>
             </div>
