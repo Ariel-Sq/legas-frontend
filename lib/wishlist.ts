@@ -1,7 +1,6 @@
-// Wishlist types and utility functions
-
 export interface WishlistItem {
-  id: number;
+  id: string;
+  variationId: string;
   name: string;
   price: number;
   image: string;
@@ -9,30 +8,27 @@ export interface WishlistItem {
   addedAt: Date;
 }
 
-// Add item to wishlist
+export interface WishlistProductInput {
+  id: string;
+  variationId: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+}
+
 export function addToWishlist(
   currentItems: WishlistItem[],
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }
+  product: WishlistProductInput
 ): WishlistItem[] {
-  const productId = Number(product.id);
-  const existingItem = currentItems.find((item) => item.id === productId);
-
-  if (existingItem) {
-    // Item already in wishlist, don't add again
+  if (currentItems.some((item) => item.id === product.id)) {
     return currentItems;
   }
-
-  // Add new item with ID as number
   return [
     ...currentItems,
     {
-      id: productId,
+      id: product.id,
+      variationId: product.variationId,
       name: product.name,
       price: product.price,
       image: product.image,
@@ -42,32 +38,19 @@ export function addToWishlist(
   ];
 }
 
-// Remove item from wishlist
 export function removeFromWishlist(
   currentItems: WishlistItem[],
-  productId: number
+  productId: string
 ): WishlistItem[] {
-  const id = Number(productId);
-  return currentItems.filter((item) => item.id !== id);
+  return currentItems.filter((item) => item.id !== productId);
 }
 
-// Toggle item in wishlist
 export function toggleWishlistItem(
   currentItems: WishlistItem[],
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }
+  product: WishlistProductInput
 ): WishlistItem[] {
-  const productId = Number(product.id);
-  const existingItem = currentItems.find((item) => item.id === productId);
-
-  if (existingItem) {
-    return removeFromWishlist(currentItems, productId);
+  if (currentItems.some((item) => item.id === product.id)) {
+    return removeFromWishlist(currentItems, product.id);
   }
-
   return addToWishlist(currentItems, product);
 }

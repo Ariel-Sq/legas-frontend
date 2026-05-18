@@ -304,7 +304,8 @@ export function ProductDetailClient({
                 category: selectedProduct.category,
                 stock: selectedProduct.stock,
               }}
-              wishlistId={Number(initialTemplate.id)}
+              wishlistId={initialTemplate.id}
+              wishlistVariationId={selectedVariation.id}
               quantity={quantity}
               onQuantityChange={setQuantity}
               key={selectedProduct.id}

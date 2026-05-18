@@ -20,7 +20,7 @@ interface BackendCartItem {
     stock: number;
     attributes: Record<string, any>;
     is_active: boolean;
-    images: Array<{ id: string; url: string; isMain?: boolean }>;
+    images: Array<{ id: string; url: string; path?: string; isMain?: boolean }>;
   };
 }
 
@@ -79,6 +79,20 @@ function buildHeaders(userId?: string, sessionId?: string): Record<string, strin
   return headers;
 }
 
+function resolveImageUrl(image: { url?: string; path?: string } | undefined): string {
+  if (!image) return '';
+  // The backend stores a placeholder ({{LOCAL_STORAGE}}/...) on raw responses;
+  // the templates service rewrites it, but the cart endpoint does not. Build
+  // the public URL from `path` when the raw url isn't usable.
+  if (image.url && !image.url.startsWith('{{') && /^https?:\/\//.test(image.url)) {
+    return image.url;
+  }
+  if (image.path && BACKEND_URL) {
+    return `${BACKEND_URL}/api/images?path=${image.path}`;
+  }
+  return '';
+}
+
 function mapBackendCart(cart: BackendCart): CartData {
   const items: CartItem[] = cart.items.map((item) => {
     const mainImage =
@@ -92,7 +106,7 @@ function mapBackendCart(cart: BackendCart): CartData {
       cartItemId: item.id,
       name: item.productVariation?.name || 'Product',
       price: unitPrice,
-      image: mainImage?.url || '',
+      image: resolveImageUrl(mainImage),
       quantity: item.quantity,
       category: '',
       stock: item.productVariation?.stock ?? 0,

@@ -15,7 +15,8 @@ interface AddToCartSectionProps {
     category: string;
     stock?: number;
   };
-  wishlistId?: number;
+  wishlistId?: string;
+  wishlistVariationId?: string;
   quantity?: number;
   onQuantityChange?: (quantity: number) => void;
 }
@@ -23,6 +24,7 @@ interface AddToCartSectionProps {
 export function AddToCartSection({
   product,
   wishlistId,
+  wishlistVariationId,
   quantity: controlledQuantity,
   onQuantityChange,
 }: AddToCartSectionProps) {
@@ -37,8 +39,7 @@ export function AddToCartSection({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const cartItem = getCartItem(product.id);
   const productInCart = isInCart(product.id);
-  const wishlistItemId = wishlistId ?? 0;
-  const inWishlist = wishlistItemId ? isInWishlist(wishlistItemId) : false;
+  const inWishlist = wishlistId ? isInWishlist(wishlistId) : false;
 
   useEffect(() => {
     if (cartItem) {
@@ -83,8 +84,10 @@ export function AddToCartSection({
   };
 
   const handleToggleWishlist = () => {
+    if (!wishlistId || !wishlistVariationId) return;
     toggleWishlist({
-      id: wishlistItemId,
+      id: wishlistId,
+      variationId: wishlistVariationId,
       name: product.name,
       price: product.price,
       image: product.image,

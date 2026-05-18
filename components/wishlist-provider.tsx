@@ -4,6 +4,7 @@ import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
   type WishlistItem,
+  type WishlistProductInput,
   addToWishlist as addToWishlistUtil,
   removeFromWishlist as removeFromWishlistUtil,
   toggleWishlistItem as toggleWishlistItemUtil,
@@ -12,22 +13,10 @@ import {
 interface WishlistContextType {
   items: WishlistItem[];
   itemCount: number;
-  addToWishlist: (product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }) => void;
-  removeFromWishlist: (productId: number) => void;
-  toggleWishlist: (product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }) => void;
-  isInWishlist: (productId: number) => boolean;
+  addToWishlist: (product: WishlistProductInput) => void;
+  removeFromWishlist: (productId: string) => void;
+  toggleWishlist: (product: WishlistProductInput) => void;
+  isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
 }
 
@@ -35,59 +24,47 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined
 );
 
+const STORAGE_KEY = 'ltecdeco-wishlist';
+
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [itemCount, setItemCount] = useState(0);
 
-  // Load wishlist from localStorage on mount
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('woodland-wishlist');
-    if (savedWishlist) {
-      try {
-        const parsedWishlist = JSON.parse(savedWishlist);
-        // Convert date strings back to Date objects
-        const itemsWithDates = parsedWishlist.map((item: WishlistItem) => ({
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      const itemsWithDates = parsed
+        .filter((item: WishlistItem) => typeof item.id === 'string')
+        .map((item: WishlistItem) => ({
           ...item,
           addedAt: new Date(item.addedAt),
         }));
-        setItems(itemsWithDates);
-      } catch (error) {
-        console.error('Failed to load wishlist from localStorage:', error);
-      }
+      setItems(itemsWithDates);
+    } catch (error) {
+      console.error('Failed to load wishlist from localStorage:', error);
     }
   }, []);
 
-  // Update count and save to localStorage whenever items change
   useEffect(() => {
     setItemCount(items.length);
-    localStorage.setItem('woodland-wishlist', JSON.stringify(items));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addToWishlist = (product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }) => {
+  const addToWishlist = (product: WishlistProductInput) => {
     setItems((currentItems) => addToWishlistUtil(currentItems, product));
   };
 
-  const removeFromWishlist = (productId: number) => {
+  const removeFromWishlist = (productId: string) => {
     setItems((currentItems) => removeFromWishlistUtil(currentItems, productId));
   };
 
-  const toggleWishlist = (product: {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-  }) => {
+  const toggleWishlist = (product: WishlistProductInput) => {
     setItems((currentItems) => toggleWishlistItemUtil(currentItems, product));
   };
 
-  const isInWishlist = (productId: number) => {
+  const isInWishlist = (productId: string) => {
     return items.some((item) => item.id === productId);
   };
 

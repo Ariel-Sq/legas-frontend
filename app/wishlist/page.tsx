@@ -24,9 +24,8 @@ export default function WishlistPage() {
   useEffect(() => {
     const states: Record<string, { inCart: boolean; quantity: number }> = {};
     items.forEach((item) => {
-      const id = String(item.id);
-      const cartItem = getCartItem(id);
-      states[id] = {
+      const cartItem = getCartItem(item.variationId);
+      states[item.id] = {
         inCart: !!cartItem,
         quantity: cartItem?.quantity || 1,
       };
@@ -35,14 +34,13 @@ export default function WishlistPage() {
   }, [items, cartItems, getCartItem]);
 
   const handleAddToCart = (item: (typeof items)[0]) => {
-    const id = String(item.id);
-    const cartItem = getCartItem(id);
+    const cartItem = getCartItem(item.variationId);
     if (cartItem) {
-      updateQuantity(id, cartItem.quantity + 1);
+      updateQuantity(item.variationId, cartItem.quantity + 1);
     } else {
       addToCart(
         {
-          id,
+          id: item.variationId,
           name: item.name,
           price: item.price,
           image: item.image,
@@ -53,8 +51,8 @@ export default function WishlistPage() {
     }
   };
 
-  const handleRemoveFromCart = (itemId: number) => {
-    removeFromCart(String(itemId));
+  const handleRemoveFromCart = (variationId: string) => {
+    removeFromCart(variationId);
   };
 
   return (
@@ -89,7 +87,7 @@ export default function WishlistPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => {
-                const cartState = cartStates[String(item.id)] || {
+                const cartState = cartStates[item.id] || {
                   inCart: false,
                   quantity: 1,
                 };
@@ -132,7 +130,7 @@ export default function WishlistPage() {
 
                       {cartState.inCart ? (
                         <Button
-                          onClick={() => handleRemoveFromCart(item.id)}
+                          onClick={() => handleRemoveFromCart(item.variationId)}
                           variant="outline"
                           className="w-full mt-4 cursor-pointer"
                           size="sm"

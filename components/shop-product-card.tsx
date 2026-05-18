@@ -24,20 +24,21 @@ interface ShopProductCardProps {
 export function ShopProductCard({ product }: ShopProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { toggleWishlist, isInWishlist } = useWishlist();
-  // Always use templateId for wishlist, disable if not available
-  const wishlistId = product.templateId ? Number(product.templateId) : null;
+  const wishlistId = product.templateId ?? null;
+  const defaultVariationId = product.variations?.[0]?.id;
   const inWishlist = wishlistId ? isInWishlist(wishlistId) : false;
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (wishlistId) {
+    if (wishlistId && defaultVariationId) {
       toggleWishlist({
         id: wishlistId,
+        variationId: defaultVariationId,
         name: product.name,
         price: product.price,
         image: product.image,
-        category: 'Furniture',
+        category: 'Muebles',
       });
     }
   };

@@ -76,7 +76,8 @@ export interface Product {
   stock?: number;
   rating?: number;
   reviews?: number;
-  templateId?: string; // For wishlist functionality
+  templateId?: string;
+  defaultVariationId?: string;
 }
 
 export interface ListProductTemplatesParams {
@@ -133,7 +134,8 @@ export async function getShopProducts(): Promise<Product[]> {
           color: variation.attributes?.color,
           images: variation.images.map((img) => img.url),
           stock: variation.stock,
-          templateId: template.id, // Add template ID for wishlist
+          templateId: template.id,
+          defaultVariationId: variation.id,
         });
       }
     }
@@ -233,7 +235,8 @@ export async function getAllProducts(): Promise<Product[]> {
           stock: variation.stock,
           rating: 4.5, // Mock rating
           reviews: 10, // Mock reviews
-          templateId: template.id, // Add template ID for wishlist
+          templateId: template.id,
+          defaultVariationId: variation.id,
         });
       }
     }
@@ -287,6 +290,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       images: variation.images.map((img) => img.url),
       stock: variation.stock,
       templateId: template.id,
+      defaultVariationId: variation.id,
     });
   }
   return products;
@@ -317,6 +321,7 @@ export async function getNewArrivals(): Promise<Product[]> {
       images: variation.images.map((img) => img.url),
       stock: variation.stock,
       templateId: template.id,
+      defaultVariationId: variation.id,
     });
   }
   return products;
