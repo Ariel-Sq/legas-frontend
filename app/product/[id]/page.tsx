@@ -30,11 +30,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     foundTemplate.categories[0]?.name || 'Uncategorized'
   );
 
-  // Load reviews and session
-  const reviews = await getProductReviews(id);
-  const ratingSummary = await getProductRatingSummary(id);
   const session = await getServerSession(authOptions);
-
   const user = session?.user
     ? {
         id: session.user.id || '',
@@ -43,6 +39,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         image: session.user.image,
       }
     : null;
+
+  const reviews = await getProductReviews(id, user?.id);
+  const ratingSummary = await getProductRatingSummary(id);
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -15,6 +15,7 @@ export interface Review {
   isVerifiedPurchase: boolean;
   status: 'pending' | 'approved' | 'rejected' | 'hidden' | 'flagged';
   helpfulCount: number;
+  votedByMe: boolean;
   images: ReviewImage[];
   createdAt: string;
   updatedAt: string;
@@ -40,6 +41,7 @@ interface BackendReview {
   isVerifiedPurchase: boolean;
   status: Review['status'];
   helpfulVotes?: number | null;
+  votedByMe?: boolean;
   images?: ReviewImage[];
   createdAt: string;
   updatedAt: string;
@@ -62,6 +64,7 @@ function mapReview(r: BackendReview): Review {
     isVerifiedPurchase: r.isVerifiedPurchase,
     status: r.status,
     helpfulCount: r.helpfulVotes ?? 0,
+    votedByMe: r.votedByMe ?? false,
     images: r.images ?? [],
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
@@ -100,12 +103,18 @@ export interface ReviewFormData {
 }
 
 // Get approved reviews for a template (aggregates across its variations).
+// When viewerUserId is provided, the backend annotates each review with
+// votedByMe so the UI can toggle the helpful button without an extra call.
 export async function getProductReviews(
-  productTemplateId: string
+  productTemplateId: string,
+  viewerUserId?: string
 ): Promise<Review[]> {
   try {
+    const headers: Record<string, string> = {};
+    if (viewerUserId) headers['x-user-id'] = viewerUserId;
     const resp = await fetch(`${BACKEND_URL}/api/reviews`, {
       cache: 'no-store',
+      headers,
     });
     if (!resp.ok) return [];
     const data: BackendReview[] = await resp.json();
@@ -182,7 +191,8 @@ export async function submitReview(
   return mapReview(await resp.json());
 }
 
-// Mark a review as helpful. Requires authentication.
+// Mark a review as helpful. Requires authentication. 409 is tolerated
+// (user already voted) so the call is safe to repeat optimistically.
 export async function markReviewHelpful(
   reviewId: string,
   userId: string
@@ -194,5 +204,20 @@ export async function markReviewHelpful(
   });
   if (!resp.ok && resp.status !== 409) {
     throw new Error(`Failed to mark helpful (${resp.status})`);
+  }
+}
+
+// Remove the current user's helpful vote on a review. Idempotent.
+export async function unmarkReviewHelpful(
+  reviewId: string,
+  userId: string
+): Promise<void> {
+  const resp = await fetch(`${BACKEND_URL}/api/reviews/${reviewId}/helpful`, {
+    method: 'DELETE',
+    headers: { 'x-user-id': userId },
+    cache: 'no-store',
+  });
+  if (!resp.ok && resp.status !== 204) {
+    throw new Error(`Failed to remove helpful vote (${resp.status})`);
   }
 }

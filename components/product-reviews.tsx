@@ -11,7 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
-import { markReviewHelpful, submitReview } from '@/lib/reviews';
+import {
+  markReviewHelpful,
+  submitReview,
+  unmarkReviewHelpful,
+} from '@/lib/reviews';
 import { useRouter } from 'next/navigation';
 
 interface ProductReviewsProps {
@@ -64,13 +68,20 @@ export function ProductReviews({
     }
   };
 
-  const handleMarkHelpful = async (reviewId: string) => {
-    if (!userId) return;
+  const handleToggleHelpful = async (review: Review) => {
+    if (!userId) {
+      alert('Iniciá sesión para marcar reseñas como útiles');
+      return;
+    }
     try {
-      await markReviewHelpful(reviewId, userId);
+      if (review.votedByMe) {
+        await unmarkReviewHelpful(review.id, userId);
+      } else {
+        await markReviewHelpful(review.id, userId);
+      }
       router.refresh();
     } catch (error) {
-      console.error('Error marking review as helpful:', error);
+      console.error('Error toggling helpful vote:', error);
     }
   };
 
@@ -285,15 +296,17 @@ export function ProductReviews({
                     </div>
                   )}
 
-                  {/* Helpful Button */}
                   <div className="flex items-center gap-2 mt-4">
                     <Button
-                      variant="outline"
+                      variant={review.votedByMe ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => handleMarkHelpful(review.id)}
-                      className="gap-2"
+                      onClick={() => handleToggleHelpful(review)}
+                      className="gap-2 cursor-pointer"
+                      aria-pressed={review.votedByMe}
                     >
-                      <ThumbsUp className="h-4 w-4" />
+                      <ThumbsUp
+                        className={`h-4 w-4 ${review.votedByMe ? 'fill-current' : ''}`}
+                      />
                       Útil ({review.helpfulCount})
                     </Button>
                   </div>
