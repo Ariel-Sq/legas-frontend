@@ -17,6 +17,7 @@ import {
   unmarkReviewHelpful,
 } from '@/lib/reviews';
 import { useRouter } from 'next/navigation';
+import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
 
 interface ProductReviewsProps {
   productId: string;
@@ -38,11 +39,18 @@ export function ProductReviews({
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signInPrompt, setSignInPrompt] = useState<
+    { title: string; description: string } | null
+  >(null);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) {
-      alert('Debes iniciar sesión para dejar una reseña');
+      setSignInPrompt({
+        title: 'Iniciá sesión para opinar',
+        description:
+          'Compartí tu experiencia con la comunidad. Solo necesitamos un email para identificarte.',
+      });
       return;
     }
 
@@ -70,7 +78,11 @@ export function ProductReviews({
 
   const handleToggleHelpful = async (review: Review) => {
     if (!userId) {
-      alert('Iniciá sesión para marcar reseñas como útiles');
+      setSignInPrompt({
+        title: 'Iniciá sesión para reaccionar',
+        description:
+          'Tu voto ayuda a otros compradores a encontrar las mejores reseñas.',
+      });
       return;
     }
     try {
@@ -86,6 +98,13 @@ export function ProductReviews({
   };
 
   return (
+    <>
+      <SignInPromptDialog
+        open={signInPrompt !== null}
+        onOpenChange={(o) => !o && setSignInPrompt(null)}
+        title={signInPrompt?.title}
+        description={signInPrompt?.description}
+      />
     <div className="space-y-8">
       {/* Rating Summary */}
       {ratingSummary && (
@@ -328,5 +347,6 @@ export function ProductReviews({
         </div>
       )}
     </div>
+    </>
   );
 }
