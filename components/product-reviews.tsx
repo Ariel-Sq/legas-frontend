@@ -65,8 +65,9 @@ export function ProductReviews({
   };
 
   const handleMarkHelpful = async (reviewId: string) => {
+    if (!userId) return;
     try {
-      await markReviewHelpful(reviewId);
+      await markReviewHelpful(reviewId, userId);
       router.refresh();
     } catch (error) {
       console.error('Error marking review as helpful:', error);
