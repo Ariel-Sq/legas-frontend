@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { CreditCard, Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useCart } from '@/components/cart-provider';
 import { useWishlist } from '@/components/wishlist-provider';
 
@@ -123,31 +124,43 @@ export function AddToCartSection({
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
         {productInCart ? (
           <>
             <Button
-              onClick={handleAddOrUpdateCart}
-              disabled={!quantityChanged}
-              className="flex-1 h-12 text-base cursor-pointer"
+              asChild
               size="lg"
-              variant={quantityChanged ? 'default' : 'secondary'}
+              className="w-full h-12 text-base cursor-pointer"
             >
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              {quantityChanged ? 'Actualizar carrito' : 'En el carrito'}
+              <Link href="/checkout">
+                <CreditCard className="mr-2 h-5 w-5" />
+                Comprar ahora
+              </Link>
             </Button>
-            <Button
-              onClick={handleRemoveFromCart}
-              variant="destructive"
-              size="lg"
-              className="h-12 px-6 cursor-pointer"
-            >
-              <Trash2 className="mr-2 h-5 w-5" />
-              Quitar
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleAddOrUpdateCart}
+                disabled={!quantityChanged}
+                className="flex-1 h-12 text-base cursor-pointer"
+                size="lg"
+                variant={quantityChanged ? 'default' : 'secondary'}
+              >
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                {quantityChanged ? 'Actualizar carrito' : 'En el carrito'}
+              </Button>
+              <Button
+                onClick={handleRemoveFromCart}
+                variant="destructive"
+                size="lg"
+                className="h-12 px-6 cursor-pointer"
+              >
+                <Trash2 className="mr-2 h-5 w-5" />
+                Quitar
+              </Button>
+            </div>
           </>
         ) : (
-          <>
+          <div className="flex gap-3">
             <Button
               onClick={handleAddOrUpdateCart}
               disabled={isOutOfStock}
@@ -167,7 +180,7 @@ export function AddToCartSection({
                 className={`h-5 w-5 ${inWishlist ? 'fill-primary text-primary' : ''}`}
               />
             </Button>
-          </>
+          </div>
         )}
       </div>
     </div>

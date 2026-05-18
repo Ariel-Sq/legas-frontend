@@ -47,6 +47,38 @@ export function CheckoutClient() {
     phone: '',
   });
 
+  // Pre-fill from the logged-in user (NextAuth session is merged with the
+  // backend User record in lib/auth.ts, so firstName/lastName/address/etc.
+  // come along for the ride). Only fills empty fields so a user mid-edit
+  // doesn't get their changes clobbered when the session arrives.
+  useEffect(() => {
+    const u = session?.user as
+      | (typeof session.user & {
+          firstName?: string;
+          lastName?: string;
+          phoneNumber?: string;
+          address?: string;
+          city?: string;
+          zipCode?: string;
+          country?: string;
+        })
+      | undefined;
+    if (!u) return;
+    const fullName =
+      [u.firstName, u.lastName].filter(Boolean).join(' ').trim() ||
+      u.name ||
+      '';
+    setFormData((prev) => ({
+      fullName: prev.fullName || fullName,
+      email: prev.email || u.email || '',
+      address: prev.address || u.address || '',
+      city: prev.city || u.city || '',
+      postalCode: prev.postalCode || u.zipCode || '',
+      country: prev.country || u.country || '',
+      phone: prev.phone || u.phoneNumber || '',
+    }));
+  }, [session]);
+
   const shippingCost = subtotal >= 500 ? 0 : 25;
   const total = subtotal + shippingCost;
 
