@@ -48,13 +48,20 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
     }
   };
 
+  const statusLabel: Record<Order['status'], string> = {
+    pending: 'Pendiente',
+    processing: 'En preparación',
+    shipped: 'Enviado',
+    delivered: 'Entregado',
+  };
+
   return (
     <main className="flex-grow bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">My Orders</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Mis pedidos</h1>
           <p className="text-muted-foreground">
-            View and track your order history
+            Mirá y seguí el historial de tus compras
           </p>
         </div>
 
@@ -62,12 +69,12 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Package className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No orders yet</h3>
+              <h3 className="text-xl font-semibold mb-2">Todavía no hay pedidos</h3>
               <p className="text-muted-foreground mb-6">
-                Start shopping to see your orders here
+                Empezá a comprar y los vas a ver acá
               </p>
               <Button asChild className="cursor-pointer">
-                <Link href="/shop">Browse Products</Link>
+                <Link href="/shop">Ir a la tienda</Link>
               </Button>
             </CardContent>
           </Card>
@@ -79,21 +86,20 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        Order #{order.orderNumber}
+                        Pedido #{order.orderNumber}
                         <Badge
                           variant="outline"
                           className={getStatusColor(order.status)}
                         >
                           <span className="flex items-center gap-1">
                             {getStatusIcon(order.status)}
-                            {order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)}
+                            {statusLabel[order.status]}
                           </span>
                         </Badge>
                       </CardTitle>
                       <CardDescription>
-                        Placed on{' '}
-                        {new Date(order.date).toLocaleDateString('en-US', {
+                        Realizado el{' '}
+                        {new Date(order.date).toLocaleDateString('es-AR', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -109,7 +115,7 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
                           (sum, item) => sum + item.quantity,
                           0
                         )}{' '}
-                        items
+                        productos
                       </p>
                     </div>
                   </div>
@@ -131,7 +137,7 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
                           <div className="flex-grow">
                             <h4 className="font-medium">{item.name}</h4>
                             <p className="text-sm text-muted-foreground">
-                              Quantity: {item.quantity}
+                              Cantidad: {item.quantity}
                             </p>
                           </div>
                           <div className="text-right">
@@ -139,7 +145,7 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
                               ${(item.price * item.quantity).toFixed(2)}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              ${item.price.toFixed(2)} each
+                              ${item.price.toFixed(2)} c/u
                             </p>
                           </div>
                         </div>
@@ -148,7 +154,7 @@ export function OrdersClient({ initialOrders }: OrdersClientProps) {
 
                     {/* Shipping Info */}
                     <div className="border-t pt-4">
-                      <h4 className="font-semibold mb-2">Shipping Address</h4>
+                      <h4 className="font-semibold mb-2">Dirección de envío</h4>
                       <p className="text-sm text-muted-foreground">
                         {order.shipping.name}
                         <br />

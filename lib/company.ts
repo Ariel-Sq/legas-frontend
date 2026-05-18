@@ -41,7 +41,7 @@ export interface FooterLinks {
 
 export async function getCompanyInfo(): Promise<CompanyInfo> {
   return {
-    name: 'Woodland',
+    name: 'LtecDeco',
     tagline: 'Creando muebles atemporales desde 1995',
     foundedYear: 1995,
   };
@@ -49,12 +49,12 @@ export async function getCompanyInfo(): Promise<CompanyInfo> {
 
 export async function getAboutContent(): Promise<AboutContent> {
   return {
-    title: 'Sobre Woodland',
+    title: 'Sobre LtecDeco',
     subtitle: 'Creando muebles atemporales desde 1995',
     workshopImage:
       'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=1200&h=600&fit=crop',
     paragraphs: [
-      'En Woodland creemos que un mueble es mucho más que un objeto funcional. Cada pieza que fabricamos cuenta una historia de oficio, dedicación y un profundo respeto por los materiales nobles.',
+      'En LtecDeco creemos que un mueble es mucho más que un objeto funcional. Cada pieza que fabricamos cuenta una historia de oficio, dedicación y un profundo respeto por los materiales nobles.',
       'Empezamos en un pequeño taller, inspirados por la belleza de la madera natural y la idea de hacer muebles a mano que duraran generaciones. Hoy seguimos esa tradición, combinando técnicas artesanales con un diseño contemporáneo.',
       'Cada mueble lo arman artesanos con experiencia, que se enorgullecen de su trabajo. Usamos madera de bosques manejados de forma sostenible y terminaciones ecológicas para que cada pieza sea hermosa y, además, responsable con el ambiente.',
     ],

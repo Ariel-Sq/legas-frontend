@@ -36,10 +36,10 @@ interface BackendReview {
   } | null;
   rating: number;
   title: string;
-  comment: string;
+  content: string;
   isVerifiedPurchase: boolean;
   status: Review['status'];
-  helpfulCount?: number | null;
+  helpfulVotes?: number | null;
   images?: ReviewImage[];
   createdAt: string;
   updatedAt: string;
@@ -58,10 +58,10 @@ function mapReview(r: BackendReview): Review {
     userName: fullName || r.user?.email || 'Anonymous',
     rating: r.rating,
     title: r.title,
-    comment: r.comment,
+    comment: r.content,
     isVerifiedPurchase: r.isVerifiedPurchase,
     status: r.status,
-    helpfulCount: r.helpfulCount ?? 0,
+    helpfulCount: r.helpfulVotes ?? 0,
     images: r.images ?? [],
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
@@ -171,7 +171,7 @@ export async function submitReview(
       productVariationId: reviewData.productVariationId,
       rating: reviewData.rating,
       title: reviewData.title,
-      comment: reviewData.comment,
+      content: reviewData.comment,
     }),
     cache: 'no-store',
   });

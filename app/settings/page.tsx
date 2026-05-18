@@ -40,7 +40,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle>Tema</CardTitle>
                 <CardDescription>
-                  Personaliza cómo se ve Woodland para ti
+                  Personalizá cómo se ve LtecDeco
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

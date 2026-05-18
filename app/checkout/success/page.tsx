@@ -42,27 +42,27 @@ function SuccessContent() {
               <div className="flex flex-col items-center text-center">
                 <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
                 <CardTitle className="text-2xl mb-2">
-                  Payment Successful!
+                  ¡Pago exitoso!
                 </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center text-muted-foreground">
                 <p>
-                  Thank you for your purchase. You will receive a confirmation
-                  email shortly.
+                  Gracias por tu compra. En breve te llega un email de
+                  confirmación.
                 </p>
                 {paymentId && (
-                  <p className="mt-2">Payment ID: {paymentId}</p>
+                  <p className="mt-2">ID de pago: {paymentId}</p>
                 )}
-                {status && <p>Status: {status}</p>}
+                {status && <p>Estado: {status}</p>}
                 {externalReference && (
-                  <p>Order Reference: {externalReference}</p>
+                  <p>Referencia de pedido: {externalReference}</p>
                 )}
               </div>
               <div className="flex justify-center mt-6">
                 <Button asChild>
-                  <Link href="/shop">Continue Shopping</Link>
+                  <Link href="/shop">Seguir comprando</Link>
                 </Button>
               </div>
             </CardContent>

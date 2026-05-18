@@ -19,7 +19,7 @@ export default async function AboutPage() {
             <div className="relative w-full h-[400px] rounded-lg overflow-hidden mb-12">
               <Image
                 src={aboutContent.workshopImage || '/placeholder.svg'}
-                alt="Woodland workshop"
+                alt="Taller LtecDeco"
                 fill
                 className="object-cover"
               />

@@ -28,7 +28,7 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground text-center md:text-right">
-            © 2025 Woodland. Todos los derechos reservados
+            © 2026 LtecDeco. Todos los derechos reservados
           </p>
         </div>
       </div>

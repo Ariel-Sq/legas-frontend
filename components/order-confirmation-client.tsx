@@ -24,13 +24,13 @@ export function OrderConfirmationClient({
             <CheckCircle2 className="h-20 w-20 text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
-            Order Confirmed!
+            ¡Pedido confirmado!
           </h1>
           <p className="text-lg text-muted-foreground mb-2">
-            Thank you for your purchase
+            Gracias por tu compra
           </p>
           <p className="text-sm text-muted-foreground">
-            Order Number:{' '}
+            Número de pedido:{' '}
             <span className="font-semibold text-foreground">
               {order.orderNumber}
             </span>
@@ -45,7 +45,7 @@ export function OrderConfirmationClient({
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Order Items
+                  Productos del pedido
                 </h2>
                 <div className="space-y-4">
                   {order.items.map((item) => (
@@ -61,7 +61,7 @@ export function OrderConfirmationClient({
                       <div className="flex-grow">
                         <h3 className="font-medium">{item.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Quantity: {item.quantity}
+                          Cantidad: {item.quantity}
                         </p>
                       </div>
                       <div className="text-right">
@@ -83,11 +83,11 @@ export function OrderConfirmationClient({
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Truck className="h-5 w-5" />
-                  Shipping Information
+                  Información de envío
                 </h2>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <span className="font-medium">Name:</span>{' '}
+                    <span className="font-medium">Nombre:</span>{' '}
                     {order.shipping.name}
                   </p>
                   <p>
@@ -95,12 +95,12 @@ export function OrderConfirmationClient({
                     {order.shipping.email}
                   </p>
                   <p>
-                    <span className="font-medium">Phone:</span>{' '}
+                    <span className="font-medium">Teléfono:</span>{' '}
                     {order.shipping.phone}
                   </p>
                   <Separator className="my-3" />
                   <p>
-                    <span className="font-medium">Address:</span>{' '}
+                    <span className="font-medium">Dirección:</span>{' '}
                     {order.shipping.address}
                   </p>
                   <p>
@@ -109,10 +109,10 @@ export function OrderConfirmationClient({
                   <p>{order.shipping.country}</p>
                   <Separator className="my-3" />
                   <p>
-                    <span className="font-medium">Shipping Method:</span>{' '}
+                    <span className="font-medium">Método de envío:</span>{' '}
                     {order.shipping.method === 'express'
-                      ? 'Express Shipping'
-                      : 'Standard Shipping'}
+                      ? 'Envío express'
+                      : 'Envío estándar'}
                   </p>
                 </div>
               </CardContent>
@@ -124,17 +124,17 @@ export function OrderConfirmationClient({
             {/* Order Summary */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+                <h2 className="text-lg font-semibold mb-4">Resumen del pedido</h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>${order.subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">Envío</span>
                     <span>
                       {order.shippingCost === 0
-                        ? 'Free'
+                        ? 'Gratis'
                         : `$${order.shippingCost.toFixed(2)}`}
                     </span>
                   </div>
@@ -150,21 +150,21 @@ export function OrderConfirmationClient({
             {/* Next Steps */}
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold mb-3">What's Next?</h2>
+                <h2 className="text-lg font-semibold mb-3">¿Qué sigue?</h2>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>
-                    We've sent a confirmation email to{' '}
+                    Te enviamos un email de confirmación a{' '}
                     <span className="font-medium text-foreground">
                       {order.shipping.email}
                     </span>
                   </p>
-                  <p>Your order will be processed within 1-2 business days.</p>
+                  <p>Procesamos tu pedido en 1 o 2 días hábiles.</p>
                   <p>
-                    Estimated delivery:{' '}
+                    Entrega estimada:{' '}
                     <span className="font-medium text-foreground">
                       {order.shipping.method === 'express'
-                        ? '2-3 business days'
-                        : '5-7 business days'}
+                        ? '2 a 3 días hábiles'
+                        : '5 a 7 días hábiles'}
                     </span>
                   </p>
                 </div>
@@ -175,7 +175,7 @@ export function OrderConfirmationClient({
             <div className="space-y-3">
               <Button asChild className="w-full" size="lg">
                 <Link href="/shop">
-                  Continue Shopping
+                  Seguir comprando
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -185,7 +185,7 @@ export function OrderConfirmationClient({
                 className="w-full bg-transparent"
                 size="lg"
               >
-                <Link href="/">Back to Home</Link>
+                <Link href="/">Volver al inicio</Link>
               </Button>
             </div>
           </div>

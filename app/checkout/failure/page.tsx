@@ -35,28 +35,28 @@ function FailureContent() {
             <CardHeader>
               <div className="flex flex-col items-center text-center">
                 <XCircle className="h-16 w-16 text-red-500 mb-4" />
-                <CardTitle className="text-2xl mb-2">Payment Failed</CardTitle>
+                <CardTitle className="text-2xl mb-2">Pago rechazado</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center text-muted-foreground">
                 <p>
-                  Something went wrong with your payment. Please try again.
+                  Hubo un problema con tu pago. Probá de nuevo.
                 </p>
                 {paymentId && (
-                  <p className="mt-2">Payment ID: {paymentId}</p>
+                  <p className="mt-2">ID de pago: {paymentId}</p>
                 )}
-                {status && <p>Status: {status}</p>}
+                {status && <p>Estado: {status}</p>}
                 {externalReference && (
-                  <p>Order Reference: {externalReference}</p>
+                  <p>Referencia de pedido: {externalReference}</p>
                 )}
               </div>
               <div className="flex justify-center gap-4 mt-6">
                 <Button variant="outline" asChild>
-                  <Link href="/checkout">Try Again</Link>
+                  <Link href="/checkout">Reintentar</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/shop">Back to Shop</Link>
+                  <Link href="/shop">Volver a la tienda</Link>
                 </Button>
               </div>
             </CardContent>

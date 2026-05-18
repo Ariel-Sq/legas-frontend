@@ -28,7 +28,7 @@ export function Header() {
                   fill="currentColor"
                 />
               </svg>
-              <h1 className="text-2xl font-bold">Woodland</h1>
+              <h1 className="text-2xl font-bold">LtecDeco</h1>
             </Link>
             <HeaderNav />
           </div>

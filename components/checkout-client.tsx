@@ -72,7 +72,7 @@ export function CheckoutClient() {
         const id = await createCheckoutPreference(userId);
         setPreferenceId(id);
       } catch (err: any) {
-        setError(err.message || 'Error setting up payment');
+        setError(err.message || 'Error al iniciar el pago');
       } finally {
         setIsCreatingPreference(false);
       }
@@ -104,12 +104,12 @@ export function CheckoutClient() {
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-16 text-center">
           <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="mb-4 text-3xl font-bold">Your cart is empty</h1>
+          <h1 className="mb-4 text-3xl font-bold">Tu carrito está vacío</h1>
           <p className="mb-8 text-muted-foreground">
-            Add some products to your cart before checking out.
+            Agregá productos al carrito antes de pasar a pagar.
           </p>
           <Button asChild>
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/shop">Seguir comprando</Link>
           </Button>
         </div>
       </main>
@@ -125,10 +125,10 @@ export function CheckoutClient() {
             <Link href="/cart">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Cart
+                Volver al carrito
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold mt-4 mb-2">Checkout</h1>
+            <h1 className="text-3xl font-bold mt-4 mb-2">Finalizar compra</h1>
 
             <div className="flex items-center gap-4 mb-8">
               <div
@@ -143,7 +143,7 @@ export function CheckoutClient() {
                     '1'
                   )}
                 </div>
-                <span className="font-medium">Shipping</span>
+                <span className="font-medium">Envío</span>
               </div>
               <div className="flex-1 h-px bg-border" />
               <div
@@ -154,7 +154,7 @@ export function CheckoutClient() {
                 >
                   2
                 </div>
-                <span className="font-medium">Payment</span>
+                <span className="font-medium">Pago</span>
               </div>
             </div>
           </div>
@@ -165,17 +165,17 @@ export function CheckoutClient() {
                 <div className="rounded-lg border bg-card p-6">
                   <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Shipping Information
+                    Datos de envío
                   </h2>
                   <form
                     onSubmit={handleShippingSubmit}
                     className="grid gap-4 sm:grid-cols-2"
                   >
                     <div className="sm:col-span-2">
-                      <Label htmlFor="fullName">Full Name</Label>
+                      <Label htmlFor="fullName">Nombre completo</Label>
                       <Input
                         id="fullName"
-                        placeholder="John Doe"
+                        placeholder="Juan Pérez"
                         value={formData.fullName}
                         onChange={handleInputChange}
                       />
@@ -185,22 +185,22 @@ export function CheckoutClient() {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="juan@ejemplo.com"
                         value={formData.email}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address">Dirección</Label>
                       <Input
                         id="address"
-                        placeholder="123 Main St"
+                        placeholder="Av. Corrientes 1234"
                         value={formData.address}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city">Ciudad</Label>
                       <Input
                         id="city"
                         placeholder="Buenos Aires"
@@ -209,16 +209,16 @@ export function CheckoutClient() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Label htmlFor="postalCode">Código postal</Label>
                       <Input
                         id="postalCode"
-                        placeholder="1000"
+                        placeholder="C1043"
                         value={formData.postalCode}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="country">Country</Label>
+                      <Label htmlFor="country">País</Label>
                       <Input
                         id="country"
                         placeholder="Argentina"
@@ -227,7 +227,7 @@ export function CheckoutClient() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone">Teléfono</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -238,7 +238,7 @@ export function CheckoutClient() {
                     </div>
                     <div className="sm:col-span-2">
                       <Button type="submit" className="w-full" size="lg">
-                        Continue to Payment
+                        Continuar al pago
                       </Button>
                     </div>
                   </form>
@@ -249,13 +249,13 @@ export function CheckoutClient() {
                 <div className="rounded-lg border bg-card p-6">
                   <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    Payment Method
+                    Método de pago
                   </h2>
                   {isCreatingPreference && (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                       <span className="ml-3 text-muted-foreground">
-                        Setting up payment...
+                        Preparando el pago...
                       </span>
                     </div>
                   )}
@@ -271,7 +271,7 @@ export function CheckoutClient() {
                     onClick={() => setCurrentStep(1)}
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Shipping
+                    Volver al envío
                   </Button>
                 </div>
               )}
@@ -279,7 +279,7 @@ export function CheckoutClient() {
 
             <div className="lg:col-span-1">
               <div className="rounded-lg border bg-card p-6 sticky top-4">
-                <h2 className="mb-4 text-xl font-semibold">Order Summary</h2>
+                <h2 className="mb-4 text-xl font-semibold">Resumen del pedido</h2>
 
                 <div className="space-y-4 mb-4">
                   {items.map((item) => (
@@ -297,7 +297,7 @@ export function CheckoutClient() {
                           {item.name}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Qty: {item.quantity}
+                          Cantidad: {item.quantity}
                         </p>
                         <p className="text-sm font-semibold">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -315,10 +315,10 @@ export function CheckoutClient() {
                     <span className="font-medium">${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">Envío</span>
                     <span className="font-medium">
                       {shippingCost === 0
-                        ? 'FREE'
+                        ? 'GRATIS'
                         : `$${shippingCost.toFixed(2)}`}
                     </span>
                   </div>
@@ -331,7 +331,7 @@ export function CheckoutClient() {
 
                 {subtotal > 0 && subtotal < 500 && (
                   <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                    Add ${(500 - subtotal).toFixed(2)} more for free shipping!
+                    Agregá ${(500 - subtotal).toFixed(2)} más para envío gratis.
                   </p>
                 )}
               </div>

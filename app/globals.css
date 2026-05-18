@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Updated color scheme for Woodland furniture e-commerce theme */
+/* Color scheme for LtecDeco furniture e-commerce theme */
 :root {
   --background: oklch(0.98 0.005 85); /* #f8f7f5 - warm off-white */
   --foreground: oklch(0.35 0.02 60); /* warm dark gray */

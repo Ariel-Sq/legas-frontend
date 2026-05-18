@@ -36,27 +36,27 @@ function PendingContent() {
               <div className="flex flex-col items-center text-center">
                 <Clock className="h-16 w-16 text-yellow-500 mb-4" />
                 <CardTitle className="text-2xl mb-2">
-                  Payment Pending
+                  Pago pendiente
                 </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center text-muted-foreground">
                 <p>
-                  Your payment is being processed. We'll notify you once it's
-                  confirmed.
+                  Tu pago se está procesando. Te avisamos cuando se
+                  confirme.
                 </p>
                 {paymentId && (
-                  <p className="mt-2">Payment ID: {paymentId}</p>
+                  <p className="mt-2">ID de pago: {paymentId}</p>
                 )}
-                {status && <p>Status: {status}</p>}
+                {status && <p>Estado: {status}</p>}
                 {externalReference && (
-                  <p>Order Reference: {externalReference}</p>
+                  <p>Referencia de pedido: {externalReference}</p>
                 )}
               </div>
               <div className="flex justify-center mt-6">
                 <Button asChild>
-                  <Link href="/shop">Continue Shopping</Link>
+                  <Link href="/shop">Seguir comprando</Link>
                 </Button>
               </div>
             </CardContent>
