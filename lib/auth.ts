@@ -7,29 +7,41 @@ import {
 } from '@/utils/environments';
 
 async function findOrCreateUser(session: Session) {
-  const res = await fetch(`${BACKEND_URL}/api/users/${session.user?.email}`);
-  const user = await res.json();
+  const email = session.user?.email;
+  if (!email) return null;
 
-  if (!user.email) {
-    const nameParts = (session.user?.name || '').split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-
-    const createRes = await fetch(`${BACKEND_URL}/api/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: session.user?.email,
-        firstName,
-        lastName,
-        authProvider: 'google',
-        role: 'customer',
-      }),
-    });
-    return await createRes.json();
+  const lookup = await fetch(
+    `${BACKEND_URL}/api/users/by-email/${encodeURIComponent(email)}`,
+    { cache: 'no-store' }
+  );
+  if (lookup.ok) return await lookup.json();
+  if (lookup.status !== 404) {
+    console.error(
+      '[auth] failed to look up user:',
+      lookup.status,
+      await lookup.text()
+    );
+    return null;
   }
 
-  return user;
+  const nameParts = (session.user?.name || '').split(' ');
+  const firstName = nameParts[0] || email;
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  const createRes = await fetch(`${BACKEND_URL}/api/users/oauth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, firstName, lastName, authProvider: 'google' }),
+  });
+  if (!createRes.ok) {
+    console.error(
+      '[auth] failed to create OAuth user:',
+      createRes.status,
+      await createRes.text()
+    );
+    return null;
+  }
+  return await createRes.json();
 }
 
 export const authOptions: NextAuthOptions = {
