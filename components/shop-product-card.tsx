@@ -24,17 +24,18 @@ interface ShopProductCardProps {
 export function ShopProductCard({ product }: ShopProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const wishlistId = product.templateId ?? null;
   const defaultVariationId = product.variations?.[0]?.id;
-  const inWishlist = wishlistId ? isInWishlist(wishlistId) : false;
+  const inWishlist = defaultVariationId
+    ? isInWishlist(defaultVariationId)
+    : false;
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (wishlistId && defaultVariationId) {
+    if (defaultVariationId) {
       toggleWishlist({
-        id: wishlistId,
-        variationId: defaultVariationId,
+        productVariationId: defaultVariationId,
+        templateId: product.templateId ?? undefined,
         name: product.name,
         price: product.price,
         image: product.image,

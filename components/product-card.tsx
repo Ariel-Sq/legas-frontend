@@ -20,15 +20,17 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const inWishlist = isInWishlist(product.id);
+  const inWishlist = product.defaultVariationId
+    ? isInWishlist(product.defaultVariationId)
+    : false;
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!product.defaultVariationId) return;
     toggleWishlist({
-      id: product.id,
-      variationId: product.defaultVariationId,
+      productVariationId: product.defaultVariationId,
+      templateId: product.id,
       name: product.name,
       price: product.price,
       image: product.image,

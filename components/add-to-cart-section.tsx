@@ -41,7 +41,9 @@ export function AddToCartSection({
   const { toggleWishlist, isInWishlist } = useWishlist();
   const cartItem = getCartItem(product.id);
   const productInCart = isInCart(product.id);
-  const inWishlist = wishlistId ? isInWishlist(wishlistId) : false;
+  const inWishlist = wishlistVariationId
+    ? isInWishlist(wishlistVariationId)
+    : false;
 
   useEffect(() => {
     if (cartItem) {
@@ -86,10 +88,10 @@ export function AddToCartSection({
   };
 
   const handleToggleWishlist = () => {
-    if (!wishlistId || !wishlistVariationId) return;
+    if (!wishlistVariationId) return;
     toggleWishlist({
-      id: wishlistId,
-      variationId: wishlistVariationId,
+      productVariationId: wishlistVariationId,
+      templateId: wishlistId,
       name: product.name,
       price: product.price,
       image: product.image,

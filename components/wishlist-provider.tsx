@@ -1,90 +1,153 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { useSession } from 'next-auth/react';
 import {
   type WishlistItem,
   type WishlistProductInput,
-  addToWishlist as addToWishlistUtil,
-  removeFromWishlist as removeFromWishlistUtil,
-  toggleWishlistItem as toggleWishlistItemUtil,
 } from '@/lib/wishlist';
+import {
+  fetchWishlist,
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from '@/lib/wishlist-api';
+import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
 
 interface WishlistContextType {
   items: WishlistItem[];
   itemCount: number;
+  isAuthenticated: boolean;
   addToWishlist: (product: WishlistProductInput) => void;
-  removeFromWishlist: (productId: string) => void;
+  removeFromWishlist: (productVariationId: string) => void;
   toggleWishlist: (product: WishlistProductInput) => void;
-  isInWishlist: (productId: string) => boolean;
-  clearWishlist: () => void;
+  isInWishlist: (productVariationId: string) => boolean;
+  promptSignIn: () => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
-  undefined
+  undefined,
 );
 
-const STORAGE_KEY = 'legas-wishlist';
-
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
+  const isAuthenticated = !!userId;
+
   const [items, setItems] = useState<WishlistItem[]>([]);
-  const [itemCount, setItemCount] = useState(0);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const prevUserIdRef = useRef<string | undefined>('__initial__' as any);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-    try {
-      const parsed = JSON.parse(saved);
-      const itemsWithDates = parsed
-        .filter((item: WishlistItem) => typeof item.id === 'string')
-        .map((item: WishlistItem) => ({
-          ...item,
-          addedAt: new Date(item.addedAt),
-        }));
-      setItems(itemsWithDates);
-    } catch (error) {
-      console.error('Failed to load wishlist from localStorage:', error);
+    if (status === 'loading') return;
+    if (prevUserIdRef.current === userId) return;
+    prevUserIdRef.current = userId;
+
+    if (!userId) {
+      setItems([]);
+      return;
     }
-  }, []);
+    fetchWishlist(userId).then(setItems);
+  }, [userId, status]);
 
-  useEffect(() => {
-    setItemCount(items.length);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const promptSignIn = useCallback(() => setSignInOpen(true), []);
 
-  const addToWishlist = (product: WishlistProductInput) => {
-    setItems((currentItems) => addToWishlistUtil(currentItems, product));
-  };
+  const addToWishlist = useCallback(
+    (product: WishlistProductInput) => {
+      if (!userId) {
+        setSignInOpen(true);
+        return;
+      }
+      const optimistic: WishlistItem = {
+        wishlistItemId: `optimistic-${product.productVariationId}`,
+        productVariationId: product.productVariationId,
+        templateId: product.templateId ?? '',
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category ?? '',
+        addedAt: new Date(),
+      };
+      setItems((current) =>
+        current.some((i) => i.productVariationId === product.productVariationId)
+          ? current
+          : [...current, optimistic],
+      );
+      addToWishlistAction(userId, product.productVariationId).then((saved) => {
+        if (saved) {
+          setItems((current) =>
+            current.map((i) =>
+              i.productVariationId === product.productVariationId ? saved : i,
+            ),
+          );
+        }
+      });
+    },
+    [userId],
+  );
 
-  const removeFromWishlist = (productId: string) => {
-    setItems((currentItems) => removeFromWishlistUtil(currentItems, productId));
-  };
+  const removeFromWishlist = useCallback(
+    (productVariationId: string) => {
+      if (!userId) return;
+      setItems((current) =>
+        current.filter((i) => i.productVariationId !== productVariationId),
+      );
+      removeFromWishlistAction(userId, productVariationId);
+    },
+    [userId],
+  );
 
-  const toggleWishlist = (product: WishlistProductInput) => {
-    setItems((currentItems) => toggleWishlistItemUtil(currentItems, product));
-  };
+  const toggleWishlist = useCallback(
+    (product: WishlistProductInput) => {
+      if (!userId) {
+        setSignInOpen(true);
+        return;
+      }
+      const already = items.some(
+        (i) => i.productVariationId === product.productVariationId,
+      );
+      if (already) {
+        removeFromWishlist(product.productVariationId);
+      } else {
+        addToWishlist(product);
+      }
+    },
+    [userId, items, addToWishlist, removeFromWishlist],
+  );
 
-  const isInWishlist = (productId: string) => {
-    return items.some((item) => item.id === productId);
-  };
-
-  const clearWishlist = () => {
-    setItems([]);
-  };
+  const isInWishlist = useCallback(
+    (productVariationId: string) =>
+      items.some((i) => i.productVariationId === productVariationId),
+    [items],
+  );
 
   return (
     <WishlistContext.Provider
       value={{
         items,
-        itemCount,
+        itemCount: items.length,
+        isAuthenticated,
         addToWishlist,
         removeFromWishlist,
         toggleWishlist,
         isInWishlist,
-        clearWishlist,
+        promptSignIn,
       }}
     >
       {children}
+      <SignInPromptDialog
+        open={signInOpen}
+        onOpenChange={setSignInOpen}
+        title="Iniciá sesión para guardar favoritos"
+        description="Tu lista de deseos se sincroniza con tu cuenta para que la encuentres en cualquier dispositivo."
+      />
     </WishlistContext.Provider>
   );
 }

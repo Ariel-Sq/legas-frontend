@@ -6,10 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function WishlistPage() {
-  const { items, removeFromWishlist } = useWishlist();
+  const { items, removeFromWishlist, isAuthenticated, promptSignIn } =
+    useWishlist();
   const {
     items: cartItems,
     addToCart,
@@ -24,8 +25,8 @@ export default function WishlistPage() {
   useEffect(() => {
     const states: Record<string, { inCart: boolean; quantity: number }> = {};
     items.forEach((item) => {
-      const cartItem = getCartItem(item.variationId);
-      states[item.id] = {
+      const cartItem = getCartItem(item.productVariationId);
+      states[item.productVariationId] = {
         inCart: !!cartItem,
         quantity: cartItem?.quantity || 1,
       };
@@ -34,25 +35,21 @@ export default function WishlistPage() {
   }, [items, cartItems, getCartItem]);
 
   const handleAddToCart = (item: (typeof items)[0]) => {
-    const cartItem = getCartItem(item.variationId);
+    const cartItem = getCartItem(item.productVariationId);
     if (cartItem) {
-      updateQuantity(item.variationId, cartItem.quantity + 1);
+      updateQuantity(item.productVariationId, cartItem.quantity + 1);
     } else {
       addToCart(
         {
-          id: item.variationId,
+          id: item.productVariationId,
           name: item.name,
           price: item.price,
           image: item.image,
           category: item.category,
         },
-        1
+        1,
       );
     }
-  };
-
-  const handleRemoveFromCart = (variationId: string) => {
-    removeFromCart(variationId);
   };
 
   return (
@@ -70,14 +67,28 @@ export default function WishlistPage() {
             </p>
           </div>
 
-          {items.length === 0 ? (
+          {!isAuthenticated ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Heart className="h-24 w-24 text-muted-foreground/30 mb-4" />
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
+                Iniciá sesión para ver tu lista de deseos
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Tu lista se guarda en tu cuenta y la podés ver desde cualquier
+                dispositivo.
+              </p>
+              <Button onClick={promptSignIn} size="lg" className="cursor-pointer">
+                Iniciar sesión
+              </Button>
+            </div>
+          ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Heart className="h-24 w-24 text-muted-foreground/30 mb-4" />
               <h2 className="text-2xl font-semibold text-foreground mb-2">
                 Tu lista de deseos está vacía
               </h2>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Explora nuestra colección y guarda tus productos favoritos para
+                Explorá nuestra colección y guardá tus productos favoritos para
                 más tarde
               </p>
               <Button asChild size="lg">
@@ -87,16 +98,19 @@ export default function WishlistPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => {
-                const cartState = cartStates[item.id] || {
+                const cartState = cartStates[item.productVariationId] || {
                   inCart: false,
                   quantity: 1,
                 };
+                const productHref = item.templateId
+                  ? `/product/${item.templateId}`
+                  : '/shop';
                 return (
                   <div
-                    key={item.id}
+                    key={item.wishlistItemId}
                     className="group relative bg-card rounded-lg shadow-md overflow-hidden"
                   >
-                    <Link href={`/product/${item.id}`}>
+                    <Link href={productHref}>
                       <div className="relative w-full aspect-square">
                         <Image
                           src={item.image || '/placeholder.svg'}
@@ -108,15 +122,17 @@ export default function WishlistPage() {
                     </Link>
 
                     <button
-                      onClick={() => removeFromWishlist(item.id)}
+                      onClick={() =>
+                        removeFromWishlist(item.productVariationId)
+                      }
                       className="absolute top-3 right-3 h-9 w-9 rounded-full bg-background/90 hover:bg-background flex items-center justify-center cursor-pointer shadow-md transition-colors"
-                      aria-label="Remove from wishlist"
+                      aria-label="Quitar de la lista de deseos"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </button>
 
                     <div className="p-4">
-                      <Link href={`/product/${item.id}`}>
+                      <Link href={productHref}>
                         <h3 className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-1">
                           {item.name}
                         </h3>
@@ -130,7 +146,9 @@ export default function WishlistPage() {
 
                       {cartState.inCart ? (
                         <Button
-                          onClick={() => handleRemoveFromCart(item.variationId)}
+                          onClick={() =>
+                            removeFromCart(item.productVariationId)
+                          }
                           variant="outline"
                           className="w-full mt-4 cursor-pointer"
                           size="sm"
