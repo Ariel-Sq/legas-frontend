@@ -13,7 +13,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
-        <HeroSection />
+        <HeroSection featuredProduct={featuredProducts[0]} />
         <FeaturedProducts products={featuredProducts} />
         <NewArrivals products={newArrivals} />
         <CTASection />

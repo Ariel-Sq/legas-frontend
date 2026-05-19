@@ -1,8 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import type { Product } from '@/lib/products';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  featuredProduct?: Product;
+}
+
+export function HeroSection({ featuredProduct }: HeroSectionProps) {
+  const linkHref = featuredProduct
+    ? `/product/${featuredProduct.templateId ?? featuredProduct.id}`
+    : '/shop';
+  const imageUrl =
+    featuredProduct?.image ||
+    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=900&fit=crop';
+  const caption = featuredProduct?.name ?? 'Hecho para tu comodidad';
+
   return (
     <section className="bg-primary/20 py-12 sm:py-20 md:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 items-center">
@@ -29,19 +42,16 @@ export function HeroSection() {
             </Link>
           </div>
         </div>
-        <Link href="/shop" className="block group cursor-pointer">
+        <Link href={linkHref} className="block group cursor-pointer">
           <div className="relative h-64 md:h-auto md:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl group-hover:shadow-3xl transition-shadow duration-300">
             <div
               className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=900&fit=crop')",
-              }}
+              style={{ backgroundImage: `url('${imageUrl}')` }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6">
               <p className="text-white text-2xl font-bold tracking-tight">
-                Hecho para tu comodidad
+                {caption}
               </p>
             </div>
           </div>

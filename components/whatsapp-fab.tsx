@@ -1,17 +1,12 @@
 'use client';
 
-// Floating WhatsApp contact button shown site-wide.
-// Phone and message can be overridden at build time via NEXT_PUBLIC_* envs.
-// NEXT_PUBLIC_* variables are inlined by Next.js at build time, so reading
-// them from a 'use client' module is safe.
+import { whatsappUrl } from '@/lib/whatsapp';
 
-const DEFAULT_PHONE = '5491150000000';
-const DEFAULT_MESSAGE = 'Hola LtecDeco, tengo una consulta sobre…';
+const DEFAULT_MESSAGE = 'Hola Legas, tengo una consulta sobre…';
 
 export function WhatsAppFab() {
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || DEFAULT_PHONE;
   const message = process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE || DEFAULT_MESSAGE;
-  const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const href = whatsappUrl(message);
 
   return (
     <a

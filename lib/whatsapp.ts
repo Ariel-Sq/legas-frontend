@@ -1,0 +1,21 @@
+import type { Order } from './orders-shared';
+
+const DEFAULT_PHONE = '5491173666370';
+
+export function getWhatsAppPhone(): string {
+  return process.env.NEXT_PUBLIC_WHATSAPP_PHONE || DEFAULT_PHONE;
+}
+
+export function whatsappUrl(message: string, phone?: string): string {
+  const p = phone || getWhatsAppPhone();
+  return `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
+}
+
+export function buildOrderInquiryMessage(order: Order): string {
+  const items = order.items.map((i) => `${i.name} x${i.quantity}`).join(', ');
+  return `Hola Legas, quería consultar por mi pedido #${order.orderNumber} (${items}).`;
+}
+
+export function whatsappOrderUrl(order: Order): string {
+  return whatsappUrl(buildOrderInquiryMessage(order));
+}

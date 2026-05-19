@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle2, Package, Truck, ArrowRight } from 'lucide-react';
+import { CheckCircle2, MessageCircle, Package, Truck, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { Order } from '@/lib/orders';
+import type { Order } from '@/lib/orders-shared';
+import { whatsappOrderUrl } from '@/lib/whatsapp';
 
 interface OrderConfirmationClientProps {
   order: Order;
@@ -173,7 +174,21 @@ export function OrderConfirmationClient({
 
             {/* Actions */}
             <div className="space-y-3">
-              <Button asChild className="w-full" size="lg">
+              <Button
+                asChild
+                className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+                size="lg"
+              >
+                <a
+                  href={whatsappOrderUrl(order)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Coordinar por WhatsApp
+                </a>
+              </Button>
+              <Button asChild className="w-full" size="lg" variant="outline">
                 <Link href="/shop">
                   Seguir comprando
                   <ArrowRight className="ml-2 h-4 w-4" />

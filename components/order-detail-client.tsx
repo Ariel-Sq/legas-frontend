@@ -2,15 +2,16 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
 import {
   STATUS_COLOR,
   STATUS_LABEL,
   getStatusIcon,
   type Order,
   type OrderStatus,
-} from '@/lib/orders';
+} from '@/lib/orders-shared';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { whatsappOrderUrl } from '@/lib/whatsapp';
 
 interface OrderDetailClientProps {
   order: Order;
@@ -178,6 +180,23 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-6">
+          <Button
+            asChild
+            className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+            size="lg"
+          >
+            <a
+              href={whatsappOrderUrl(order)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Coordinar este pedido por WhatsApp
+            </a>
+          </Button>
+        </div>
       </div>
     </main>
   );
