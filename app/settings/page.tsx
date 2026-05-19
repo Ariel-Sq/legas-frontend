@@ -40,7 +40,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle>Tema</CardTitle>
                 <CardDescription>
-                  Personalizá cómo se ve LtecDeco
+                  Personalizá cómo se ve Legas
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

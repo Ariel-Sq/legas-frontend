@@ -12,7 +12,7 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">1. Aceptación</h2>
               <p>
-                Al usar LtecDeco aceptás estos términos. Si no estás de acuerdo,
+                Al usar Legas aceptás estos términos. Si no estás de acuerdo,
                 te pedimos que no uses el sitio.
               </p>
             </section>
@@ -52,7 +52,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold">5. Propiedad intelectual</h2>
               <p>
                 Todo el contenido del sitio (textos, imágenes, logo, diseño) es
-                propiedad de LtecDeco y no puede reutilizarse sin nuestra
+                propiedad de Legas y no puede reutilizarse sin nuestra
                 autorización escrita.
               </p>
             </section>
@@ -62,10 +62,10 @@ export default function TermsPage() {
               <p>
                 Por dudas sobre estos términos escribinos a{' '}
                 <a
-                  href="mailto:hola@woodland.com"
+                  href="mailto:hola@legas.com"
                   className="text-primary hover:underline"
                 >
-                  hola@woodland.com
+                  hola@legas.com
                 </a>
                 .
               </p>

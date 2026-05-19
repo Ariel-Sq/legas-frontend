@@ -46,10 +46,10 @@ export default function PrivacyPage() {
                 Tenés derecho a acceder, corregir o eliminar tus datos personales
                 en cualquier momento. Para ejercerlos, escribinos a{' '}
                 <a
-                  href="mailto:hola@woodland.com"
+                  href="mailto:hola@legas.com"
                   className="text-primary hover:underline"
                 >
-                  hola@woodland.com
+                  hola@legas.com
                 </a>
                 .
               </p>
@@ -60,10 +60,10 @@ export default function PrivacyPage() {
               <p>
                 Si tenés dudas sobre esta política, escribinos a{' '}
                 <a
-                  href="mailto:hola@woodland.com"
+                  href="mailto:hola@legas.com"
                   className="text-primary hover:underline"
                 >
-                  hola@woodland.com
+                  hola@legas.com
                 </a>
                 .
               </p>

@@ -54,10 +54,10 @@ export interface CartData {
 
 async function getSessionId(): Promise<string> {
   const cookieStore = await cookies();
-  let sessionId = cookieStore.get('woodland-session-id')?.value;
+  let sessionId = cookieStore.get('legas-session-id')?.value;
   if (!sessionId) {
     sessionId = crypto.randomUUID();
-    cookieStore.set('woodland-session-id', sessionId, {
+    cookieStore.set('legas-session-id', sessionId, {
       httpOnly: true,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 365,

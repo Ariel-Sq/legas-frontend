@@ -5,7 +5,7 @@ import { BACKEND_URL } from '@/utils/environments';
 
 async function getSessionId(): Promise<string | undefined> {
   const cookieStore = await cookies();
-  return cookieStore.get('woodland-session-id')?.value;
+  return cookieStore.get('legas-session-id')?.value;
 }
 
 function buildHeaders(

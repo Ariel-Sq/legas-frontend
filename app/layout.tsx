@@ -20,7 +20,7 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'LtecDeco - Muebles de Madera Artesanales',
+  title: 'Legas - Muebles de Madera Artesanales',
   description:
     'Descubre muebles de madera artesanales que aportan calidez, belleza y carácter a tu hogar.',
   generator: 'v0.app',

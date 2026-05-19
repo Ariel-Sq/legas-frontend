@@ -53,7 +53,7 @@ export function AuthDialog() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl">
-            Bienvenido a LtecDeco
+            Bienvenido a Legas
           </DialogTitle>
         </DialogHeader>
 

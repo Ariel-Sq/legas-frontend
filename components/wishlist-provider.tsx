@@ -24,7 +24,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined
 );
 
-const STORAGE_KEY = 'ltecdeco-wishlist';
+const STORAGE_KEY = 'legas-wishlist';
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);

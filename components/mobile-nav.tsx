@@ -36,7 +36,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="right" className="w-80 p-6">
         <SheetHeader className="mb-8">
-          <SheetTitle className="text-2xl font-bold">LtecDeco</SheetTitle>
+          <SheetTitle className="text-2xl font-bold">Legas</SheetTitle>
         </SheetHeader>
         <Separator className="mb-6" />
         <nav className="flex flex-col gap-2">

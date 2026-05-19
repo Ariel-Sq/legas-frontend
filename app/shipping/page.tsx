@@ -72,10 +72,10 @@ export default function ShippingPage() {
               <p>
                 Escribinos a{' '}
                 <a
-                  href="mailto:hola@woodland.com"
+                  href="mailto:hola@legas.com"
                   className="text-primary hover:underline"
                 >
-                  hola@woodland.com
+                  hola@legas.com
                 </a>{' '}
                 o usá el{' '}
                 <a href="/contact" className="text-primary hover:underline">
