@@ -1,7 +1,15 @@
-'use server';
-
 import { cookies } from 'next/headers';
 import { BACKEND_URL } from '@/utils/environments';
+import {
+  CheckCircle,
+  Clock,
+  PackageCheck,
+  RotateCcw,
+  Truck,
+  Wrench,
+  XCircle,
+} from 'lucide-react';
+import { createElement, type ReactElement } from 'react';
 
 export type OrderStatus =
   | 'processing_payment'
@@ -121,13 +129,14 @@ function mapOrder(o: BackendOrder): Order {
   };
 }
 
-export async function getUserOrders(userId?: string): Promise<Order[]> {
+async function fetchOrders(userId?: string): Promise<Order[]> {
   try {
     const headers: Record<string, string> = {};
     if (userId) headers['x-user-id'] = userId;
     // Forward the sessionId cookie when there is no logged-in user, so the
     // backend can scope orders to the anon shopper that created them.
-    const sessionCookie = cookies().get('sessionId')?.value;
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('sessionId')?.value;
     if (!userId && sessionCookie) {
       headers['x-session-id'] = sessionCookie;
     }
@@ -140,5 +149,57 @@ export async function getUserOrders(userId?: string): Promise<Order[]> {
     return data.map(mapOrder);
   } catch {
     return [];
+  }
+}
+
+export async function getUserOrders(userId?: string): Promise<Order[]> {
+  return fetchOrders(userId);
+}
+
+export async function getOrderById(
+  id: string,
+  userId?: string,
+): Promise<Order | null> {
+  const orders = await fetchOrders(userId);
+  return orders.find((o) => o.id === id) ?? null;
+}
+
+export const STATUS_LABEL: Record<OrderStatus, string> = {
+  processing_payment: 'Procesando pago',
+  paid_preparing: 'Pagado y preparando el producto',
+  paid_ready_to_ship: 'Pagado y listo para enviar',
+  paid_shipped: 'Pagado y en camino',
+  paid_delivered: 'Pagado y entregado',
+  cancelled: 'Cancelado',
+  refunded: 'Reembolsado',
+};
+
+export const STATUS_COLOR: Record<OrderStatus, string> = {
+  processing_payment: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  paid_preparing: 'bg-blue-100 text-blue-800 border-blue-200',
+  paid_ready_to_ship: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  paid_shipped: 'bg-purple-100 text-purple-800 border-purple-200',
+  paid_delivered: 'bg-green-100 text-green-800 border-green-200',
+  cancelled: 'bg-red-100 text-red-800 border-red-200',
+  refunded: 'bg-zinc-200 text-zinc-800 border-zinc-300',
+};
+
+export function getStatusIcon(status: OrderStatus): ReactElement {
+  const iconProps = { className: 'h-4 w-4' };
+  switch (status) {
+    case 'processing_payment':
+      return createElement(Clock, iconProps);
+    case 'paid_preparing':
+      return createElement(Wrench, iconProps);
+    case 'paid_ready_to_ship':
+      return createElement(PackageCheck, iconProps);
+    case 'paid_shipped':
+      return createElement(Truck, iconProps);
+    case 'paid_delivered':
+      return createElement(CheckCircle, iconProps);
+    case 'cancelled':
+      return createElement(XCircle, iconProps);
+    case 'refunded':
+      return createElement(RotateCcw, iconProps);
   }
 }

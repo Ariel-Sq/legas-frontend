@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Order } from '@/lib/orders';
+import {
+  STATUS_COLOR,
+  STATUS_LABEL,
+  getStatusIcon,
+  type Order,
+} from '@/lib/orders';
 import { submitReview } from '@/lib/reviews';
 import {
   Card,
@@ -25,17 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
-import {
-  Package,
-  Truck,
-  CheckCircle,
-  Clock,
-  XCircle,
-  RotateCcw,
-  Wrench,
-  PackageCheck,
-  Star,
-} from 'lucide-react';
+import { Package, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -62,54 +57,6 @@ export function OrdersClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
-
-  const getStatusIcon = (status: Order['status']) => {
-    switch (status) {
-      case 'processing_payment':
-        return <Clock className="h-4 w-4" />;
-      case 'paid_preparing':
-        return <Wrench className="h-4 w-4" />;
-      case 'paid_ready_to_ship':
-        return <PackageCheck className="h-4 w-4" />;
-      case 'paid_shipped':
-        return <Truck className="h-4 w-4" />;
-      case 'paid_delivered':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'cancelled':
-        return <XCircle className="h-4 w-4" />;
-      case 'refunded':
-        return <RotateCcw className="h-4 w-4" />;
-    }
-  };
-
-  const getStatusColor = (status: Order['status']) => {
-    switch (status) {
-      case 'processing_payment':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'paid_preparing':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'paid_ready_to_ship':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'paid_shipped':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'paid_delivered':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'refunded':
-        return 'bg-zinc-200 text-zinc-800 border-zinc-300';
-    }
-  };
-
-  const statusLabel: Record<Order['status'], string> = {
-    processing_payment: 'Procesando pago',
-    paid_preparing: 'Pagado y preparando el producto',
-    paid_ready_to_ship: 'Pagado y listo para enviar',
-    paid_shipped: 'Pagado y en camino',
-    paid_delivered: 'Pagado y entregado',
-    cancelled: 'Cancelado',
-    refunded: 'Reembolsado',
-  };
 
   const resetReviewForm = () => {
     setRating(0);
@@ -301,7 +248,12 @@ export function OrdersClient({
           ) : (
             <div className="space-y-6">
               {orders.map((order) => (
-                <Card key={order.id}>
+                <Link
+                  key={order.id}
+                  href={`/orders/${order.id}`}
+                  className="block rounded-lg transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                <Card className="cursor-pointer">
                   <CardHeader>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
@@ -309,11 +261,11 @@ export function OrdersClient({
                           Pedido #{order.orderNumber}
                           <Badge
                             variant="outline"
-                            className={getStatusColor(order.status)}
+                            className={STATUS_COLOR[order.status]}
                           >
                             <span className="flex items-center gap-1">
                               {getStatusIcon(order.status)}
-                              {statusLabel[order.status]}
+                              {STATUS_LABEL[order.status]}
                             </span>
                           </Badge>
                         </CardTitle>
@@ -374,7 +326,11 @@ export function OrdersClient({
                                   variant="outline"
                                   size="sm"
                                   className="cursor-pointer gap-1"
-                                  onClick={() => handleReviewClick(item)}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleReviewClick(item);
+                                  }}
                                 >
                                   <Star className="h-4 w-4" />
                                   Dejar reseña
@@ -401,6 +357,7 @@ export function OrdersClient({
                     </div>
                   </CardContent>
                 </Card>
+                </Link>
               ))}
             </div>
           )}
