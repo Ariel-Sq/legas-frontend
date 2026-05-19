@@ -1,5 +1,6 @@
 import { OrdersClient } from '@/components/orders-client';
 import { getUserOrders } from '@/lib/orders';
+import { getMyReviewedVariationIds } from '@/lib/reviews';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getEffectiveUserId } from '@/lib/effective-user';
@@ -9,6 +10,9 @@ export default async function OrdersPage() {
   const userId = getEffectiveUserId(session?.user?.id);
   const orders = await getUserOrders(userId);
   const isAuthenticated = !!userId;
+  const reviewedVariationIds = userId
+    ? Array.from(await getMyReviewedVariationIds(userId))
+    : [];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -16,6 +20,7 @@ export default async function OrdersPage() {
         initialOrders={orders}
         isAuthenticated={isAuthenticated}
         userId={userId}
+        reviewedVariationIds={reviewedVariationIds}
       />
     </div>
   );

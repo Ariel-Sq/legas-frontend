@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
-import { Package, Star } from 'lucide-react';
+import { CheckCircle2, Package, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -38,6 +38,7 @@ interface OrdersClientProps {
   initialOrders: Order[];
   isAuthenticated?: boolean;
   userId?: string;
+  reviewedVariationIds?: string[];
 }
 
 type OrderItem = Order['items'][number];
@@ -46,9 +47,13 @@ export function OrdersClient({
   initialOrders,
   isAuthenticated = false,
   userId,
+  reviewedVariationIds = [],
 }: OrdersClientProps) {
   const router = useRouter();
   const [orders] = useState<Order[]>(initialOrders);
+  const [locallyReviewed, setLocallyReviewed] = useState<Set<string>>(
+    new Set(reviewedVariationIds),
+  );
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -96,6 +101,11 @@ export function OrdersClient({
         rating,
         title,
         comment,
+      });
+      setLocallyReviewed((prev) => {
+        const next = new Set(prev);
+        next.add(reviewItem.productVariationId);
+        return next;
       });
       setReviewItem(null);
       resetReviewForm();
@@ -324,21 +334,26 @@ export function OrdersClient({
                                   ${item.price.toFixed(2)} c/u
                                 </p>
                               </div>
-                              {order.status === 'paid_delivered' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="cursor-pointer gap-1"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleReviewClick(item);
-                                  }}
-                                >
-                                  <Star className="h-4 w-4" />
-                                  Dejar reseña
-                                </Button>
-                              )}
+                              {order.status === 'paid_delivered' &&
+                                (locallyReviewed.has(item.productVariationId) ? (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                                    Ya reseñaste
+                                  </span>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    className="cursor-pointer gap-1 shadow-sm hover:shadow"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleReviewClick(item);
+                                    }}
+                                  >
+                                    <Star className="h-4 w-4 fill-current" />
+                                    Dejar reseña
+                                  </Button>
+                                ))}
                             </div>
                           </div>
                         ))}

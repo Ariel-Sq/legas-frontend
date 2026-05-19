@@ -164,6 +164,24 @@ export async function getProductRatingSummary(
   };
 }
 
+// Returns the set of productVariationIds the current user has already
+// reviewed. Used to swap the "Dejar reseña" CTA for an "Ya reseñado" pill.
+export async function getMyReviewedVariationIds(
+  userId: string,
+): Promise<Set<string>> {
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/reviews/mine`, {
+      cache: 'no-store',
+      headers: { 'x-user-id': userId },
+    });
+    if (!resp.ok) return new Set();
+    const data: BackendReview[] = await resp.json();
+    return new Set(data.map((r) => r.productVariationId));
+  } catch {
+    return new Set();
+  }
+}
+
 // Submit a new review. Requires authentication on the backend; the caller is
 // expected to pass the logged-in userId so we can forward the x-user-id header.
 export async function submitReview(
