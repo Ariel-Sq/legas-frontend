@@ -103,6 +103,126 @@ export async function getProductTemplates(
   return data;
 }
 
+export interface ShopDisplayProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  material?: string;
+  color?: string;
+  createdAt: string;
+  variations: ProductVariation[];
+  minPrice: number;
+  maxPrice: number;
+}
+
+export interface ShopProductsPage {
+  products: ShopDisplayProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  filterOptions: {
+    categories: string[];
+    materials: string[];
+    colors: { name: string; hex: string }[];
+    priceRange: { min: number; max: number };
+  };
+}
+
+export interface GetShopProductsPageParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+}
+
+/**
+ * Server-side paginated + searchable fetch for the /shop page.
+ *
+ * The backend's /api/product-templates endpoint does not currently expose
+ * `page`/`q` query params (only `sort`, `order`, `limit`, `featured`), so we
+ * fetch the active templates and apply search + pagination here on the server
+ * before returning to the page. Filter options are computed from the FULL
+ * (unpaginated, but search-filtered) result set so the sidebar reflects the
+ * full search space, not just the current page.
+ */
+export async function getShopProductsPage(
+  params: GetShopProductsPageParams = {}
+): Promise<ShopProductsPage> {
+  const page = Math.max(1, Math.floor(params.page ?? 1));
+  const limit = Math.max(1, Math.min(100, Math.floor(params.limit ?? 12)));
+  const q = (params.q ?? '').trim();
+
+  const templates = await getProductTemplates();
+
+  // Convert each template into one display product (first active variation
+  // drives the card). Templates without active variations are skipped.
+  const displayProducts: ShopDisplayProduct[] = [];
+  for (const template of templates) {
+    if (!template.is_active) continue;
+    const activeVariations = (template.variations || []).filter(
+      (v) => v.is_active
+    );
+    if (activeVariations.length === 0) continue;
+
+    const defaultVariation = activeVariations[0];
+    const mainImage =
+      defaultVariation.images?.find((img) => img.isMain) ||
+      defaultVariation.images?.[0];
+
+    const prices = activeVariations.map((v) => parseFloat(v.price));
+    displayProducts.push({
+      id: template.id,
+      name: template.name,
+      price: parseFloat(defaultVariation.price),
+      image: mainImage?.url || '',
+      category: template.categories[0]?.name || 'Sin categoría',
+      material: defaultVariation.attributes?.material,
+      color: defaultVariation.attributes?.color,
+      createdAt: template.created_at,
+      variations: activeVariations,
+      minPrice: Math.min(...prices),
+      maxPrice: Math.max(...prices),
+    });
+  }
+
+  // Apply search filter on the server so pagination math is consistent with
+  // what the user typed. Match against name, category, material, and color so
+  // queries like "mesa", "alacena", or "roble" all work.
+  const matchedProducts = q
+    ? displayProducts.filter((p) => {
+        const haystack = [p.name, p.category, p.material, p.color]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q.toLowerCase());
+      })
+    : displayProducts;
+
+  const total = matchedProducts.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * limit;
+  const pageProducts = matchedProducts.slice(start, start + limit);
+
+  // Compute filter options from the search-filtered (but not paginated) set so
+  // the sidebar reflects the full search space.
+  const filterTemplates = q
+    ? templates.filter((t) => matchedProducts.some((p) => p.id === t.id))
+    : templates;
+  const filterOptions = await getFilterOptions(filterTemplates);
+
+  return {
+    products: pageProducts,
+    total,
+    page: safePage,
+    limit,
+    totalPages,
+    filterOptions,
+  };
+}
+
 export async function getProductTemplateById(
   id: string
 ): Promise<ProductTemplate | null> {

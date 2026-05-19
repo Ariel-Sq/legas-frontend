@@ -20,6 +20,16 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { X, SlidersHorizontal } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  buildPageList,
+} from '@/components/ui/pagination';
 
 interface Product {
   id: string;
@@ -43,12 +53,33 @@ interface ShopContentProps {
   products: Product[];
   filterOptions: FilterOptions;
   searchQuery?: string;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+function buildShopHref(opts: {
+  q?: string;
+  page: number;
+  limit?: number;
+}): string {
+  const sp = new URLSearchParams();
+  if (opts.q) sp.set('q', opts.q);
+  if (opts.page > 1) sp.set('page', String(opts.page));
+  if (opts.limit && opts.limit !== 12) sp.set('limit', String(opts.limit));
+  const qs = sp.toString();
+  return qs ? `/shop?${qs}` : '/shop';
 }
 
 export function ShopContent({
   products,
   filterOptions,
   searchQuery,
+  page,
+  limit,
+  total,
+  totalPages,
 }: ShopContentProps) {
   const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -62,48 +93,36 @@ export function ShopContent({
   const [sortBy, setSortBy] = useState<string>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Filters and sort operate on the visible page slice. Pagination + search
+  // happen server-side; these client-side filters narrow what was returned
+  // for the current page.
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query)
-      );
-    }
-
-    // Filter by category buttons
     if (categoryFilter !== 'All') {
       filtered = filtered.filter((p) => p.category === categoryFilter);
     }
 
-    // Filter by sidebar categories
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((p) =>
         selectedCategories.includes(p.category)
       );
     }
 
-    // Filter by materials
     if (selectedMaterials.length > 0) {
       filtered = filtered.filter(
         (p) => p.material && selectedMaterials.includes(p.material)
       );
     }
 
-    // Filter by color
     if (selectedColor) {
       filtered = filtered.filter((p) => p.color === selectedColor);
     }
 
-    // Filter by price range
     filtered = filtered.filter(
       (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
     );
 
-    // Sort products
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -131,7 +150,6 @@ export function ShopContent({
     priceRange,
     categoryFilter,
     sortBy,
-    searchQuery,
   ]);
 
   const handleCategoryChange = (category: string) => {
@@ -173,6 +191,13 @@ export function ShopContent({
     filterOptions.priceRange,
   ]);
 
+  const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
+  const rangeEnd = Math.min(page * limit, total);
+  const pageList = useMemo(
+    () => buildPageList(page, totalPages),
+    [page, totalPages]
+  );
+
   return (
     <main className="flex flex-1">
       {/* Desktop Filters */}
@@ -191,7 +216,7 @@ export function ShopContent({
       </div>
 
       <div className="flex-1 p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-bold">
               {searchQuery
@@ -270,6 +295,14 @@ export function ShopContent({
           </div>
         </div>
 
+        <p className="text-sm text-muted-foreground mb-6">
+          {total === 0
+            ? 'Mostrando 0 productos'
+            : `Mostrando ${rangeStart}-${rangeEnd} de ${total} ${
+                total === 1 ? 'producto' : 'productos'
+              }`}
+        </p>
+
         {!searchQuery && filterOptions.categories.length > 0 && (
           <div className="flex gap-3 mb-6 flex-wrap">
             {['All', ...filterOptions.categories].map((cat) => (
@@ -288,19 +321,77 @@ export function ShopContent({
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ShopProductCard key={product.id} product={product} />
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <ShopProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">
-              {searchQuery
-                ? `No encontramos productos para "${searchQuery}". Probá con otra búsqueda.`
-                : 'No hay productos que coincidan con los filtros.'}
-            </p>
+            {searchQuery ? (
+              <>
+                <p className="text-lg text-muted-foreground">
+                  No encontramos productos para &ldquo;{searchQuery}&rdquo;.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Probá con otra palabra o revisá la ortografía.
+                </p>
+              </>
+            ) : (
+              <p className="text-lg text-muted-foreground">
+                No hay productos que coincidan con los filtros.
+              </p>
+            )}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="mt-10">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href={buildShopHref({
+                      q: searchQuery,
+                      page: Math.max(1, page - 1),
+                      limit,
+                    })}
+                    disabled={page <= 1}
+                  />
+                </PaginationItem>
+                {pageList.map((entry, idx) =>
+                  entry === 'ellipsis' ? (
+                    <PaginationItem key={`ellipsis-${idx}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={entry}>
+                      <PaginationLink
+                        href={buildShopHref({
+                          q: searchQuery,
+                          page: entry,
+                          limit,
+                        })}
+                        isActive={entry === page}
+                      >
+                        {entry}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    href={buildShopHref({
+                      q: searchQuery,
+                      page: Math.min(totalPages, page + 1),
+                      limit,
+                    })}
+                    disabled={page >= totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </div>
