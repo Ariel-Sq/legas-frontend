@@ -2,10 +2,11 @@ import { OrdersClient } from '@/components/orders-client';
 import { getUserOrders } from '@/lib/orders';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { getEffectiveUserId } from '@/lib/effective-user';
 
 export default async function OrdersPage() {
   const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  const userId = getEffectiveUserId(session?.user?.id);
   const orders = await getUserOrders(userId);
   const isAuthenticated = !!userId;
 
