@@ -11,6 +11,7 @@ import { AuthProvider } from '@/lib/auth-context';
 import './globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
+import { WhatsAppFab } from '@/components/whatsapp-fab';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -45,6 +46,7 @@ export default function RootLayout({
                   <Header />
                   {children}
                   <Footer />
+                  <WhatsAppFab />
                 </Suspense>
               </CartProvider>
             </WishlistProvider>
