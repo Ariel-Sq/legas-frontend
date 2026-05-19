@@ -44,6 +44,32 @@ async function findOrCreateUser(session: Session) {
   return await createRes.json();
 }
 
+// Dev-only: when IMPERSONATE_USER_ID is set and NODE_ENV is development,
+// fetch that user from the backend so the session is fully swapped to the
+// impersonated user. Production ignores the env entirely.
+async function maybeImpersonate() {
+  if (process.env.NODE_ENV !== 'development') return null;
+  const impersonateId = process.env.IMPERSONATE_USER_ID;
+  if (!impersonateId) return null;
+  try {
+    const resp = await fetch(
+      `${BACKEND_URL}/api/users/by-id/${encodeURIComponent(impersonateId)}`,
+      { cache: 'no-store' }
+    );
+    if (!resp.ok) {
+      console.warn(
+        '[auth] IMPERSONATE_USER_ID lookup failed:',
+        resp.status,
+      );
+      return null;
+    }
+    return await resp.json();
+  } catch (err) {
+    console.warn('[auth] IMPERSONATE_USER_ID lookup error:', err);
+    return null;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -53,6 +79,22 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session }): Promise<Session> {
+      const impersonated = await maybeImpersonate();
+      if (impersonated) {
+        return {
+          ...session,
+          user: {
+            // Keep the avatar from Google if there is one, otherwise let
+            // anything explicit on the impersonated user win.
+            ...session.user,
+            ...impersonated,
+            name: [impersonated.firstName, impersonated.lastName]
+              .filter(Boolean)
+              .join(' ') || impersonated.email,
+            email: impersonated.email,
+          },
+        };
+      }
       const userData = await findOrCreateUser(session);
       return {
         ...session,
