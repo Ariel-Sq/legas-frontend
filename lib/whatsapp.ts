@@ -19,3 +19,22 @@ export function buildOrderInquiryMessage(order: Order): string {
 export function whatsappOrderUrl(order: Order): string {
   return whatsappUrl(buildOrderInquiryMessage(order));
 }
+
+export function buildProductInquiryMessage(
+  productName: string,
+  price?: number,
+  quantity?: number,
+): string {
+  const qty = quantity && quantity > 1 ? ` (cantidad ${quantity})` : '';
+  const priceStr =
+    typeof price === 'number' ? ` ($${price.toFixed(2)})` : '';
+  return `Hola Legas, me interesa "${productName}"${priceStr}${qty}. ¿Me podés dar más info?`;
+}
+
+export function whatsappProductInquiryUrl(
+  productName: string,
+  price?: number,
+  quantity?: number,
+): string {
+  return whatsappUrl(buildProductInquiryMessage(productName, price, quantity));
+}

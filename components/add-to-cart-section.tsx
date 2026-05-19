@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { CreditCard, Heart, MessageCircle, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/components/cart-provider';
 import { useWishlist } from '@/components/wishlist-provider';
+import { whatsappProductInquiryUrl } from '@/lib/whatsapp';
 
 interface AddToCartSectionProps {
   product: {
@@ -182,6 +183,22 @@ export function AddToCartSection({
             </Button>
           </div>
         )}
+
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="w-full h-12 text-base cursor-pointer border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]"
+        >
+          <a
+            href={whatsappProductInquiryUrl(product.name, product.price, quantity)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <MessageCircle className="mr-2 h-5 w-5" />
+            Consultar por WhatsApp
+          </a>
+        </Button>
       </div>
     </div>
   );
