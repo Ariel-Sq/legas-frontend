@@ -11,5 +11,7 @@
 
 ### Open
 
-- Compare Products.
+- Admin panel: orders (list, transition status), products (CRUD, image
+  upload), reviews moderation, users. Backend admin endpoints already
+  exist under `/api/admin/*` and are gated by `AdminGuard`.
 - Cache Service / SWR layer.
