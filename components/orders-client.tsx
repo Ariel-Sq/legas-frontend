@@ -7,7 +7,7 @@ import {
   STATUS_LABEL,
   getStatusIcon,
   type Order,
-} from '@/lib/orders';
+} from '@/lib/orders-shared';
 import { submitReview } from '@/lib/reviews';
 import {
   Card,
