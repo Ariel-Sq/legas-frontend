@@ -19,6 +19,7 @@ export interface Order {
   status: OrderStatus;
   items: {
     id: string;
+    productVariationId: string;
     name: string;
     price: number;
     quantity: number;
@@ -88,6 +89,7 @@ function mapOrder(o: BackendOrder): Order {
       it.productVariation?.images?.[0];
     return {
       id: it.id,
+      productVariationId: it.productVariationId,
       name: it.title,
       price: Number(it.unitPrice),
       quantity: it.quantity,

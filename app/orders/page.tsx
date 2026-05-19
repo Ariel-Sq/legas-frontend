@@ -14,6 +14,7 @@ export default async function OrdersPage() {
       <OrdersClient
         initialOrders={orders}
         isAuthenticated={isAuthenticated}
+        userId={userId}
       />
     </div>
   );
