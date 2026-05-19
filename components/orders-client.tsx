@@ -102,7 +102,10 @@ export function OrdersClient({
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      if (message.includes('409')) {
+      if (
+        message.includes('409') ||
+        message.toLowerCase().includes('already reviewed')
+      ) {
         setFormError('Ya dejaste una reseña para este producto.');
       } else {
         setFormError('No pudimos guardar tu reseña, probá de nuevo.');
