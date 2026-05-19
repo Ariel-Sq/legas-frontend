@@ -24,15 +24,21 @@ function buildHeaders(
 }
 
 export async function createCheckoutPreference(
-  userId?: string
+  userId?: string,
+  contact?: { customerEmail?: string; customerPhone?: string },
 ): Promise<string> {
   const sessionId = await getSessionId();
+
+  const body: Record<string, string> = {};
+  if (contact?.customerEmail) body.customerEmail = contact.customerEmail;
+  if (contact?.customerPhone) body.customerPhone = contact.customerPhone;
 
   const response = await fetch(
     `${BACKEND_URL}/api/payments/mercadopago/checkout`,
     {
       method: 'POST',
       headers: buildHeaders(userId, sessionId),
+      body: JSON.stringify(body),
     }
   );
 

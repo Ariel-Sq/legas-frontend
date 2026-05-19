@@ -106,7 +106,10 @@ export function CheckoutClient() {
       setIsCreatingPreference(true);
       setError('');
       try {
-        const id = await createCheckoutPreference(userId);
+        const id = await createCheckoutPreference(userId, {
+          customerEmail: formData.email.trim(),
+          customerPhone: formData.phone.trim(),
+        });
         setPreferenceId(id);
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el pago');
@@ -116,7 +119,7 @@ export function CheckoutClient() {
     };
 
     setupPayment();
-  }, [currentStep, userId]);
+  }, [currentStep, userId, formData.email, formData.phone]);
 
   useEffect(() => {
     if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
