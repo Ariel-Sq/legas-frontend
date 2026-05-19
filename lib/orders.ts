@@ -3,11 +3,20 @@
 import { cookies } from 'next/headers';
 import { BACKEND_URL } from '@/utils/environments';
 
+export type OrderStatus =
+  | 'processing_payment'
+  | 'paid_preparing'
+  | 'paid_ready_to_ship'
+  | 'paid_shipped'
+  | 'paid_delivered'
+  | 'cancelled'
+  | 'refunded';
+
 export interface Order {
   id: string;
   orderNumber: string;
   date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: OrderStatus;
   items: {
     id: string;
     name: string;
@@ -57,20 +66,20 @@ interface BackendOrder {
   items: BackendOrderItem[];
 }
 
-const statusFromBackend = (s: string): Order['status'] => {
-  switch (s) {
-    case 'completed':
-      return 'delivered';
-    case 'cancelled':
-    case 'refunded':
-      return 'delivered';
-    case 'processing':
-      return 'processing';
-    case 'pending':
-    default:
-      return 'pending';
-  }
-};
+const KNOWN_STATUSES: OrderStatus[] = [
+  'processing_payment',
+  'paid_preparing',
+  'paid_ready_to_ship',
+  'paid_shipped',
+  'paid_delivered',
+  'cancelled',
+  'refunded',
+];
+
+const statusFromBackend = (s: string): OrderStatus =>
+  (KNOWN_STATUSES as string[]).includes(s)
+    ? (s as OrderStatus)
+    : 'processing_payment';
 
 function mapOrder(o: BackendOrder): Order {
   const items = (o.items || []).map((it) => {

@@ -11,7 +11,16 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import {
+  Package,
+  Truck,
+  CheckCircle,
+  Clock,
+  XCircle,
+  RotateCcw,
+  Wrench,
+  PackageCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -28,35 +37,50 @@ export function OrdersClient({
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
-      case 'pending':
+      case 'processing_payment':
         return <Clock className="h-4 w-4" />;
-      case 'processing':
-        return <Package className="h-4 w-4" />;
-      case 'shipped':
+      case 'paid_preparing':
+        return <Wrench className="h-4 w-4" />;
+      case 'paid_ready_to_ship':
+        return <PackageCheck className="h-4 w-4" />;
+      case 'paid_shipped':
         return <Truck className="h-4 w-4" />;
-      case 'delivered':
+      case 'paid_delivered':
         return <CheckCircle className="h-4 w-4" />;
+      case 'cancelled':
+        return <XCircle className="h-4 w-4" />;
+      case 'refunded':
+        return <RotateCcw className="h-4 w-4" />;
     }
   };
 
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
-      case 'pending':
+      case 'processing_payment':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'processing':
+      case 'paid_preparing':
         return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'shipped':
+      case 'paid_ready_to_ship':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'paid_shipped':
         return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'delivered':
+      case 'paid_delivered':
         return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'refunded':
+        return 'bg-zinc-200 text-zinc-800 border-zinc-300';
     }
   };
 
   const statusLabel: Record<Order['status'], string> = {
-    pending: 'Pendiente',
-    processing: 'En preparación',
-    shipped: 'Enviado',
-    delivered: 'Entregado',
+    processing_payment: 'Procesando pago',
+    paid_preparing: 'Pagado y preparando el producto',
+    paid_ready_to_ship: 'Pagado y listo para enviar',
+    paid_shipped: 'Pagado y en camino',
+    paid_delivered: 'Pagado y entregado',
+    cancelled: 'Cancelado',
+    refunded: 'Reembolsado',
   };
 
   return (
