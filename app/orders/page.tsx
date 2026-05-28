@@ -3,15 +3,14 @@ import { getUserOrders } from '@/lib/orders';
 import { getMyReviewedVariationIds } from '@/lib/reviews';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getEffectiveUserId } from '@/lib/effective-user';
 
 export default async function OrdersPage() {
   const session = await getServerSession(authOptions);
-  const userId = getEffectiveUserId(session?.user?.id);
-  const orders = await getUserOrders(userId);
+  const userId = session?.user?.id;
+  const orders = await getUserOrders();
   const isAuthenticated = !!userId;
   const reviewedVariationIds = userId
-    ? Array.from(await getMyReviewedVariationIds(userId))
+    ? Array.from(await getMyReviewedVariationIds())
     : [];
 
   return (

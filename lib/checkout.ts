@@ -2,29 +2,29 @@
 
 import { cookies } from 'next/headers';
 import { BACKEND_URL } from '@/utils/environments';
+import { getAuthHeaders } from './server-auth';
 
 async function getSessionId(): Promise<string | undefined> {
   const cookieStore = await cookies();
   return cookieStore.get('legas-session-id')?.value;
 }
 
-function buildHeaders(
-  userId?: string,
-  sessionId?: string
-): Record<string, string> {
+async function buildHeaders(sessionId?: string): Promise<Record<string, string>> {
+  const auth = await getAuthHeaders();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...auth,
   };
-  if (userId) {
-    headers['x-user-id'] = userId;
-  } else if (sessionId) {
+  if (!('Authorization' in auth) && sessionId) {
     headers['x-session-id'] = sessionId;
   }
   return headers;
 }
 
+// `userId` is kept for call-site compatibility; identity is resolved
+// server-side from the session (Bearer) or the anon session id.
 export async function createCheckoutPreference(
-  userId?: string,
+  _userId?: string,
   contact?: { customerEmail?: string; customerPhone?: string },
 ): Promise<string> {
   const sessionId = await getSessionId();
@@ -37,7 +37,7 @@ export async function createCheckoutPreference(
     `${BACKEND_URL}/api/payments/mercadopago/checkout`,
     {
       method: 'POST',
-      headers: buildHeaders(userId, sessionId),
+      headers: await buildHeaders(sessionId),
       body: JSON.stringify(body),
     }
   );

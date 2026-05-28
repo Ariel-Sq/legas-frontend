@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { BACKEND_URL } from '@/utils/environments';
+import { getAuthHeaders } from './server-auth';
 
 // --- Types ---
 
@@ -67,13 +68,15 @@ async function getSessionId(): Promise<string> {
   return sessionId;
 }
 
-function buildHeaders(userId?: string, sessionId?: string): Record<string, string> {
+// Resolve identity server-side: a Bearer token for logged-in users. Anonymous
+// shoppers fall back to the session id so their cart persists across requests.
+async function buildHeaders(sessionId?: string): Promise<Record<string, string>> {
+  const auth = await getAuthHeaders();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...auth,
   };
-  if (userId) {
-    headers['x-user-id'] = userId;
-  } else if (sessionId) {
+  if (!('Authorization' in auth) && sessionId) {
     headers['x-session-id'] = sessionId;
   }
   return headers;
@@ -129,7 +132,7 @@ export async function fetchCart(userId?: string): Promise<CartData> {
   try {
     const sessionId = await getSessionId();
     const res = await fetch(`${BACKEND_URL}/api/cart`, {
-      headers: buildHeaders(userId, sessionId),
+      headers: await buildHeaders(sessionId),
       cache: 'no-store',
     });
     if (!res.ok) return emptyCart();
@@ -148,7 +151,7 @@ export async function addToCartAction(
   const sessionId = await getSessionId();
   const res = await fetch(`${BACKEND_URL}/api/cart/items`, {
     method: 'POST',
-    headers: buildHeaders(userId, sessionId),
+    headers: await buildHeaders(sessionId),
     body: JSON.stringify({ productId, quantity }),
   });
   if (!res.ok) {
@@ -167,7 +170,7 @@ export async function updateCartItemAction(
   const sessionId = await getSessionId();
   const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
     method: 'PATCH',
-    headers: buildHeaders(userId, sessionId),
+    headers: await buildHeaders(sessionId),
     body: JSON.stringify({ quantity }),
   });
   if (!res.ok) {
@@ -185,7 +188,7 @@ export async function removeFromCartAction(
   const sessionId = await getSessionId();
   const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
     method: 'DELETE',
-    headers: buildHeaders(userId, sessionId),
+    headers: await buildHeaders(sessionId),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -199,6 +202,6 @@ export async function clearCartAction(userId?: string): Promise<void> {
   const sessionId = await getSessionId();
   await fetch(`${BACKEND_URL}/api/cart/clear`, {
     method: 'DELETE',
-    headers: buildHeaders(userId, sessionId),
+    headers: await buildHeaders(sessionId),
   });
 }

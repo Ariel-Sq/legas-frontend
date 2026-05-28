@@ -1,6 +1,7 @@
 'use server';
 
 import { BACKEND_URL } from '@/utils/environments';
+import { getAuthHeaders } from './server-auth';
 import type { WishlistItem } from './wishlist';
 
 interface BackendImage {
@@ -24,10 +25,11 @@ interface BackendWishlistItem {
   } | null;
 }
 
-function buildHeaders(userId: string): Record<string, string> {
+// Identity is resolved server-side from the session; wishlist requires auth.
+async function buildHeaders(): Promise<Record<string, string>> {
   return {
-    'x-user-id': userId,
     'Content-Type': 'application/json',
+    ...(await getAuthHeaders()),
   };
 }
 
@@ -47,10 +49,10 @@ function mapItem(b: BackendWishlistItem): WishlistItem {
   };
 }
 
-export async function fetchWishlist(userId: string): Promise<WishlistItem[]> {
+export async function fetchWishlist(_userId?: string): Promise<WishlistItem[]> {
   try {
     const resp = await fetch(`${BACKEND_URL}/api/wishlist`, {
-      headers: buildHeaders(userId),
+      headers: await buildHeaders(),
       cache: 'no-store',
     });
     if (!resp.ok) return [];
@@ -62,12 +64,12 @@ export async function fetchWishlist(userId: string): Promise<WishlistItem[]> {
 }
 
 export async function addToWishlistAction(
-  userId: string,
+  _userId: string,
   productVariationId: string,
 ): Promise<WishlistItem | null> {
   const resp = await fetch(`${BACKEND_URL}/api/wishlist`, {
     method: 'POST',
-    headers: buildHeaders(userId),
+    headers: await buildHeaders(),
     body: JSON.stringify({ productVariationId }),
     cache: 'no-store',
   });
@@ -77,14 +79,14 @@ export async function addToWishlistAction(
 }
 
 export async function removeFromWishlistAction(
-  userId: string,
+  _userId: string,
   productVariationId: string,
 ): Promise<boolean> {
   const resp = await fetch(
     `${BACKEND_URL}/api/wishlist/${productVariationId}`,
     {
       method: 'DELETE',
-      headers: buildHeaders(userId),
+      headers: await buildHeaders(),
       cache: 'no-store',
     },
   );

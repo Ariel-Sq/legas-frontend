@@ -1,6 +1,7 @@
 'use server';
 
 import { BACKEND_URL } from '@/utils/environments';
+import { getAuthHeaders } from './server-auth';
 
 export interface ProfileUpdate {
   firstName?: string;
@@ -19,15 +20,17 @@ export interface UpdateProfileResult {
   message?: string;
 }
 
+// `userId` is kept for call-site compatibility but the backend resolves the
+// target user from the Bearer token (PATCH /users/me).
 export async function updateProfileAction(
-  userId: string,
+  _userId: string,
   update: ProfileUpdate,
 ): Promise<UpdateProfileResult> {
   const resp = await fetch(`${BACKEND_URL}/api/users/me`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'x-user-id': userId,
+      ...(await getAuthHeaders()),
     },
     body: JSON.stringify(update),
     cache: 'no-store',

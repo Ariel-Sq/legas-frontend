@@ -1,6 +1,7 @@
 'use server';
 
 import { BACKEND_URL } from '@/utils/environments';
+import { getAuthHeaders } from './server-auth';
 
 export interface Review {
   id: string;
@@ -107,11 +108,11 @@ export interface ReviewFormData {
 // votedByMe so the UI can toggle the helpful button without an extra call.
 export async function getProductReviews(
   productTemplateId: string,
-  viewerUserId?: string
+  _viewerUserId?: string
 ): Promise<Review[]> {
   try {
-    const headers: Record<string, string> = {};
-    if (viewerUserId) headers['x-user-id'] = viewerUserId;
+    // Auth is optional here: when present the backend annotates votedByMe.
+    const headers = await getAuthHeaders();
     const resp = await fetch(`${BACKEND_URL}/api/reviews`, {
       cache: 'no-store',
       headers,
@@ -167,12 +168,12 @@ export async function getProductRatingSummary(
 // Returns the set of productVariationIds the current user has already
 // reviewed. Used to swap the "Dejar reseña" CTA for an "Ya reseñado" pill.
 export async function getMyReviewedVariationIds(
-  userId: string,
+  _userId?: string,
 ): Promise<Set<string>> {
   try {
     const resp = await fetch(`${BACKEND_URL}/api/reviews/mine`, {
       cache: 'no-store',
-      headers: { 'x-user-id': userId },
+      headers: await getAuthHeaders(),
     });
     if (!resp.ok) return new Set();
     const data: BackendReview[] = await resp.json();
@@ -182,17 +183,17 @@ export async function getMyReviewedVariationIds(
   }
 }
 
-// Submit a new review. Requires authentication on the backend; the caller is
-// expected to pass the logged-in userId so we can forward the x-user-id header.
+// Submit a new review. Requires authentication on the backend; identity is
+// resolved server-side from the session and sent as a Bearer token.
 export async function submitReview(
-  userId: string,
+  _userId: string,
   reviewData: ReviewFormData
 ): Promise<Review> {
   const resp = await fetch(`${BACKEND_URL}/api/reviews`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-user-id': userId,
+      ...(await getAuthHeaders()),
     },
     body: JSON.stringify({
       productVariationId: reviewData.productVariationId,
@@ -213,11 +214,11 @@ export async function submitReview(
 // (user already voted) so the call is safe to repeat optimistically.
 export async function markReviewHelpful(
   reviewId: string,
-  userId: string
+  _userId?: string
 ): Promise<void> {
   const resp = await fetch(`${BACKEND_URL}/api/reviews/${reviewId}/helpful`, {
     method: 'POST',
-    headers: { 'x-user-id': userId },
+    headers: await getAuthHeaders(),
     cache: 'no-store',
   });
   if (!resp.ok && resp.status !== 409) {
@@ -228,11 +229,11 @@ export async function markReviewHelpful(
 // Remove the current user's helpful vote on a review. Idempotent.
 export async function unmarkReviewHelpful(
   reviewId: string,
-  userId: string
+  _userId?: string
 ): Promise<void> {
   const resp = await fetch(`${BACKEND_URL}/api/reviews/${reviewId}/helpful`, {
     method: 'DELETE',
-    headers: { 'x-user-id': userId },
+    headers: await getAuthHeaders(),
     cache: 'no-store',
   });
   if (!resp.ok && resp.status !== 204) {

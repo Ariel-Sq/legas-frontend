@@ -1,4 +1,4 @@
-import type { NextAuthOptions, Session } from 'next-auth';
+import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import {
   BACKEND_URL,
@@ -6,71 +6,39 @@ import {
   GOOGLE_CLIENT_SECRET,
 } from '@/utils/environments';
 
-async function findOrCreateUser(session: Session) {
-  const email = session.user?.email;
-  if (!email) return null;
-
-  const lookup = await fetch(
-    `${BACKEND_URL}/api/users/by-email/${encodeURIComponent(email)}`,
-    { cache: 'no-store' }
-  );
-  if (lookup.ok) return await lookup.json();
-  if (lookup.status !== 404) {
-    console.error(
-      '[auth] failed to look up user:',
-      lookup.status,
-      await lookup.text()
-    );
-    return null;
-  }
-
-  const nameParts = (session.user?.name || '').split(' ');
-  const firstName = nameParts[0] || email;
-  const lastName = nameParts.slice(1).join(' ') || '';
-
-  const createRes = await fetch(`${BACKEND_URL}/api/users/oauth`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, firstName, lastName, authProvider: 'google' }),
-  });
-  if (!createRes.ok) {
-    console.error(
-      '[auth] failed to create OAuth user:',
-      createRes.status,
-      await createRes.text()
-    );
-    return null;
-  }
-  return await createRes.json();
-}
-
-// Dev-only: when IMPERSONATE_USER_ID is set and NODE_ENV is development,
-// fetch that user from the backend so the session is fully swapped to the
-// impersonated user. Production ignores the env entirely.
-async function maybeImpersonate() {
-  if (process.env.NODE_ENV !== 'development') return null;
-  const impersonateId = process.env.IMPERSONATE_USER_ID;
-  if (!impersonateId) return null;
+// Exchange the Google id_token for a backend-issued session JWT. The backend
+// verifies the id_token against Google, provisions the user on first sign-in,
+// and returns { accessToken, user }. Runs once per sign-in (server-side).
+async function exchangeGoogleIdToken(idToken: string) {
   try {
-    const resp = await fetch(
-      `${BACKEND_URL}/api/users/by-id/${encodeURIComponent(impersonateId)}`,
-      { cache: 'no-store' }
-    );
-    if (!resp.ok) {
-      console.warn(
-        '[auth] IMPERSONATE_USER_ID lookup failed:',
-        resp.status,
+    const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      console.error(
+        '[auth] backend google login failed:',
+        res.status,
+        await res.text()
       );
       return null;
     }
-    return await resp.json();
+    return (await res.json()) as {
+      accessToken: string;
+      user: Record<string, unknown>;
+    };
   } catch (err) {
-    console.warn('[auth] IMPERSONATE_USER_ID lookup error:', err);
+    console.error('[auth] backend google login error:', err);
     return null;
   }
 }
 
 export const authOptions: NextAuthOptions = {
+  // Stateless JWT sessions: the backend token + user are persisted on the
+  // (encrypted, httpOnly) NextAuth token via the jwt callback below.
+  session: { strategy: 'jwt' },
   providers: [
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID!,
@@ -78,29 +46,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session }): Promise<Session> {
-      const impersonated = await maybeImpersonate();
-      if (impersonated) {
-        return {
-          ...session,
-          user: {
-            // Keep the avatar from Google if there is one, otherwise let
-            // anything explicit on the impersonated user win.
-            ...session.user,
-            ...impersonated,
-            name: [impersonated.firstName, impersonated.lastName]
-              .filter(Boolean)
-              .join(' ') || impersonated.email,
-            email: impersonated.email,
-          },
-        };
+    // Runs server-side. On initial sign-in `account` carries the Google
+    // id_token; we exchange it for a backend session JWT once and cache both
+    // the token and the backend user on the NextAuth token.
+    async jwt({ token, account }) {
+      if (account?.id_token) {
+        const result = await exchangeGoogleIdToken(account.id_token);
+        if (result) {
+          token.backendToken = result.accessToken;
+          token.backendUser = result.user as typeof token.backendUser;
+        }
       }
-      const userData = await findOrCreateUser(session);
+      return token;
+    },
+    // Runs on every session read. Copies the cached backend user into the
+    // client-visible session. The backendToken is intentionally NOT exposed
+    // here — server code reads it from the NextAuth token (see server-auth.ts).
+    async session({ session, token }) {
       return {
         ...session,
         user: {
           ...session.user,
-          ...userData,
+          ...(token.backendUser ?? {}),
         },
       };
     },
