@@ -16,8 +16,15 @@ import { NEXTAUTH_SECRET } from '@/utils/environments';
  */
 export async function getAuthHeaders(): Promise<Record<string, string>> {
   const cookieStore = await cookies();
+  const all = cookieStore.getAll();
+  // next-auth v4 getToken reads the session cookie from `req.cookies` (an
+  // object map), not from the raw `cookie` header. Pass both so it resolves
+  // regardless of version.
+  const cookieMap = Object.fromEntries(all.map((c) => [c.name, c.value]));
+  const cookieHeader = all.map((c) => `${c.name}=${c.value}`).join('; ');
+
   const token = await getToken({
-    req: { headers: { cookie: cookieStore.toString() } } as never,
+    req: { cookies: cookieMap, headers: { cookie: cookieHeader } } as never,
     secret: NEXTAUTH_SECRET,
   });
 
