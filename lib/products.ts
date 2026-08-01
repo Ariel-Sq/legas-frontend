@@ -100,9 +100,23 @@ export async function getProductTemplates(
           .map(([k, v]) => [k, String(v)])
       ).toString()
     : '';
-  const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`);
-  const data: ProductTemplate[] = await resp.json();
-  return data;
+  // Resilient on purpose: several pages (home, shop, sitemap) prerender at
+  // build time — an unreachable backend must degrade to an empty catalogue,
+  // never break the deploy.
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`);
+    if (!resp.ok) {
+      console.error(
+        `getProductTemplates: backend responded ${resp.status} for ${qs || '/'}`
+      );
+      return [];
+    }
+    const data: ProductTemplate[] = await resp.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('getProductTemplates: backend unreachable', err);
+    return [];
+  }
 }
 
 export interface ShopDisplayProduct {
