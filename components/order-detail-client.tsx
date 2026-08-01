@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { whatsappOrderUrl } from '@/lib/whatsapp';
 
 interface OrderDetailClientProps {
@@ -160,12 +160,12 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                       Cantidad: {item.quantity}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      ${item.price.toFixed(2)} c/u
+                      {formatPrice(item.price)} c/u
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
             <div className="border-t mt-6 pt-4 flex items-center justify-between">
               <span className="text-lg font-semibold">Total</span>
               <span className="text-2xl font-bold text-primary">
-                ${order.total.toFixed(2)}
+                {formatPrice(order.total)}
               </span>
             </div>
           </CardContent>

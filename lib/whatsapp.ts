@@ -1,4 +1,5 @@
 import type { Order } from './orders-shared';
+import { formatPrice } from '@/lib/utils';
 
 const DEFAULT_PHONE = '5491173666370';
 
@@ -27,7 +28,7 @@ export function buildProductInquiryMessage(
 ): string {
   const qty = quantity && quantity > 1 ? ` (cantidad ${quantity})` : '';
   const priceStr =
-    typeof price === 'number' ? ` ($${price.toFixed(2)})` : '';
+    typeof price === 'number' ? ` (${formatPrice(price)})` : '';
   return `Hola Legas, me interesa "${productName}"${priceStr}${qty}. ¿Me podés dar más info?`;
 }
 

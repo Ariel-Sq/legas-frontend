@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/components/cart-provider';
 import type { CartItem } from '@/lib/cart';
+import { formatPrice } from '@/lib/utils';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -54,7 +55,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
           )}
           <p className="text-lg font-semibold text-primary mt-2">
-            ${item.price}
+            {formatPrice(item.price)}
           </p>
         </div>
 
@@ -95,7 +96,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
         <div className="text-right md:w-24">
           <p className="font-semibold text-lg">
-            ${(item.price * item.quantity).toFixed(2)}
+            {formatPrice(item.price * item.quantity)}
           </p>
         </div>
       </div>

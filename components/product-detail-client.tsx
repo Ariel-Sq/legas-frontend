@@ -12,6 +12,7 @@ import type {
   Product,
 } from '@/lib/products';
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
+import { formatPrice } from '@/lib/utils';
 
 interface ProductUser {
   id: string;
@@ -177,7 +178,7 @@ export function ProductDetailClient({
 
               <div className="mb-6">
                 <p className="text-4xl font-bold text-primary">
-                  ${unitPrice.toFixed(2)}
+                  {formatPrice(unitPrice)}
                   <span className="text-base font-normal text-muted-foreground">
                     {' '}
                     / unidad
@@ -185,13 +186,13 @@ export function ProductDetailClient({
                 </p>
                 {quantity > 1 && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {quantity} × ${unitPrice.toFixed(2)} ={' '}
+                    {quantity} × {formatPrice(unitPrice)} ={' '}
                     <span className="font-semibold text-foreground">
-                      ${lineTotal.toFixed(2)}
+                      {formatPrice(lineTotal)}
                     </span>
                     {matchedTier && (
                       <span className="ml-2 text-primary">
-                        (ahorrás ${((basePrice - unitPrice) * quantity).toFixed(2)})
+                        (ahorrás {formatPrice((basePrice - unitPrice) * quantity)})
                       </span>
                     )}
                   </p>
@@ -239,7 +240,7 @@ export function ProductDetailClient({
                             row.key === 'base' ? '' : 'text-primary'
                           }
                         >
-                          ${row.price.toFixed(2)} / unidad
+                          {formatPrice(row.price)} / unidad
                         </span>
                       </li>
                     ));

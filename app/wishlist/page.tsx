@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { formatPrice } from '@/lib/utils';
 
 export default function WishlistPage() {
   const { items, removeFromWishlist, isAuthenticated, promptSignIn } =
@@ -141,7 +142,7 @@ export default function WishlistPage() {
                         {item.category}
                       </p>
                       <p className="text-lg font-bold text-primary mt-2">
-                        ${item.price}
+                        {formatPrice(item.price)}
                       </p>
 
                       {cartState.inCart ? (

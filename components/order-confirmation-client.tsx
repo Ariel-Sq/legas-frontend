@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import type { Order } from '@/lib/orders-shared';
 import { whatsappOrderUrl } from '@/lib/whatsapp';
+import { formatPrice } from '@/lib/utils';
 
 interface OrderConfirmationClientProps {
   order: Order;
@@ -67,10 +68,10 @@ export function OrderConfirmationClient({
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">
-                          ${item.price.toFixed(2)}
+                          {formatPrice(item.price)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          ${(item.price * item.quantity).toFixed(2)} total
+                          {formatPrice(item.price * item.quantity)} total
                         </p>
                       </div>
                     </div>
@@ -129,20 +130,20 @@ export function OrderConfirmationClient({
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
+                    <span>{formatPrice(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Envío</span>
                     <span>
                       {order.shippingCost === 0
                         ? 'Gratis'
-                        : `$${order.shippingCost.toFixed(2)}`}
+                        : formatPrice(order.shippingCost)}
                     </span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-base font-semibold">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>{formatPrice(order.total)}</span>
                   </div>
                 </div>
               </CardContent>

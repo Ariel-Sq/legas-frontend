@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useWishlist } from '@/components/wishlist-provider';
+import { formatPrice } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -74,7 +75,7 @@ export function ProductCard({
             {product.description}
           </p>
           <p className="mt-2 font-bold text-primary text-xl">
-            ${product.price}
+            {formatPrice(product.price)}
           </p>
         </div>
       </div>

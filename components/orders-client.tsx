@@ -33,6 +33,7 @@ import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
 import { CheckCircle2, Package, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatPrice } from '@/lib/utils';
 
 interface OrdersClientProps {
   initialOrders: Order[];
@@ -293,7 +294,7 @@ export function OrdersClient({
                       </div>
                       <div className="text-left md:text-right">
                         <p className="text-2xl font-bold text-primary">
-                          ${order.total.toFixed(2)}
+                          {formatPrice(order.total)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {order.items.reduce(
@@ -328,10 +329,10 @@ export function OrdersClient({
                             <div className="flex flex-col items-end gap-2">
                               <div className="text-right">
                                 <p className="font-semibold">
-                                  ${(item.price * item.quantity).toFixed(2)}
+                                  {formatPrice(item.price * item.quantity)}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  ${item.price.toFixed(2)} c/u
+                                  {formatPrice(item.price)} c/u
                                 </p>
                               </div>
                               {order.status === 'paid_delivered' &&

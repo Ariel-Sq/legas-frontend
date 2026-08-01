@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useWishlist } from '@/components/wishlist-provider';
+import { formatPrice } from '@/lib/utils';
 
 interface ShopProductCardProps {
   product: {
@@ -92,8 +93,8 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
               {product.minPrice &&
               product.maxPrice &&
               product.minPrice !== product.maxPrice
-                ? `$${product.minPrice} - $${product.maxPrice}`
-                : `$${product.price}`}
+                ? `${formatPrice(product.minPrice)} - ${formatPrice(product.maxPrice)}`
+                : formatPrice(product.price)}
             </p>
             {product.variations && product.variations.length > 1 && (
               <span className="text-xs text-muted-foreground">
