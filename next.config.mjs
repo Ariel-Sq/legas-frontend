@@ -10,17 +10,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '18.222.110.214',
-        port: '8080',
-      },
-      {
-        protocol: 'http',
         hostname: 'localhost',
         port: '8080',
       },
       {
         protocol: 'https',
-        hostname: 'ecommerce-backend-production-1183.up.railway.app',
+        hostname: 'legas-api.vercel.app',
       },
       {
         protocol: 'https',
