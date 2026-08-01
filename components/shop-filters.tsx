@@ -3,6 +3,7 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { formatPrice } from '@/lib/utils';
 
 interface FilterOptions {
   categories: string[];
@@ -21,6 +22,8 @@ interface ShopFiltersProps {
   onMaterialChange: (material: string) => void;
   onColorChange: (color: string) => void;
   onPriceRangeChange: (range: [number, number]) => void;
+  /** Fired when the user releases the slider — commits the range filter. */
+  onPriceRangeCommit?: (range: [number, number]) => void;
   hideTitle?: boolean;
 }
 
@@ -34,6 +37,7 @@ export function ShopFilters({
   onMaterialChange,
   onColorChange,
   onPriceRangeChange,
+  onPriceRangeCommit,
   hideTitle = false,
 }: ShopFiltersProps) {
   return (
@@ -51,11 +55,14 @@ export function ShopFilters({
             onValueChange={(value) =>
               onPriceRangeChange(value as [number, number])
             }
+            onValueCommit={(value) =>
+              onPriceRangeCommit?.(value as [number, number])
+            }
             className="cursor-pointer"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span>{formatPrice(priceRange[0])}</span>
+            <span>{formatPrice(priceRange[1])}</span>
           </div>
         </div>
       </div>

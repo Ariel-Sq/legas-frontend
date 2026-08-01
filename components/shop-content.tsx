@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShopFilters } from '@/components/shop-filters';
 import { ShopProductCard } from '@/components/shop-product-card';
@@ -57,17 +57,34 @@ interface ShopContentProps {
   limit: number;
   total: number;
   totalPages: number;
+  selectedCategories: string[];
+  selectedMaterials: string[];
+  selectedColor: string | null;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
-function buildShopHref(opts: {
+interface ShopFilterState {
   q?: string;
   page: number;
   limit?: number;
-}): string {
+  categories?: string[];
+  materials?: string[];
+  color?: string | null;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+function buildShopHref(opts: ShopFilterState): string {
   const sp = new URLSearchParams();
   if (opts.q) sp.set('q', opts.q);
   if (opts.page > 1) sp.set('page', String(opts.page));
   if (opts.limit && opts.limit !== 12) sp.set('limit', String(opts.limit));
+  if (opts.categories?.length) sp.set('category', opts.categories.join(','));
+  if (opts.materials?.length) sp.set('material', opts.materials.join(','));
+  if (opts.color) sp.set('color', opts.color);
+  if (opts.minPrice !== undefined) sp.set('minPrice', String(opts.minPrice));
+  if (opts.maxPrice !== undefined) sp.set('maxPrice', String(opts.maxPrice));
   const qs = sp.toString();
   return qs ? `/shop?${qs}` : '/shop';
 }
@@ -80,58 +97,96 @@ export function ShopContent({
   limit,
   total,
   totalPages,
+  selectedCategories,
+  selectedMaterials,
+  selectedColor,
+  minPrice,
+  maxPrice,
 }: ShopContentProps) {
   const router = useRouter();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    filterOptions.priceRange.min,
-    filterOptions.priceRange.max,
-  ]);
-  const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Filters and sort operate on the visible page slice. Pagination + search
-  // happen server-side; these client-side filters narrow what was returned
-  // for the current page.
-  const filteredProducts = useMemo(() => {
-    let filtered = [...products];
+  // Filters live in the URL and are applied server-side over the FULL
+  // catalogue (see getShopProductsPage) — filtering the current page slice
+  // client-side would wrongly report "no matches" for products that live on
+  // other pages. The slider keeps local state while dragging and commits to
+  // the URL on release.
+  const [priceDraft, setPriceDraft] = useState<[number, number]>([
+    minPrice ?? filterOptions.priceRange.min,
+    maxPrice ?? filterOptions.priceRange.max,
+  ]);
+  useEffect(() => {
+    setPriceDraft([
+      minPrice ?? filterOptions.priceRange.min,
+      maxPrice ?? filterOptions.priceRange.max,
+    ]);
+  }, [minPrice, maxPrice, filterOptions.priceRange]);
 
-    if (categoryFilter !== 'All') {
-      filtered = filtered.filter((p) => p.category === categoryFilter);
+  const currentFilters: ShopFilterState = {
+    q: searchQuery,
+    page: 1, // any filter change goes back to page 1
+    limit,
+    categories: selectedCategories,
+    materials: selectedMaterials,
+    color: selectedColor,
+    minPrice,
+    maxPrice,
+  };
+
+  const pushFilters = (next: Partial<ShopFilterState>) => {
+    router.push(buildShopHref({ ...currentFilters, ...next }));
+  };
+
+  const handleCategoryChange = (category: string) => {
+    pushFilters({
+      categories: selectedCategories.includes(category)
+        ? selectedCategories.filter((c) => c !== category)
+        : [...selectedCategories, category],
+    });
+  };
+
+  const handleMaterialChange = (material: string) => {
+    pushFilters({
+      materials: selectedMaterials.includes(material)
+        ? selectedMaterials.filter((m) => m !== material)
+        : [...selectedMaterials, material],
+    });
+  };
+
+  const handleColorChange = (color: string) => {
+    pushFilters({ color: selectedColor === color ? null : color });
+  };
+
+  const handlePriceRangeCommit = (range: [number, number]) => {
+    pushFilters({
+      minPrice: range[0] > filterOptions.priceRange.min ? range[0] : undefined,
+      maxPrice: range[1] < filterOptions.priceRange.max ? range[1] : undefined,
+    });
+  };
+
+  // The quick tags toggle categories over the same URL param the sidebar
+  // checkboxes use — multi-select, "Todos" clears the selection.
+  const handleTagClick = (cat: string) => {
+    if (cat === 'All') {
+      pushFilters({ categories: [] });
+      return;
     }
+    handleCategoryChange(cat);
+  };
 
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((p) =>
-        selectedCategories.includes(p.category)
-      );
-    }
-
-    if (selectedMaterials.length > 0) {
-      filtered = filtered.filter(
-        (p) => p.material && selectedMaterials.includes(p.material)
-      );
-    }
-
-    if (selectedColor) {
-      filtered = filtered.filter((p) => p.color === selectedColor);
-    }
-
-    filtered = filtered.filter(
-      (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
-    );
-
+  // Sorting stays client-side over the current page slice.
+  const sortedProducts = useMemo(() => {
+    const sorted = [...products];
     switch (sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => a.price - b.price);
         break;
       case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => b.price - a.price);
         break;
       case 'newest':
-        filtered.sort(
+        sorted.sort(
           (a, b) =>
             new Date(b.createdAt ?? 0).getTime() -
             new Date(a.createdAt ?? 0).getTime()
@@ -140,56 +195,15 @@ export function ShopContent({
       default:
         break;
     }
-
-    return filtered;
-  }, [
-    products,
-    selectedCategories,
-    selectedMaterials,
-    selectedColor,
-    priceRange,
-    categoryFilter,
-    sortBy,
-  ]);
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  const handleMaterialChange = (material: string) => {
-    setSelectedMaterials((prev) =>
-      prev.includes(material)
-        ? prev.filter((m) => m !== material)
-        : [...prev, material]
-    );
-  };
-
-  const handleColorChange = (color: string) => {
-    setSelectedColor((prev) => (prev === color ? null : color));
-  };
+    return sorted;
+  }, [products, sortBy]);
 
   const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (selectedCategories.length > 0) count += selectedCategories.length;
-    if (selectedMaterials.length > 0) count += selectedMaterials.length;
+    let count = selectedCategories.length + selectedMaterials.length;
     if (selectedColor) count += 1;
-    if (
-      priceRange[0] !== filterOptions.priceRange.min ||
-      priceRange[1] !== filterOptions.priceRange.max
-    )
-      count += 1;
+    if (minPrice !== undefined || maxPrice !== undefined) count += 1;
     return count;
-  }, [
-    selectedCategories,
-    selectedMaterials,
-    selectedColor,
-    priceRange,
-    filterOptions.priceRange,
-  ]);
+  }, [selectedCategories, selectedMaterials, selectedColor, minPrice, maxPrice]);
 
   const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
   const rangeEnd = Math.min(page * limit, total);
@@ -207,11 +221,12 @@ export function ShopContent({
           selectedCategories={selectedCategories}
           selectedMaterials={selectedMaterials}
           selectedColor={selectedColor}
-          priceRange={priceRange}
+          priceRange={priceDraft}
           onCategoryChange={handleCategoryChange}
           onMaterialChange={handleMaterialChange}
           onColorChange={handleColorChange}
-          onPriceRangeChange={setPriceRange}
+          onPriceRangeChange={setPriceDraft}
+          onPriceRangeCommit={handlePriceRangeCommit}
         />
       </div>
 
@@ -221,8 +236,8 @@ export function ShopContent({
             <h1 className="text-3xl font-bold">
               {searchQuery
                 ? `Resultados para "${searchQuery}"`
-                : categoryFilter !== 'All'
-                  ? categoryFilter
+                : selectedCategories.length === 1
+                  ? selectedCategories[0]
                   : 'Todos los productos'}
             </h1>
             {searchQuery && (
@@ -262,11 +277,12 @@ export function ShopContent({
                     selectedCategories={selectedCategories}
                     selectedMaterials={selectedMaterials}
                     selectedColor={selectedColor}
-                    priceRange={priceRange}
+                    priceRange={priceDraft}
                     onCategoryChange={handleCategoryChange}
                     onMaterialChange={handleMaterialChange}
                     onColorChange={handleColorChange}
-                    onPriceRangeChange={setPriceRange}
+                    onPriceRangeChange={setPriceDraft}
+                    onPriceRangeCommit={handlePriceRangeCommit}
                     hideTitle={true}
                   />
                 </div>
@@ -308,9 +324,10 @@ export function ShopContent({
             {['All', ...filterOptions.categories].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setCategoryFilter(cat)}
+                onClick={() => handleTagClick(cat)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                  categoryFilter === cat
+                  (cat === 'All' && selectedCategories.length === 0) ||
+                  selectedCategories.includes(cat)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-primary/20 hover:bg-primary/30'
                 }`}
@@ -321,9 +338,9 @@ export function ShopContent({
           </div>
         )}
 
-        {filteredProducts.length > 0 ? (
+        {sortedProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
+            {sortedProducts.map((product) => (
               <ShopProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -353,9 +370,8 @@ export function ShopContent({
                 <PaginationItem>
                   <PaginationPrevious
                     href={buildShopHref({
-                      q: searchQuery,
+                      ...currentFilters,
                       page: Math.max(1, page - 1),
-                      limit,
                     })}
                     disabled={page <= 1}
                   />
@@ -369,9 +385,8 @@ export function ShopContent({
                     <PaginationItem key={entry}>
                       <PaginationLink
                         href={buildShopHref({
-                          q: searchQuery,
+                          ...currentFilters,
                           page: entry,
-                          limit,
                         })}
                         isActive={entry === page}
                       >
@@ -383,9 +398,8 @@ export function ShopContent({
                 <PaginationItem>
                   <PaginationNext
                     href={buildShopHref({
-                      q: searchQuery,
+                      ...currentFilters,
                       page: Math.min(totalPages, page + 1),
-                      limit,
                     })}
                     disabled={page >= totalPages}
                   />

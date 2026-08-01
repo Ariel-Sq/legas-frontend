@@ -135,17 +135,28 @@ export interface GetShopProductsPageParams {
   page?: number;
   limit?: number;
   q?: string;
+  /** Category names (template category) — product matches if its category is in the list. */
+  categories?: string[];
+  /** Material names — product matches if ANY active variation has the material. */
+  materials?: string[];
+  /** Color name — product matches if ANY active variation has the color. */
+  color?: string;
+  /** Price range — product matches if its variation price range overlaps. */
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 /**
- * Server-side paginated + searchable fetch for the /shop page.
+ * Server-side paginated + searchable + filterable fetch for the /shop page.
  *
  * The backend's /api/product-templates endpoint does not currently expose
  * `page`/`q` query params (only `sort`, `order`, `limit`, `featured`), so we
- * fetch the active templates and apply search + pagination here on the server
- * before returning to the page. Filter options are computed from the FULL
- * (unpaginated, but search-filtered) result set so the sidebar reflects the
- * full search space, not just the current page.
+ * fetch the active templates and apply search + filters + pagination here on
+ * the server before returning to the page. Filters MUST run here (not on the
+ * client) because they need to narrow the full catalogue, not the current
+ * page slice. Filter options are computed from the FULL (unpaginated, but
+ * search-filtered) result set so the sidebar reflects the full search space,
+ * not just the current page.
  */
 export async function getShopProductsPage(
   params: GetShopProductsPageParams = {}
@@ -190,7 +201,7 @@ export async function getShopProductsPage(
   // Apply search filter on the server so pagination math is consistent with
   // what the user typed. Match against name, category, material, and color so
   // queries like "mesa", "alacena", or "roble" all work.
-  const matchedProducts = q
+  const searchedProducts = q
     ? displayProducts.filter((p) => {
         const haystack = [p.name, p.category, p.material, p.color]
           .filter(Boolean)
@@ -200,16 +211,37 @@ export async function getShopProductsPage(
       })
     : displayProducts;
 
+  // Facet filters, also over the full (searched) set — before pagination.
+  const { categories, materials, color, minPrice, maxPrice } = params;
+  const matchedProducts = searchedProducts.filter((p) => {
+    if (categories?.length && !categories.includes(p.category)) return false;
+    if (
+      materials?.length &&
+      !p.variations.some(
+        (v) =>
+          typeof v.attributes?.material === 'string' &&
+          materials.includes(v.attributes.material)
+      )
+    )
+      return false;
+    if (color && !p.variations.some((v) => v.attributes?.color === color))
+      return false;
+    if (minPrice !== undefined && p.maxPrice < minPrice) return false;
+    if (maxPrice !== undefined && p.minPrice > maxPrice) return false;
+    return true;
+  });
+
   const total = matchedProducts.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * limit;
   const pageProducts = matchedProducts.slice(start, start + limit);
 
-  // Compute filter options from the search-filtered (but not paginated) set so
-  // the sidebar reflects the full search space.
+  // Compute filter options from the search-filtered (but NOT facet-filtered,
+  // NOT paginated) set so the sidebar keeps showing every available option
+  // instead of collapsing to the current selection.
   const filterTemplates = q
-    ? templates.filter((t) => matchedProducts.some((p) => p.id === t.id))
+    ? templates.filter((t) => searchedProducts.some((p) => p.id === t.id))
     : templates;
   const filterOptions = await getFilterOptions(filterTemplates);
 

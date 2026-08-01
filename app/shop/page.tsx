@@ -18,6 +18,11 @@ export default async function ShopPage({
     search?: string;
     page?: string;
     limit?: string;
+    category?: string;
+    material?: string;
+    color?: string;
+    minPrice?: string;
+    maxPrice?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -30,8 +35,34 @@ export default async function ShopPage({
     MAX_PAGE_SIZE
   );
 
+  const parseList = (value?: string): string[] =>
+    (value ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  const parsePrice = (value?: string): number | undefined => {
+    if (!value) return undefined;
+    const n = Number.parseInt(value, 10);
+    return Number.isFinite(n) && n >= 0 ? n : undefined;
+  };
+
+  const categories = parseList(params.category);
+  const materials = parseList(params.material);
+  const color = params.color?.trim() || undefined;
+  const minPrice = parsePrice(params.minPrice);
+  const maxPrice = parsePrice(params.maxPrice);
+
   const { products, total, page: safePage, totalPages, filterOptions } =
-    await getShopProductsPage({ page, limit, q: query });
+    await getShopProductsPage({
+      page,
+      limit,
+      q: query,
+      categories,
+      materials,
+      color,
+      minPrice,
+      maxPrice,
+    });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -43,6 +74,11 @@ export default async function ShopPage({
         limit={limit}
         total={total}
         totalPages={totalPages}
+        selectedCategories={categories}
+        selectedMaterials={materials}
+        selectedColor={color ?? null}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
       />
     </div>
   );
