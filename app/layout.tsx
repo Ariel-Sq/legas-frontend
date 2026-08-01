@@ -34,6 +34,13 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`font-sans ${workSans.variable} ${GeistMono.variable}`}>
+        {/* Apply the user's palette (see components/palette-picker.tsx)
+            before first paint so there is no flash of default colors. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var c=localStorage.getItem('legas-palette-css');if(c){var s=document.createElement('style');s.id='palette-style';s.textContent=c;document.head.appendChild(s);}}catch(e){}`,
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

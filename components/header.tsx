@@ -6,6 +6,7 @@ import { CartButton } from '@/components/cart-button';
 import { HeaderNav } from '@/components/header-client';
 import { WishlistButton } from '@/components/wishlist-button';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { PalettePicker } from '@/components/palette-picker';
 
 export function Header() {
   return (
@@ -35,6 +36,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             <SearchBar />
             <ThemeToggle />
+            <PalettePicker />
             <WishlistButton />
             <CartButton />
             <AuthSection />
