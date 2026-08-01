@@ -116,7 +116,9 @@ export function ProductCard({
         <p className="mt-1 text-sm text-muted-foreground flex-grow">
           {product.description}
         </p>
-        <p className="mt-4 font-bold text-primary text-xl">${product.price}</p>
+        <p className="mt-4 font-bold text-primary text-xl">
+          {formatPrice(product.price)}
+        </p>
       </div>
     </div>
   );

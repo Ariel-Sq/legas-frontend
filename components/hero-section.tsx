@@ -48,7 +48,7 @@ export function HeroSection({ featuredProduct }: HeroSectionProps) {
               className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
               style={{ backgroundImage: `url('${imageUrl}')` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6">
               <p className="text-white text-2xl font-bold tracking-tight">
                 {caption}
