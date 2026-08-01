@@ -62,6 +62,7 @@ interface ShopContentProps {
   selectedColor: string | null;
   minPrice?: number;
   maxPrice?: number;
+  sort: string;
 }
 
 interface ShopFilterState {
@@ -73,6 +74,7 @@ interface ShopFilterState {
   color?: string | null;
   minPrice?: number;
   maxPrice?: number;
+  sort?: string;
 }
 
 function buildShopHref(opts: ShopFilterState): string {
@@ -85,6 +87,7 @@ function buildShopHref(opts: ShopFilterState): string {
   if (opts.color) sp.set('color', opts.color);
   if (opts.minPrice !== undefined) sp.set('minPrice', String(opts.minPrice));
   if (opts.maxPrice !== undefined) sp.set('maxPrice', String(opts.maxPrice));
+  if (opts.sort && opts.sort !== 'newest') sp.set('sort', opts.sort);
   const qs = sp.toString();
   return qs ? `/shop?${qs}` : '/shop';
 }
@@ -102,9 +105,9 @@ export function ShopContent({
   selectedColor,
   minPrice,
   maxPrice,
+  sort,
 }: ShopContentProps) {
   const router = useRouter();
-  const [sortBy, setSortBy] = useState<string>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Filters live in the URL and are applied server-side over the FULL
@@ -132,6 +135,7 @@ export function ShopContent({
     color: selectedColor,
     minPrice,
     maxPrice,
+    sort,
   };
 
   const pushFilters = (next: Partial<ShopFilterState>) => {
@@ -174,29 +178,6 @@ export function ShopContent({
     }
     handleCategoryChange(cat);
   };
-
-  // Sorting stays client-side over the current page slice.
-  const sortedProducts = useMemo(() => {
-    const sorted = [...products];
-    switch (sortBy) {
-      case 'price-low':
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt ?? 0).getTime() -
-            new Date(a.createdAt ?? 0).getTime()
-        );
-        break;
-      default:
-        break;
-    }
-    return sorted;
-  }, [products, sortBy]);
 
   const activeFiltersCount = useMemo(() => {
     let count = selectedCategories.length + selectedMaterials.length;
@@ -292,7 +273,10 @@ export function ShopContent({
             <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
               Ordenar por:
             </span>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select
+              value={sort}
+              onValueChange={(value) => pushFilters({ sort: value })}
+            >
               <SelectTrigger className="w-full sm:w-[180px] cursor-pointer">
                 <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
@@ -338,9 +322,9 @@ export function ShopContent({
           </div>
         )}
 
-        {sortedProducts.length > 0 ? (
+        {products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {sortedProducts.map((product) => (
+            {products.map((product) => (
               <ShopProductCard key={product.id} product={product} />
             ))}
           </div>

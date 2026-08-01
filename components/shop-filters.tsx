@@ -67,66 +67,72 @@ export function ShopFilters({
         </div>
       </div>
 
-      <div>
-        <h3 className="text-lg font-bold mb-4">Categoría</h3>
-        <div className="space-y-3">
-          {filterOptions.categories.map((category) => (
-            <div key={category} className="flex items-center gap-x-3">
-              <Checkbox
-                id={`category-${category}`}
-                checked={selectedCategories.includes(category)}
-                onCheckedChange={() => onCategoryChange(category)}
-                className="cursor-pointer"
-              />
-              <Label
-                htmlFor={`category-${category}`}
-                className="text-sm font-medium cursor-pointer"
-              >
-                {category}
-              </Label>
-            </div>
-          ))}
+      {filterOptions.categories.length > 0 && (
+        <div>
+          <h3 className="text-lg font-bold mb-4">Categoría</h3>
+          <div className="space-y-3">
+            {filterOptions.categories.map((category) => (
+              <div key={category} className="flex items-center gap-x-3">
+                <Checkbox
+                  id={`category-${category}`}
+                  checked={selectedCategories.includes(category)}
+                  onCheckedChange={() => onCategoryChange(category)}
+                  className="cursor-pointer"
+                />
+                <Label
+                  htmlFor={`category-${category}`}
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {category}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div>
-        <h3 className="text-lg font-bold mb-4">Material</h3>
-        <div className="space-y-3">
-          {filterOptions.materials.map((material) => (
-            <div key={material} className="flex items-center gap-x-3">
-              <Checkbox
-                id={`material-${material}`}
-                checked={selectedMaterials.includes(material)}
-                onCheckedChange={() => onMaterialChange(material)}
-                className="cursor-pointer"
-              />
-              <Label
-                htmlFor={`material-${material}`}
-                className="text-sm font-medium cursor-pointer"
-              >
-                {material}
-              </Label>
-            </div>
-          ))}
+      {filterOptions.materials.length > 0 && (
+        <div>
+          <h3 className="text-lg font-bold mb-4">Material</h3>
+          <div className="space-y-3">
+            {filterOptions.materials.map((material) => (
+              <div key={material} className="flex items-center gap-x-3">
+                <Checkbox
+                  id={`material-${material}`}
+                  checked={selectedMaterials.includes(material)}
+                  onCheckedChange={() => onMaterialChange(material)}
+                  className="cursor-pointer"
+                />
+                <Label
+                  htmlFor={`material-${material}`}
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {material}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div>
-        <h3 className="text-lg font-bold mb-4">Color</h3>
-        <div className="flex flex-wrap gap-3">
-          {filterOptions.colors.map((color) => (
-            <button
-              key={color.name}
-              onClick={() => onColorChange(color.name)}
-              className={`h-8 w-8 rounded-full border border-border ring-offset-2 ring-offset-background cursor-pointer transition-all ${
-                selectedColor === color.name ? 'ring-2 ring-primary' : ''
-              }`}
-              style={{ backgroundColor: color.hex }}
-              aria-label={`Filtrar por ${color.name}`}
-            />
-          ))}
+      {filterOptions.colors.length > 0 && (
+        <div>
+          <h3 className="text-lg font-bold mb-4">Color</h3>
+          <div className="flex flex-wrap gap-3">
+            {filterOptions.colors.map((color) => (
+              <button
+                key={color.name}
+                onClick={() => onColorChange(color.name)}
+                className={`h-8 w-8 rounded-full border border-border ring-offset-2 ring-offset-background cursor-pointer transition-all ${
+                  selectedColor === color.name ? 'ring-2 ring-primary' : ''
+                }`}
+                style={{ backgroundColor: color.hex }}
+                aria-label={`Filtrar por ${color.name}`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

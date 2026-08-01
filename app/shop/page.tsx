@@ -1,5 +1,5 @@
 import { ShopContent } from '@/components/shop-content';
-import { getShopProductsPage } from '@/lib/products';
+import { getShopProductsPage, type ShopSortOption } from '@/lib/products';
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 48;
@@ -23,6 +23,7 @@ export default async function ShopPage({
     color?: string;
     minPrice?: string;
     maxPrice?: string;
+    sort?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -51,6 +52,10 @@ export default async function ShopPage({
   const color = params.color?.trim() || undefined;
   const minPrice = parsePrice(params.minPrice);
   const maxPrice = parsePrice(params.maxPrice);
+  const sort: ShopSortOption =
+    params.sort === 'price-low' || params.sort === 'price-high'
+      ? params.sort
+      : 'newest';
 
   const { products, total, page: safePage, totalPages, filterOptions } =
     await getShopProductsPage({
@@ -62,6 +67,7 @@ export default async function ShopPage({
       color,
       minPrice,
       maxPrice,
+      sort,
     });
 
   return (
@@ -79,6 +85,7 @@ export default async function ShopPage({
         selectedColor={color ?? null}
         minPrice={minPrice}
         maxPrice={maxPrice}
+        sort={sort}
       />
     </div>
   );

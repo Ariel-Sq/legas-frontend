@@ -144,7 +144,10 @@ export interface GetShopProductsPageParams {
   /** Price range — product matches if its variation price range overlaps. */
   minPrice?: number;
   maxPrice?: number;
+  sort?: ShopSortOption;
 }
+
+export type ShopSortOption = 'newest' | 'price-low' | 'price-high';
 
 /**
  * Server-side paginated + searchable + filterable fetch for the /shop page.
@@ -230,6 +233,28 @@ export async function getShopProductsPage(
     if (maxPrice !== undefined && p.minPrice > maxPrice) return false;
     return true;
   });
+
+  // Sort over the full matched set — sorting the page slice client-side
+  // would only reorder the 12 visible products. Price sorts use the
+  // variation range (min for ascending, max for descending) so a product
+  // whose top variation is the most expensive ranks first.
+  const sort = params.sort ?? 'newest';
+  switch (sort) {
+    case 'price-low':
+      matchedProducts.sort((a, b) => a.minPrice - b.minPrice);
+      break;
+    case 'price-high':
+      matchedProducts.sort((a, b) => b.maxPrice - a.maxPrice);
+      break;
+    case 'newest':
+    default:
+      matchedProducts.sort(
+        (a, b) =>
+          new Date(b.createdAt ?? 0).getTime() -
+          new Date(a.createdAt ?? 0).getTime()
+      );
+      break;
+  }
 
   const total = matchedProducts.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));

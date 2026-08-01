@@ -165,9 +165,14 @@ function PaginationEllipsis({
 export function buildPageList(
   current: number,
   total: number,
-  siblings = 1
+  siblings = 2
 ): (number | 'ellipsis')[] {
   if (total <= 1) return [1];
+  // Show every page while the list stays short — an ellipsis hiding one or
+  // two numbers costs more space than it saves.
+  if (total <= 5 + 2 * siblings) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
   const first = 1;
   const last = total;
   const pages = new Set<number>([first, last, current]);
