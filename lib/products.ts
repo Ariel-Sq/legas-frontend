@@ -68,6 +68,8 @@ export interface Product {
   price: number;
   image: string;
   category: string;
+  /** Template slug — preferred over the uuid for product URLs (SEO). */
+  slug?: string;
   material?: string;
   color?: string;
   images?: string[];
@@ -109,6 +111,8 @@ export interface ShopDisplayProduct {
   price: number;
   image: string;
   category: string;
+  /** Template slug — preferred over the uuid for product URLs (SEO). */
+  slug?: string;
   material?: string;
   color?: string;
   createdAt: string;
@@ -192,6 +196,7 @@ export async function getShopProductsPage(
       price: parseFloat(defaultVariation.price),
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Sin categoría',
+      slug: template.slug,
       material: defaultVariation.attributes?.material,
       color: defaultVariation.attributes?.color,
       createdAt: template.created_at,
@@ -288,6 +293,22 @@ export async function getProductTemplateById(
   return productTemplates.find((template) => template.id === id) || null;
 }
 
+/**
+ * Resolve a template by slug (preferred, SEO-friendly URL) or by uuid
+ * (legacy links: cart items, old bookmarks). Both keep working; canonical
+ * URLs always use the slug.
+ */
+export async function getProductTemplateBySlugOrId(
+  slugOrId: string
+): Promise<ProductTemplate | null> {
+  const productTemplates = await getProductTemplates();
+  return (
+    productTemplates.find(
+      (template) => template.slug === slugOrId || template.id === slugOrId
+    ) || null
+  );
+}
+
 export async function getShopProducts(): Promise<Product[]> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -307,6 +328,7 @@ export async function getShopProducts(): Promise<Product[]> {
           price: parseFloat(variation.price),
           image: mainImage?.url || '',
           category: template.categories[0]?.name || 'Uncategorized',
+          slug: template.slug,
           material: variation.attributes?.material,
           color: variation.attributes?.color,
           images: variation.images.map((img) => img.url),
@@ -356,6 +378,7 @@ export async function getProductById(id: string): Promise<Product | null> {
         price: parseFloat(variation.price),
         image: mainImage?.url || '',
         category: template.categories[0]?.name || 'Uncategorized',
+          slug: template.slug,
         material: variation.attributes?.material,
         color: variation.attributes?.color,
         images: variation.images.map((img) => img.url),
@@ -401,6 +424,7 @@ export async function getAllProducts(): Promise<Product[]> {
             .sort((a, b) => a.sortOrder - b.sortOrder)
             .map((img) => img.url),
           category: template.categories[0]?.name || 'Uncategorized',
+          slug: template.slug,
           material: variation.attributes?.material,
           color: variation.attributes?.color,
           specifications: Object.entries(template.specifications || {}).map(
@@ -462,6 +486,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       price: parseFloat(variation.price),
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'featured',
+      slug: template.slug,
       material: variation.attributes?.material,
       color: variation.attributes?.color,
       images: variation.images.map((img) => img.url),
@@ -493,6 +518,7 @@ export async function getNewArrivals(): Promise<Product[]> {
       price: parseFloat(variation.price),
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Uncategorized',
+          slug: template.slug,
       material: variation.attributes?.material,
       color: variation.attributes?.color,
       images: variation.images.map((img) => img.url),

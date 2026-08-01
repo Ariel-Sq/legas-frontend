@@ -12,6 +12,7 @@ import './globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { WhatsAppFab } from '@/components/whatsapp-fab';
+import { SITE_URL } from '@/utils/environments';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -20,10 +21,33 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Legas - Muebles de Madera Artesanales',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Legas — Muebles de Madera Artesanales',
+    template: '%s | Legas Muebles',
+  },
   description:
-    'Descubre muebles de madera artesanales que aportan calidez, belleza y carácter a tu hogar.',
-  generator: 'v0.app',
+    'Muebles de madera artesanales: mesas de comedor de petiribí y álamo macizo, sillas, racks, escritorios y más. Fabricación propia, envíos coordinados.',
+  keywords: [
+    'muebles de madera',
+    'muebles artesanales',
+    'mesa de comedor petiribí',
+    'mesa de comedor álamo',
+    'muebles macizos argentina',
+  ],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    siteName: 'Legas Muebles',
+    title: 'Legas — Muebles de Madera Artesanales',
+    description:
+      'Muebles de madera artesanales: mesas de comedor de petiribí y álamo macizo, sillas, racks, escritorios y más.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

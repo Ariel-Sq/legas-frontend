@@ -9,7 +9,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ featuredProduct }: HeroSectionProps) {
   const linkHref = featuredProduct
-    ? `/product/${featuredProduct.templateId ?? featuredProduct.id}`
+    ? `/product/${featuredProduct.slug ?? featuredProduct.templateId ?? featuredProduct.id}`
     : '/shop';
   const imageUrl =
     featuredProduct?.image ||

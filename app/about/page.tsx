@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getAboutContent } from '@/lib/company';
+
+export const metadata: Metadata = {
+  title: 'Nosotros',
+  description:
+    'Conocé Legas Muebles: fabricación artesanal de muebles de madera maciza.',
+  alternates: { canonical: '/about' },
+};
 
 export default async function AboutPage() {
   const aboutContent = await getAboutContent();

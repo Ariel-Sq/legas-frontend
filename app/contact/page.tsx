@@ -4,6 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getContactInfo } from '@/lib/company';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Contacto',
+  description:
+    'Escribinos por WhatsApp o email para consultas sobre muebles de madera, medidas y envíos.',
+  alternates: { canonical: '/contact' },
+};
 
 export default async function ContactPage() {
   const contactInfo = await getContactInfo();

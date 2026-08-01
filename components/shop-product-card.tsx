@@ -15,6 +15,7 @@ interface ShopProductCardProps {
     name: string;
     price: number;
     image: string;
+    slug?: string;
     variations?: any[];
     minPrice?: number;
     maxPrice?: number;
@@ -51,7 +52,7 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/product/${product.id}`}>
+      <Link href={`/product/${product.slug ?? product.id}`}>
         <div className="relative overflow-hidden rounded-lg">
           <div className="relative w-full aspect-square bg-muted rounded-lg">
             <Image

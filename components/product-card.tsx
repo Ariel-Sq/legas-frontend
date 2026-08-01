@@ -46,7 +46,7 @@ export function ProductCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link href={`/product/${product.id}`}>
+        <Link href={`/product/${product.slug ?? product.id}`}>
           <div className="relative w-full aspect-square rounded-lg overflow-hidden">
             <Image
               src={product.image || '/placeholder.svg'}
@@ -88,7 +88,7 @@ export function ProductCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/product/${product.id}`}>
+      <Link href={`/product/${product.slug ?? product.id}`}>
         <div className="relative w-full aspect-square">
           <Image
             src={product.image || '/placeholder.svg'}

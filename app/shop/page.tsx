@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import { ShopContent } from '@/components/shop-content';
 import { getShopProductsPage, type ShopSortOption } from '@/lib/products';
+
+export const metadata: Metadata = {
+  title: 'Tienda',
+  description:
+    'Catálogo completo de muebles de madera: mesas de comedor, sillas, racks, vajilleros, escritorios, cómodas y más. Petiribí macizo y álamo.',
+  alternates: { canonical: '/shop' },
+};
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 48;
