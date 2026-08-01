@@ -13,6 +13,7 @@ import Script from 'next/script';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { createCheckoutPreference } from '@/lib/checkout';
+import { formatPrice } from '@/lib/utils';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -28,6 +29,14 @@ declare global {
     MercadoPago: any;
   }
 }
+
+/**
+ * Card payment surcharge over the catalogue (cash/transfer) prices.
+ * The backend applies the same rate when building the MercadoPago
+ * preference — keep in sync with CARD_SURCHARGE_RATE in
+ * ecommerce-backend/src/payments/payments.service.ts.
+ */
+const CARD_SURCHARGE_RATE = 0.2;
 
 export function CheckoutClient() {
   const { items, subtotal } = useCart();
@@ -80,7 +89,8 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  const total = subtotal;
+  const cardSurcharge = subtotal * CARD_SURCHARGE_RATE;
+  const total = subtotal + cardSurcharge;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -389,7 +399,7 @@ export function CheckoutClient() {
                           Cantidad: {item.quantity}
                         </p>
                         <p className="text-sm font-semibold">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -399,13 +409,30 @@ export function CheckoutClient() {
                 <Separator className="my-4" />
 
                 <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Recargo pago con tarjeta (20%)
+                    </span>
+                    <span>{formatPrice(cardSurcharge)}</span>
+                  </div>
+                  <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
+                  Los precios publicados son en efectivo o transferencia.
+                  Pagando online con tarjeta se agrega un 20% de recargo, ya
+                  incluido en el total.
+                </p>
+
+                <p className="mt-2 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   El envío se coordina con el vendedor después de la compra.
                 </p>
               </div>

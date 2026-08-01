@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
+import { formatPrice } from '@/lib/utils';
 
 export function CartContent() {
   const { items, itemCount, subtotal } = useCart();
@@ -77,7 +78,7 @@ export function CartContent() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span className="text-primary">${subtotal.toFixed(2)}</span>
+                  <span className="text-primary">{formatPrice(subtotal)}</span>
                 </div>
 
                 <Separator />
@@ -86,6 +87,12 @@ export function CartContent() {
                   <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <span>El envío se coordina con el vendedor después de la compra.</span>
                 </div>
+
+                <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
+                  Precios en efectivo o transferencia. Pagando online con
+                  tarjeta se agrega un 20% de recargo (se muestra en el
+                  checkout).
+                </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>
                   <Link href="/checkout">Ir a pagar</Link>
