@@ -20,7 +20,7 @@
 
 ### Decisions
 
-- No admin panel in the frontend. Admin operations (orders, products,
-  reviews moderation, users) are done via chat (Claude) directly against
-  the backend `/api/admin/*` endpoints / DB. The backend endpoints stay
-  gated by `AdminGuard`.
+- No admin panel in the frontend, and no admin endpoints in the backend
+  (they were removed). Admin operations (orders, products, reviews
+  moderation, users) are done via chat (Claude) directly against the
+  database.
