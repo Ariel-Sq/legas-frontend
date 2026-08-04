@@ -18,6 +18,9 @@ import {
  *
  * Every combination keeps the Material dark-theme rules from globals.css
  * (tonal elevation steps, lighter+softer accents in dark, no pure white).
+ *
+ * TODO: track the chosen combination (analytics/backend event) so we can
+ * see which palette users pick most and eventually promote it to default.
  */
 
 interface PaletteOption {

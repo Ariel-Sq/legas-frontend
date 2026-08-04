@@ -11,7 +11,16 @@
 
 ### Open
 
-- Admin panel: orders (list, transition status), products (CRUD, image
-  upload), reviews moderation, users. Backend admin endpoints already
-  exist under `/api/admin/*` and are gated by `AdminGuard`.
 - Cache Service / SWR layer.
+- Palette picker analytics: track which base/accent combination users
+  pick (today it only lives in each browser's localStorage) so we can
+  learn the most-chosen palette and eventually make it the default.
+  Cheapest path: send the choice to a tiny backend endpoint or a Vercel
+  Analytics custom event on select.
+
+### Decisions
+
+- No admin panel in the frontend. Admin operations (orders, products,
+  reviews moderation, users) are done via chat (Claude) directly against
+  the backend `/api/admin/*` endpoints / DB. The backend endpoints stay
+  gated by `AdminGuard`.
