@@ -103,8 +103,13 @@ export async function getProductTemplates(
   // Resilient on purpose: several pages (home, shop, sitemap) prerender at
   // build time — an unreachable backend must degrade to an empty catalogue,
   // never break the deploy.
+  // Cached for 60s (ISR-style, keyed per URL): repeated /shop and home
+  // renders reuse the catalogue instead of hitting the backend + Neon on
+  // every request. Catalogue changes appear within a minute.
   try {
-    const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`);
+    const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`, {
+      next: { revalidate: 60, tags: ['catalog'] },
+    });
     if (!resp.ok) {
       console.error(
         `getProductTemplates: backend responded ${resp.status} for ${qs || '/'}`
@@ -302,7 +307,6 @@ export async function getShopProductsPage(
 export async function getProductTemplateById(
   id: string
 ): Promise<ProductTemplate | null> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
   const productTemplates = await getProductTemplates();
   return productTemplates.find((template) => template.id === id) || null;
 }
@@ -310,11 +314,23 @@ export async function getProductTemplateById(
 /**
  * Resolve a template by slug (preferred, SEO-friendly URL) or by uuid
  * (legacy links: cart items, old bookmarks). Both keep working; canonical
- * URLs always use the slug.
+ * URLs always use the slug. Hits the single-template endpoint (cached 60s)
+ * instead of downloading the whole catalogue; falls back to the cached
+ * list if the endpoint errors unexpectedly.
  */
 export async function getProductTemplateBySlugOrId(
   slugOrId: string
 ): Promise<ProductTemplate | null> {
+  try {
+    const resp = await fetch(
+      `${BACKEND_URL}/api/product-templates/by-slug/${encodeURIComponent(slugOrId)}`,
+      { next: { revalidate: 60, tags: ['catalog'] } }
+    );
+    if (resp.status === 404) return null;
+    if (resp.ok) return (await resp.json()) as ProductTemplate;
+  } catch (err) {
+    console.error('getProductTemplateBySlugOrId: backend unreachable', err);
+  }
   const productTemplates = await getProductTemplates();
   return (
     productTemplates.find(
@@ -324,7 +340,6 @@ export async function getProductTemplateBySlugOrId(
 }
 
 export async function getShopProducts(): Promise<Product[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
 
   const productTemplates = await getProductTemplates();
 
@@ -416,7 +431,6 @@ export async function getProductById(id: string): Promise<Product | null> {
 }
 
 export async function getAllProducts(): Promise<Product[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
 
   const productTemplates = await getProductTemplates();
 
