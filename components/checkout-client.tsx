@@ -12,7 +12,10 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { createCheckoutPreference } from '@/lib/checkout';
+import {
+  createCheckoutPreference,
+  type CheckoutPaymentMethod,
+} from '@/lib/checkout';
 import { formatPrice } from '@/lib/utils';
 import {
   AlertTriangle,
@@ -31,19 +34,35 @@ declare global {
 }
 
 /**
- * Online payment (MercadoPago) surcharge over the catalogue
- * (cash/transfer) prices — applies to every MP payment method (card,
- * account money, etc.). The backend applies the same rate when building
- * the MP preference — keep in sync with MP_SURCHARGE_RATE in
- * ecommerce-backend/src/payments/payments.service.ts.
+ * Method-dependent surcharge over the catalogue (cash/transfer) prices.
+ * The shopper picks the method here (Checkout Pro can't price per method
+ * inside one preference) and the backend applies the same rate while
+ * restricting the MP screen to the matching methods — keep in sync with
+ * ecommerce-backend/src/payments/payment-method.config.ts.
  */
-const MP_SURCHARGE_RATE = 0.2;
+const PAYMENT_OPTIONS: Record<
+  CheckoutPaymentMethod,
+  { rate: number; label: string; description: string }
+> = {
+  account_money: {
+    rate: 0.1,
+    label: 'Dinero en cuenta o débito',
+    description: 'Saldo de MercadoPago o tarjeta de débito · recargo 10%',
+  },
+  credit_card: {
+    rate: 0.2,
+    label: 'Tarjeta de crédito',
+    description: 'Hasta 3 cuotas · recargo 20%',
+  },
+};
 
 export function CheckoutClient() {
   const { items, subtotal } = useCart();
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
+  const [paymentMethod, setPaymentMethod] =
+    useState<CheckoutPaymentMethod | null>(null);
   const [preferenceId, setPreferenceId] = useState('');
   const [isCreatingPreference, setIsCreatingPreference] = useState(false);
   const [error, setError] = useState('');
@@ -90,8 +109,11 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  const mpSurcharge = subtotal * MP_SURCHARGE_RATE;
-  const total = subtotal + mpSurcharge;
+  const surchargeRate = paymentMethod
+    ? PAYMENT_OPTIONS[paymentMethod].rate
+    : null;
+  const mpSurcharge = surchargeRate !== null ? subtotal * surchargeRate : null;
+  const total = mpSurcharge !== null ? subtotal + mpSurcharge : null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -110,17 +132,27 @@ export function CheckoutClient() {
     setCurrentStep(2);
   };
 
+  // A preference is created only after the shopper picks a payment method
+  // (the surcharge and the methods MP offers depend on it). Switching
+  // methods discards the previous preference and creates a fresh one.
   useEffect(() => {
-    if (currentStep !== 2) return;
+    if (currentStep !== 2 || !paymentMethod) return;
 
     const setupPayment = async () => {
       setIsCreatingPreference(true);
       setError('');
+      setPreferenceId('');
+      const container = document.getElementById('payment-form');
+      if (container) container.innerHTML = '';
       try {
-        const id = await createCheckoutPreference(userId, {
-          customerEmail: formData.email.trim(),
-          customerPhone: formData.phone.trim(),
-        });
+        const id = await createCheckoutPreference(
+          userId,
+          {
+            customerEmail: formData.email.trim(),
+            customerPhone: formData.phone.trim(),
+          },
+          paymentMethod
+        );
         setPreferenceId(id);
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el pago');
@@ -130,7 +162,7 @@ export function CheckoutClient() {
     };
 
     setupPayment();
-  }, [currentStep, userId, formData.email, formData.phone]);
+  }, [currentStep, paymentMethod, userId, formData.email, formData.phone]);
 
   useEffect(() => {
     if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
@@ -351,6 +383,42 @@ export function CheckoutClient() {
                     <CreditCard className="h-5 w-5" />
                     Método de pago
                   </h2>
+
+                  <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                    {(
+                      Object.entries(PAYMENT_OPTIONS) as [
+                        CheckoutPaymentMethod,
+                        (typeof PAYMENT_OPTIONS)[CheckoutPaymentMethod],
+                      ][]
+                    ).map(([method, option]) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setPaymentMethod(method)}
+                        aria-pressed={paymentMethod === method}
+                        className={`rounded-lg border p-4 text-left transition-colors cursor-pointer ${
+                          paymentMethod === method
+                            ? 'border-ring bg-secondary'
+                            : 'border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        <p className="font-semibold">{option.label}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {option.description}
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-primary">
+                          Total: {formatPrice(subtotal * (1 + option.rate))}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {!paymentMethod && (
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Elegí cómo vas a pagar para continuar.
+                    </p>
+                  )}
+
                   {isCreatingPreference && (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -414,23 +482,30 @@ export function CheckoutClient() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      Recargo pago por MercadoPago (20%)
-                    </span>
-                    <span>{formatPrice(mpSurcharge)}</span>
-                  </div>
+                  {paymentMethod && mpSurcharge !== null && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Recargo{' '}
+                        {paymentMethod === 'credit_card'
+                          ? 'tarjeta de crédito (20%)'
+                          : 'dinero en cuenta / débito (10%)'}
+                      </span>
+                      <span>{formatPrice(mpSurcharge)}</span>
+                    </div>
+                  )}
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>{formatPrice(total)}</span>
+                    <span>
+                      {total !== null ? formatPrice(total) : 'según pago'}
+                    </span>
                   </div>
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los precios publicados son en efectivo o transferencia.
-                  Pagando online por MercadoPago se agrega un 20% de
-                  recargo, ya incluido en el total.
+                  Pagando online: dinero en cuenta o débito +10%, tarjeta de
+                  crédito +20% (hasta 3 cuotas).
                 </p>
 
                 <p className="mt-2 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">

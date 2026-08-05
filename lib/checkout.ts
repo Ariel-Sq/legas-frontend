@@ -23,15 +23,19 @@ async function buildHeaders(sessionId?: string): Promise<Record<string, string>>
 
 // `userId` is kept for call-site compatibility; identity is resolved
 // server-side from the session (Bearer) or the anon session id.
+export type CheckoutPaymentMethod = 'account_money' | 'credit_card';
+
 export async function createCheckoutPreference(
   _userId?: string,
   contact?: { customerEmail?: string; customerPhone?: string },
+  paymentMethod?: CheckoutPaymentMethod,
 ): Promise<string> {
   const sessionId = await getSessionId();
 
   const body: Record<string, string> = {};
   if (contact?.customerEmail) body.customerEmail = contact.customerEmail;
   if (contact?.customerPhone) body.customerPhone = contact.customerPhone;
+  if (paymentMethod) body.paymentMethod = paymentMethod;
 
   const response = await fetch(
     `${BACKEND_URL}/api/payments/mercadopago/checkout`,

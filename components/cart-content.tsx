@@ -89,9 +89,9 @@ export function CartContent() {
                 </div>
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                  Precios en efectivo o transferencia. Pagando online por
-                  MercadoPago se agrega un 20% de recargo (se muestra en el
-                  checkout).
+                  Precios en efectivo o transferencia. Pagando online:
+                  dinero en cuenta o débito +10%, tarjeta de crédito +20%
+                  (hasta 3 cuotas). Se muestra en el checkout.
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>
