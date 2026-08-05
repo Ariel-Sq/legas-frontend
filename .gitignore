@@ -29,3 +29,6 @@ next-env.d.ts
 
 # Playwright MCP artifacts (browser test screenshots/snapshots)
 .playwright-mcp/
+
+# Stray local screenshots
+legas-*.png
