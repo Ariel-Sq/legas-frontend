@@ -1,15 +1,12 @@
-import { Mail, Phone, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Phone, MapPin } from 'lucide-react';
+import { ContactForm } from '@/components/contact-form';
 import { getContactInfo } from '@/lib/company';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contacto',
   description:
-    'Escribinos por WhatsApp o email para consultas sobre muebles de madera, medidas y envíos.',
+    'Escribinos por WhatsApp para consultas sobre muebles de madera, medidas y envíos.',
   alternates: { canonical: '/contact' },
 };
 
@@ -61,18 +58,6 @@ export default async function ContactPage() {
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-primary/20">
-                      <Mail className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">
-                        {contactInfo.email}
-                      </p>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="mt-8">
@@ -86,49 +71,7 @@ export default async function ContactPage() {
               </div>
 
               <div>
-                <form className="space-y-6">
-                  <div>
-                    <Label htmlFor="name">Nombre</Label>
-                    <Input
-                      id="name"
-                      placeholder="Tu nombre"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="subject">Asunto</Label>
-                    <Input
-                      id="subject"
-                      placeholder="¿En qué te podemos ayudar?"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="message">Mensaje</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Contanos más sobre tu consulta..."
-                      rows={6}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" size="lg">
-                    Enviar mensaje
-                  </Button>
-                </form>
+                <ContactForm />
               </div>
             </div>
           </div>

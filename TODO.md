@@ -18,6 +18,10 @@
   Cheapest path: send the choice to a tiny backend endpoint or a Vercel
   Analytics custom event on select.
 
+- "Nosotros" (/about) is hidden from the nav and sitemap: its content is
+  template boilerplate (fake "desde 1995", stock photos, invented stats).
+  Write the real Legas story with Froid and bring the link back.
+
 ### Decisions
 
 - No admin panel in the frontend, and no admin endpoints in the backend

@@ -40,19 +40,21 @@ declare global {
  * restricting the MP screen to the matching methods — keep in sync with
  * ecommerce-backend/src/payments/payment-method.config.ts.
  */
+// credit_card goes first and starts selected: it is the common case, and
+// the cheaper account-money option stays visible right next to it.
 const PAYMENT_OPTIONS: Record<
   CheckoutPaymentMethod,
   { rate: number; label: string; description: string }
 > = {
-  account_money: {
-    rate: 0.1,
-    label: 'Dinero en cuenta o débito',
-    description: 'Saldo de MercadoPago o tarjeta de débito · recargo 10%',
-  },
   credit_card: {
     rate: 0.2,
     label: 'Tarjeta de crédito',
     description: 'Hasta 3 cuotas · recargo 20%',
+  },
+  account_money: {
+    rate: 0.1,
+    label: 'Dinero en cuenta o débito',
+    description: 'Saldo de MercadoPago o tarjeta de débito · recargo 10%',
   },
 };
 
@@ -62,7 +64,7 @@ export function CheckoutClient() {
   const userId = session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] =
-    useState<CheckoutPaymentMethod | null>(null);
+    useState<CheckoutPaymentMethod | null>('credit_card');
   const [preferenceId, setPreferenceId] = useState('');
   const [isCreatingPreference, setIsCreatingPreference] = useState(false);
   const [error, setError] = useState('');

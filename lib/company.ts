@@ -26,7 +26,6 @@ export interface ContactInfo {
     zip: string;
   };
   phone: string;
-  email: string;
   businessHours: {
     weekdays: string;
     saturday: string;
@@ -81,13 +80,12 @@ export async function getAboutContent(): Promise<AboutContent> {
 export async function getContactInfo(): Promise<ContactInfo> {
   return {
     address: {
-      street: 'Av. Corrientes 1234',
-      city: 'Buenos Aires',
-      state: 'CABA',
-      zip: 'C1043',
+      street: 'Juan de Herrera 2542',
+      city: 'Malvinas Argentinas',
+      state: 'Provincia de Buenos Aires',
+      zip: 'B1614',
     },
-    phone: '+54 11 5555-1234',
-    email: 'hola@legas.com',
+    phone: '+54 11 7366-6370',
     businessHours: {
       weekdays: 'Lunes a Viernes: 9:00 a 18:00',
       saturday: 'Sábados: 10:00 a 14:00',
