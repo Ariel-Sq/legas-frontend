@@ -25,32 +25,60 @@ async function buildHeaders(sessionId?: string): Promise<Record<string, string>>
 // server-side from the session (Bearer) or the anon session id.
 export type CheckoutPaymentMethod = 'account_money' | 'credit_card';
 
+export interface CheckoutPreferenceResult {
+  id?: string;
+  /**
+   * Human-readable failure (e.g. insufficient stock). Returned instead of
+   * thrown: Next.js masks thrown Server Action errors in production, which
+   * turned real messages into an opaque "Server Components render" error.
+   */
+  error?: string;
+}
+
 export async function createCheckoutPreference(
   _userId?: string,
   contact?: { customerEmail?: string; customerPhone?: string },
   paymentMethod?: CheckoutPaymentMethod,
-): Promise<string> {
-  const sessionId = await getSessionId();
+): Promise<CheckoutPreferenceResult> {
+  try {
+    const sessionId = await getSessionId();
 
-  const body: Record<string, string> = {};
-  if (contact?.customerEmail) body.customerEmail = contact.customerEmail;
-  if (contact?.customerPhone) body.customerPhone = contact.customerPhone;
-  if (paymentMethod) body.paymentMethod = paymentMethod;
+    const body: Record<string, string> = {};
+    if (contact?.customerEmail) body.customerEmail = contact.customerEmail;
+    if (contact?.customerPhone) body.customerPhone = contact.customerPhone;
+    if (paymentMethod) body.paymentMethod = paymentMethod;
 
-  const response = await fetch(
-    `${BACKEND_URL}/api/payments/mercadopago/checkout`,
-    {
-      method: 'POST',
-      headers: await buildHeaders(sessionId),
-      body: JSON.stringify(body),
+    const response = await fetch(
+      `${BACKEND_URL}/api/payments/mercadopago/checkout`,
+      {
+        method: 'POST',
+        headers: await buildHeaders(sessionId),
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      if (error?.error === 'INSUFFICIENT_STOCK') {
+        return {
+          error:
+            'No hay stock suficiente de alguno de los productos del carrito. Ajustá las cantidades e intentá de nuevo.',
+        };
+      }
+      return {
+        error:
+          typeof error?.message === 'string'
+            ? error.message
+            : 'No pudimos iniciar el pago. Intentá de nuevo en unos minutos.',
+      };
     }
-  );
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || 'Error creating checkout preference');
+    const data = await response.json();
+    return { id: data.id };
+  } catch (err) {
+    console.error('createCheckoutPreference failed', err);
+    return {
+      error: 'No pudimos iniciar el pago. Intentá de nuevo en unos minutos.',
+    };
   }
-
-  const data = await response.json();
-  return data.id;
 }

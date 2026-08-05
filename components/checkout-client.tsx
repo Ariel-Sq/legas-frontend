@@ -145,7 +145,7 @@ export function CheckoutClient() {
       const container = document.getElementById('payment-form');
       if (container) container.innerHTML = '';
       try {
-        const id = await createCheckoutPreference(
+        const result = await createCheckoutPreference(
           userId,
           {
             customerEmail: formData.email.trim(),
@@ -153,7 +153,11 @@ export function CheckoutClient() {
           },
           paymentMethod
         );
-        setPreferenceId(id);
+        if (result.error || !result.id) {
+          setError(result.error || 'Error al iniciar el pago');
+        } else {
+          setPreferenceId(result.id);
+        }
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el pago');
       } finally {
