@@ -35,6 +35,23 @@ async function exchangeGoogleIdToken(idToken: string) {
   }
 }
 
+// Authoritative re-read of the logged-in user, used when the client calls
+// `update()` on the session (e.g. after saving the profile) so changes show
+// up without re-login. Server-side only; never trusts client-sent data.
+async function fetchBackendUser(backendToken: string) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${backendToken}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as Record<string, unknown>;
+  } catch (err) {
+    console.error('[auth] backend user refresh error:', err);
+    return null;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   // Stateless JWT sessions: the backend token + user are persisted on the
   // (encrypted, httpOnly) NextAuth token via the jwt callback below.
@@ -49,12 +66,19 @@ export const authOptions: NextAuthOptions = {
     // Runs server-side. On initial sign-in `account` carries the Google
     // id_token; we exchange it for a backend session JWT once and cache both
     // the token and the backend user on the NextAuth token.
-    async jwt({ token, account }) {
+    async jwt({ token, account, trigger }) {
       if (account?.id_token) {
         const result = await exchangeGoogleIdToken(account.id_token);
         if (result) {
           token.backendToken = result.accessToken;
           token.backendUser = result.user as typeof token.backendUser;
+        }
+      } else if (trigger === 'update' && token.backendToken) {
+        // Client called session.update() (e.g. after a profile save):
+        // re-read the authoritative user so the cached copy stays fresh.
+        const fresh = await fetchBackendUser(token.backendToken as string);
+        if (fresh) {
+          token.backendUser = fresh as typeof token.backendUser;
         }
       }
       return token;
