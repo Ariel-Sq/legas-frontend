@@ -31,12 +31,13 @@ declare global {
 }
 
 /**
- * Card payment surcharge over the catalogue (cash/transfer) prices.
- * The backend applies the same rate when building the MercadoPago
- * preference — keep in sync with CARD_SURCHARGE_RATE in
+ * Online payment (MercadoPago) surcharge over the catalogue
+ * (cash/transfer) prices — applies to every MP payment method (card,
+ * account money, etc.). The backend applies the same rate when building
+ * the MP preference — keep in sync with MP_SURCHARGE_RATE in
  * ecommerce-backend/src/payments/payments.service.ts.
  */
-const CARD_SURCHARGE_RATE = 0.2;
+const MP_SURCHARGE_RATE = 0.2;
 
 export function CheckoutClient() {
   const { items, subtotal } = useCart();
@@ -89,8 +90,8 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  const cardSurcharge = subtotal * CARD_SURCHARGE_RATE;
-  const total = subtotal + cardSurcharge;
+  const mpSurcharge = subtotal * MP_SURCHARGE_RATE;
+  const total = subtotal + mpSurcharge;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -415,9 +416,9 @@ export function CheckoutClient() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Recargo pago con tarjeta (20%)
+                      Recargo pago por MercadoPago (20%)
                     </span>
-                    <span>{formatPrice(cardSurcharge)}</span>
+                    <span>{formatPrice(mpSurcharge)}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
@@ -428,8 +429,8 @@ export function CheckoutClient() {
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los precios publicados son en efectivo o transferencia.
-                  Pagando online con tarjeta se agrega un 20% de recargo, ya
-                  incluido en el total.
+                  Pagando online por MercadoPago se agrega un 20% de
+                  recargo, ya incluido en el total.
                 </p>
 
                 <p className="mt-2 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
