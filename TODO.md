@@ -22,6 +22,11 @@
   template boilerplate (fake "desde 1995", stock photos, invented stats).
   Write the real Legas story with Froid and bring the link back.
 
+- Legal (pendiente de definición con Froid): publicar razón social y
+  CUIT del proveedor en términos/footer (Res. 270/2020) y el QR de Data
+  Fiscal F.960/D de ARCA en la home. Bloqueado hasta definir quién es el
+  proveedor legal (¿Froid? ¿Sebastián? ¿Gonzalo?).
+
 ### Decisions
 
 - No admin panel in the frontend, and no admin endpoints in the backend

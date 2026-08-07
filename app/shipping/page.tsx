@@ -1,3 +1,13 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Envíos & Devoluciones',
+  description:
+    'Cómo se coordinan los envíos de tus muebles, y tus derechos de devolución y garantía.',
+  alternates: { canonical: '/shipping' },
+};
+
 export default function ShippingPage() {
   return (
     <main className="flex-1">
@@ -5,82 +15,93 @@ export default function ShippingPage() {
         <div className="container mx-auto max-w-3xl">
           <h1 className="text-5xl font-bold mb-6">Envíos & Devoluciones</h1>
           <p className="text-muted-foreground mb-12">
-            Todo lo que necesitás saber sobre cómo te llegan tus muebles y qué
-            hacer si algo no es lo que esperabas.
+            Última actualización: 7 de agosto de 2026
           </p>
 
           <div className="space-y-8 text-base leading-relaxed">
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">Envíos</h2>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>
-                  Envío estándar gratis en compras superiores a $500.000.
-                </li>
-                <li>
-                  Tiempo estimado de entrega: 5 a 7 días hábiles en CABA y GBA;
-                  7 a 10 días en el resto del país.
-                </li>
-                <li>
-                  Los muebles grandes se entregan en planta baja. Subir piezas
-                  por escalera o ascensor pequeño puede tener un cargo adicional
-                  (te lo coordinamos por email antes del envío).
-                </li>
-              </ul>
+              <p>
+                Nuestros muebles se fabrican a pedido. Después de tu compra te
+                contactamos por WhatsApp para coordinar el plazo de fabricación,
+                la fecha de entrega y el costo del envío, que depende de la zona
+                y del tamaño del mueble. No confirmamos plazos ni costos que no
+                podamos cumplir: todo queda acordado con vos por escrito antes
+                del despacho.
+              </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">Seguimiento</h2>
               <p>
-                Cuando despachamos tu pedido te llega un email con el código de
-                tracking. También podés ver el estado desde tu cuenta en{' '}
-                <a href="/orders" className="text-primary hover:underline">
+                El estado de tu pedido se actualiza en{' '}
+                <Link href="/orders" className="text-primary hover:underline">
                   Mis pedidos
-                </a>
-                .
+                </Link>{' '}
+                y te vamos avisando por WhatsApp en cada etapa (en fabricación,
+                listo para enviar, enviado, entregado).
               </p>
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-2xl font-semibold">Devoluciones</h2>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>
-                  Tenés 30 días desde la recepción para pedir un cambio o
-                  devolución.
-                </li>
-                <li>
-                  El mueble tiene que estar en su estado original, sin uso ni
-                  ensamblado.
-                </li>
-                <li>
-                  Los costos de logística inversa los cubre el cliente, salvo en
-                  casos de defecto de fabricación o error de despacho de nuestra
-                  parte.
-                </li>
-              </ul>
+              <h2 className="text-2xl font-semibold">
+                Derecho de arrepentimiento (10 días)
+              </h2>
+              <p>
+                Podés arrepentirte de tu compra dentro de los{' '}
+                <strong>10 días corridos</strong> desde que recibiste el
+                producto, sin expresión de causa y{' '}
+                <strong>sin ningún costo para vos</strong>: los gastos de
+                devolución corren por nuestra cuenta (art. 34, Ley 24.240).
+                Usá el{' '}
+                <Link
+                  href="/arrepentimiento"
+                  className="text-primary hover:underline"
+                >
+                  botón de arrepentimiento
+                </Link>{' '}
+                y te damos un código de trámite al instante.
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">Garantía legal</h2>
+              <p>
+                Todos nuestros muebles nuevos tienen la garantía legal de{' '}
+                <strong>6 meses</strong> por defectos de fabricación (art. 11,
+                Ley 24.240). Si algo llega dañado o falla, escribinos por
+                WhatsApp y lo resolvemos: reparación, reemplazo o reintegro,
+                según corresponda. En estos casos, todos los costos de logística
+                los cubrimos nosotros.
+              </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">Reintegros</h2>
               <p>
-                Una vez que recibimos y verificamos el producto, procesamos el
-                reintegro al mismo medio de pago en un plazo de 5 días hábiles.
+                Los reintegros se procesan al mismo medio de pago que usaste.
+                Una vez confirmada la cancelación o devolución, gestionamos el
+                reembolso a través de MercadoPago; la acreditación depende de
+                los plazos de tu banco o tarjeta.
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">¿Dudas?</h2>
               <p>
-                Escribinos a{' '}
+                Escribinos por{' '}
                 <a
-                  href="mailto:hola@legas.com"
+                  href="https://wa.me/5491173666370"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  hola@legas.com
+                  WhatsApp
                 </a>{' '}
-                o usá el{' '}
-                <a href="/contact" className="text-primary hover:underline">
-                  formulario de contacto
-                </a>
+                o desde la página de{' '}
+                <Link href="/contact" className="text-primary hover:underline">
+                  contacto
+                </Link>
                 .
               </p>
             </section>
