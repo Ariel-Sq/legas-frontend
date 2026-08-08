@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { getToken } from 'next-auth/jwt';
 import { NEXTAUTH_SECRET } from '@/utils/environments';
+import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 /**
  * Build the auth headers for a server-to-server call to the backend.
@@ -29,10 +30,13 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   });
 
   if (token?.backendToken) {
-    return { Authorization: `Bearer ${token.backendToken}` };
+    return {
+      ...frontendKeyHeaders(),
+      Authorization: `Bearer ${token.backendToken}`,
+    };
   }
 
-  return {};
+  return { ...frontendKeyHeaders() };
 }
 
 /**

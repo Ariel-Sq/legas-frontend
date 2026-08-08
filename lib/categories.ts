@@ -17,9 +17,12 @@ export interface Category {
 }
 
 import { BACKEND_URL } from '@/utils/environments';
+import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 export async function getCategories(): Promise<Category[]> {
-  const resp = await fetch(`${BACKEND_URL}/api/categories/tree`);
+  const resp = await fetch(`${BACKEND_URL}/api/categories/tree`, {
+    headers: frontendKeyHeaders(),
+  });
   const data: Category[] = await resp.json();
   return data;
 }

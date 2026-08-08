@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { logPaletteChoice } from '@/lib/metrics';
 
 /**
  * User-facing color customization: a header popover to pick the surface
@@ -442,6 +443,8 @@ export function PalettePicker() {
     } catch {
       /* storage may be unavailable (private mode) — still applied for the session */
     }
+    // Anonymous aggregate counter — answers "which palette wins?".
+    void logPaletteChoice(nextBase, nextAccent);
   };
 
   return (

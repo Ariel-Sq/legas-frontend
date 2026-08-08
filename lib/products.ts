@@ -1,6 +1,7 @@
 'use server';
 
 import { BACKEND_URL } from '@/utils/environments';
+import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 export interface Category {
   id: string;
@@ -108,6 +109,7 @@ export async function getProductTemplates(
   // every request. Catalogue changes appear within a minute.
   try {
     const resp = await fetch(`${BACKEND_URL}/api/product-templates${qs}`, {
+      headers: frontendKeyHeaders(),
       next: { revalidate: 60, tags: ['catalog'] },
     });
     if (!resp.ok) {
@@ -324,7 +326,10 @@ export async function getProductTemplateBySlugOrId(
   try {
     const resp = await fetch(
       `${BACKEND_URL}/api/product-templates/by-slug/${encodeURIComponent(slugOrId)}`,
-      { next: { revalidate: 60, tags: ['catalog'] } }
+      {
+        headers: frontendKeyHeaders(),
+        next: { revalidate: 60, tags: ['catalog'] },
+      }
     );
     if (resp.status === 404) return null;
     if (resp.ok) return (await resp.json()) as ProductTemplate;

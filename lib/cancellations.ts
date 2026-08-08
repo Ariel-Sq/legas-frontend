@@ -1,6 +1,7 @@
 'use server';
 
 import { BACKEND_URL } from '@/utils/environments';
+import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 export interface CancellationInput {
   name: string;
@@ -34,7 +35,7 @@ export async function createCancellation(
 
     const resp = await fetch(`${BACKEND_URL}/api/cancellations`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...frontendKeyHeaders() },
       body: JSON.stringify(body),
       cache: 'no-store',
     });

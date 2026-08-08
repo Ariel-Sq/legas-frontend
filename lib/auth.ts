@@ -5,6 +5,7 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
 } from '@/utils/environments';
+import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 // Exchange the Google id_token for a backend-issued session JWT. The backend
 // verifies the id_token against Google, provisions the user on first sign-in,
@@ -13,7 +14,7 @@ async function exchangeGoogleIdToken(idToken: string) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...frontendKeyHeaders() },
       body: JSON.stringify({ idToken }),
       cache: 'no-store',
     });
@@ -41,7 +42,10 @@ async function exchangeGoogleIdToken(idToken: string) {
 async function fetchBackendUser(backendToken: string) {
   try {
     const res = await fetch(`${BACKEND_URL}/api/users/me`, {
-      headers: { Authorization: `Bearer ${backendToken}` },
+      headers: {
+        Authorization: `Bearer ${backendToken}`,
+        ...frontendKeyHeaders(),
+      },
       cache: 'no-store',
     });
     if (!res.ok) return null;
