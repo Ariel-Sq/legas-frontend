@@ -351,6 +351,9 @@ export const PALETTE_ACCENTS: PaletteOption[] = [
 
 export const PALETTE_STORAGE_KEY = 'legas-palette';
 export const PALETTE_CSS_STORAGE_KEY = 'legas-palette-css';
+// Last combo already counted in analytics, so the same resting choice isn't
+// re-counted on every visit — only genuine changes add a vote.
+const PALETTE_LOGGED_KEY = 'legas-palette-logged';
 const STYLE_ID = 'palette-style';
 
 function compileCss(baseKey: string, accentKey: string): string {
@@ -413,9 +416,9 @@ function SwatchRow({
 export function PalettePicker() {
   const [base, setBase] = useState('calida');
   const [accent, setAccent] = useState('dorado');
-  // Debounce the analytics call so trying out palettes doesn't inflate the
-  // counters: only the combo the user settles on (2.5s idle) is counted.
-  const logTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Latest chosen combo, read at popover-close time (see handleOpenChange).
+  // A ref, not state, so closing reads the final value without re-renders.
+  const chosen = useRef({ base: 'calida', accent: 'dorado' });
 
   // The boot script in app/layout.tsx already applied the stored CSS before
   // first paint; here we only sync the picker UI with the stored choice.
@@ -424,6 +427,12 @@ export function PalettePicker() {
       const saved = JSON.parse(
         localStorage.getItem(PALETTE_STORAGE_KEY) ?? '{}'
       );
+      if (PALETTE_BASES.some((b) => b.key === saved.base)) {
+        chosen.current.base = saved.base;
+      }
+      if (PALETTE_ACCENTS.some((a) => a.key === saved.accent)) {
+        chosen.current.accent = saved.accent;
+      }
       if (PALETTE_BASES.some((b) => b.key === saved.base)) setBase(saved.base);
       if (PALETTE_ACCENTS.some((a) => a.key === saved.accent))
         setAccent(saved.accent);
@@ -446,24 +455,37 @@ export function PalettePicker() {
     } catch {
       /* storage may be unavailable (private mode) — still applied for the session */
     }
-    // Anonymous aggregate counter — answers "which palette wins?". Debounced:
-    // rapid tanteo (click-through) resets the timer and only the final resting
-    // combo is logged, once.
-    if (logTimer.current) clearTimeout(logTimer.current);
-    logTimer.current = setTimeout(() => {
-      void logPaletteChoice(nextBase, nextAccent);
-    }, 2500);
+    // Only remember the choice; the analytics vote is committed once, when
+    // the popover closes (handleOpenChange) — so click-through tanteo counts
+    // as a single vote for the resting combo, and a decisive user who closes
+    // fast is still counted.
+    chosen.current = { base: nextBase, accent: nextAccent };
   };
 
-  // Flush nothing on unmount, just clear the pending timer.
-  useEffect(() => {
-    return () => {
-      if (logTimer.current) clearTimeout(logTimer.current);
-    };
-  }, []);
+  // Commit-on-close: count the resting combo once, and only if it differs
+  // from what this browser last counted (dedupes repeat visits and never
+  // counts the untouched default).
+  const handleOpenChange = (open: boolean) => {
+    if (open) return;
+    const { base: b, accent: a } = chosen.current;
+    const key = `${b}+${a}`;
+    let last: string | null = null;
+    try {
+      last = localStorage.getItem(PALETTE_LOGGED_KEY);
+    } catch {
+      /* ignore */
+    }
+    if (key === last) return;
+    void logPaletteChoice(b, a);
+    try {
+      localStorage.setItem(PALETTE_LOGGED_KEY, key);
+    } catch {
+      /* ignore */
+    }
+  };
 
   return (
-    <Popover>
+    <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
           type="button"
