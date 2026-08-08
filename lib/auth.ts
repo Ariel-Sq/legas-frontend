@@ -90,12 +90,31 @@ export const authOptions: NextAuthOptions = {
     // Runs on every session read. Copies the cached backend user into the
     // client-visible session. The backendToken is intentionally NOT exposed
     // here — server code reads it from the NextAuth token (see server-auth.ts).
+    // Allowlist the fields the UI actually needs (profile prefill, checkout,
+    // greeting) so a new internal field on the backend user DTO can't leak to
+    // the browser by accident.
     async session({ session, token }) {
+      const u = (token.backendUser ?? {}) as Record<string, unknown>;
+      const pick = <K extends string>(keys: K[]) =>
+        Object.fromEntries(
+          keys.filter((k) => u[k] !== undefined).map((k) => [k, u[k]])
+        );
       return {
         ...session,
         user: {
           ...session.user,
-          ...(token.backendUser ?? {}),
+          ...pick([
+            'id',
+            'role',
+            'firstName',
+            'lastName',
+            'phoneNumber',
+            'address',
+            'city',
+            'state',
+            'zipCode',
+            'country',
+          ]),
         },
       };
     },

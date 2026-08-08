@@ -61,6 +61,9 @@ async function getSessionId(): Promise<string> {
     cookieStore.set('legas-session-id', sessionId, {
       httpOnly: true,
       sameSite: 'lax',
+      // This id is the anonymous shopper's whole identity (cart + guest
+      // orders); keep it off plaintext HTTP in production.
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 365,
       path: '/',
     });

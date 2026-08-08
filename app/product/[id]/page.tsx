@@ -121,7 +121,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <div className="flex flex-col min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Escape `<` so a product name/description containing `</script>`
+        // can't break out of the JSON-LD block (stored XSS). JSON.stringify
+        // alone does not escape it.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+        }}
       />
       <ProductDetailClient
         initialTemplate={foundTemplate}

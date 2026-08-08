@@ -23,10 +23,12 @@ async function fetchOrders(): Promise<Order[]> {
   try {
     const auth = await getAuthHeaders();
     const headers: Record<string, string> = { ...auth };
-    // Forward the sessionId cookie when there is no logged-in user, so the
-    // backend can scope orders to the anon shopper that created them.
+    // Forward the anon session cookie when there is no logged-in user, so the
+    // backend can scope orders to the anon shopper that created them. The
+    // cookie name must match the one cart/checkout set (`legas-session-id`);
+    // reading `sessionId` here meant guests never got their order history.
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('sessionId')?.value;
+    const sessionCookie = cookieStore.get('legas-session-id')?.value;
     if (!('Authorization' in auth) && sessionCookie) {
       headers['x-session-id'] = sessionCookie;
     }
