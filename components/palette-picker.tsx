@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Palette } from 'lucide-react';
 import {
   Popover,
@@ -413,6 +413,9 @@ function SwatchRow({
 export function PalettePicker() {
   const [base, setBase] = useState('calida');
   const [accent, setAccent] = useState('dorado');
+  // Debounce the analytics call so trying out palettes doesn't inflate the
+  // counters: only the combo the user settles on (2.5s idle) is counted.
+  const logTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // The boot script in app/layout.tsx already applied the stored CSS before
   // first paint; here we only sync the picker UI with the stored choice.
@@ -443,9 +446,21 @@ export function PalettePicker() {
     } catch {
       /* storage may be unavailable (private mode) — still applied for the session */
     }
-    // Anonymous aggregate counter — answers "which palette wins?".
-    void logPaletteChoice(nextBase, nextAccent);
+    // Anonymous aggregate counter — answers "which palette wins?". Debounced:
+    // rapid tanteo (click-through) resets the timer and only the final resting
+    // combo is logged, once.
+    if (logTimer.current) clearTimeout(logTimer.current);
+    logTimer.current = setTimeout(() => {
+      void logPaletteChoice(nextBase, nextAccent);
+    }, 2500);
   };
+
+  // Flush nothing on unmount, just clear the pending timer.
+  useEffect(() => {
+    return () => {
+      if (logTimer.current) clearTimeout(logTimer.current);
+    };
+  }, []);
 
   return (
     <Popover>
