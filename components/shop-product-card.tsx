@@ -64,10 +64,14 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
           </div>
           {product.templateId && (
             <button
-              className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background ${
-                isHovered ? 'opacity-100' : 'opacity-0'
+              // Always visible on touch (no hover); reveal on hover on desktop.
+              className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background opacity-100 lg:opacity-0 ${
+                isHovered ? 'lg:opacity-100' : ''
               }`}
-              aria-label="Agregar a favoritos"
+              aria-label={
+                inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'
+              }
+              aria-pressed={inWishlist}
               onClick={handleWishlistClick}
             >
               <Heart
@@ -75,17 +79,6 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
               />
             </button>
           )}
-          <button
-            className={`absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-sm font-bold py-2 transition-transform duration-300 cursor-pointer hover:bg-primary ${
-              isHovered ? 'translate-y-0' : 'translate-y-full'
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              // Navigate to product page (Link handles this)
-            }}
-          >
-            Vista rápida
-          </button>
         </div>
         <div className="mt-2">
           <p className="text-base font-medium">{product.name}</p>

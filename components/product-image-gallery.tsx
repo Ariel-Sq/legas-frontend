@@ -57,7 +57,7 @@ export function ProductImageGallery({
         >
           <Image
             src={images[selectedImage] || '/placeholder.svg'}
-            alt={`${productName} - Image ${selectedImage + 1}`}
+            alt={`${productName} — imagen ${selectedImage + 1}`}
             fill
             className="object-cover"
           />
@@ -83,7 +83,7 @@ export function ProductImageGallery({
               >
                 <Image
                   src={image || '/placeholder.svg'}
-                  alt={`${productName} thumbnail ${index + 1}`}
+                  alt={`${productName} — miniatura ${index + 1}`}
                   fill
                   className="object-cover"
                 />
@@ -96,7 +96,7 @@ export function ProductImageGallery({
       <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] p-0 bg-black/95 border-none">
           <DialogTitle className="sr-only">
-            {productName} - Image Gallery
+            {productName} — galería de imágenes
           </DialogTitle>
           <button
             onClick={() => setIsZoomOpen(false)}
@@ -122,7 +122,7 @@ export function ProductImageGallery({
             <div className="relative w-full h-full max-w-full max-h-full">
               <Image
                 src={images[selectedImage] || '/placeholder.svg'}
-                alt={`${productName} - Zoomed`}
+                alt={`${productName} — ampliada`}
                 fill
                 className="object-contain"
                 sizes="95vw"

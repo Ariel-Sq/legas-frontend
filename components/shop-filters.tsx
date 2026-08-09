@@ -50,7 +50,7 @@ export function ShopFilters({
           <Slider
             min={filterOptions.priceRange.min}
             max={filterOptions.priceRange.max}
-            step={10}
+            step={10000}
             value={priceRange}
             onValueChange={(value) =>
               onPriceRangeChange(value as [number, number])

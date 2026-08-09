@@ -10,7 +10,30 @@ import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 
 export function CartContent() {
-  const { items, itemCount, subtotal } = useCart();
+  const { items, itemCount, subtotal, loading } = useCart();
+
+  // Skeleton while the cart is still being fetched, so a slow mobile
+  // connection doesn't flash "tu carrito está vacío" before the items load.
+  if (loading) {
+    return (
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-8">
+          <div className="h-9 w-64 rounded bg-muted animate-pulse mb-8" />
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className="h-28 rounded-lg bg-muted animate-pulse"
+                />
+              ))}
+            </div>
+            <div className="h-56 rounded-lg bg-muted animate-pulse" />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -89,9 +112,9 @@ export function CartContent() {
                 </div>
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                  Precios en efectivo o transferencia. Pagando online:
-                  dinero en cuenta o débito +10%, tarjeta de crédito +20%
-                  (hasta 3 cuotas). Se muestra en el checkout.
+                  Precios en efectivo o transferencia. Con MercadoPago se
+                  agrega un 20% (hasta 3 cuotas). Elegís el medio en el
+                  checkout.
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>

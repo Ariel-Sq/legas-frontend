@@ -340,9 +340,20 @@ export function ShopContent({
                 </p>
               </>
             ) : (
-              <p className="text-lg text-muted-foreground">
-                No hay productos que coincidan con los filtros.
-              </p>
+              <>
+                <p className="text-lg text-muted-foreground">
+                  No hay productos que coincidan con los filtros.
+                </p>
+                {activeFiltersCount > 0 && (
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => router.push('/shop')}
+                  >
+                    Limpiar filtros
+                  </Button>
+                )}
+              </>
             )}
           </div>
         )}

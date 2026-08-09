@@ -25,6 +25,8 @@ import {
   CheckCircle,
   Package,
   Loader2,
+  MessageCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 declare global {
@@ -33,95 +35,71 @@ declare global {
   }
 }
 
+const WHATSAPP_NUMBER = '5491173666370';
+
 /**
- * Method-dependent surcharge over the catalogue (cash/transfer) prices.
- * The shopper picks the method here (Checkout Pro can't price per method
- * inside one preference) and the backend applies the same rate while
- * restricting the MP screen to the matching methods — keep in sync with
- * ecommerce-backend/src/payments/payment-method.config.ts.
+ * How the shopper pays. Catalogue prices are the cash/transfer prices.
+ * Keep the MercadoPago rate in sync with the backend
+ * (ecommerce-backend/src/payments/payment-method.config.ts).
  */
-// credit_card goes first and starts selected: it is the common case, and
-// the cheaper account-money option stays visible right next to it.
-const PAYMENT_OPTIONS: Record<
-  CheckoutPaymentMethod,
-  { rate: number; label: string; description: string }
-> = {
-  credit_card: {
-    rate: 0.2,
-    label: 'Tarjeta de crédito',
-    description: 'Hasta 3 cuotas · recargo 20%',
+const MP_SURCHARGE_RATE = 0.2;
+const PAYMENT_OPTIONS: {
+  key: CheckoutPaymentMethod;
+  rate: number;
+  label: string;
+  description: string;
+}[] = [
+  {
+    key: 'mercadopago',
+    rate: MP_SURCHARGE_RATE,
+    label: 'MercadoPago',
+    description:
+      'Tarjeta, débito o dinero en cuenta. Hasta 3 cuotas. Recargo 20%.',
   },
-  account_money: {
-    rate: 0.1,
-    label: 'Dinero en cuenta o débito',
-    description: 'Saldo de MercadoPago o tarjeta de débito · recargo 10%',
+  {
+    key: 'offline',
+    rate: 0,
+    label: 'Transferencia o efectivo',
+    description:
+      'Precio de lista, sin recargo. Coordinamos el pago con vos por WhatsApp.',
   },
-};
+];
 
 export function CheckoutClient() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, loading, clearCart } = useCart();
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] =
-    useState<CheckoutPaymentMethod | null>('credit_card');
+    useState<CheckoutPaymentMethod>('mercadopago');
   const [preferenceId, setPreferenceId] = useState('');
-  const [isCreatingPreference, setIsCreatingPreference] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
+  // Set once an offline order is placed → success screen with WhatsApp CTA.
+  const [offlineOrderId, setOfflineOrderId] = useState('');
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: '',
-    phone: '',
-  });
+  const [formData, setFormData] = useState({ email: '', phone: '' });
 
-  // Pre-fill from the logged-in user (NextAuth session is merged with the
-  // backend User record in lib/auth.ts, so firstName/lastName/address/etc.
-  // come along for the ride). Only fills empty fields so a user mid-edit
-  // doesn't get their changes clobbered when the session arrives.
+  // Pre-fill contact from the logged-in user (session is merged with the
+  // backend user in lib/auth.ts). Only fills empty fields.
   useEffect(() => {
     const u = session?.user as
-      | (typeof session.user & {
-          firstName?: string;
-          lastName?: string;
-          phoneNumber?: string;
-          address?: string;
-          city?: string;
-          zipCode?: string;
-          country?: string;
-        })
+      | (typeof session.user & { phoneNumber?: string })
       | undefined;
     if (!u) return;
-    const fullName =
-      [u.firstName, u.lastName].filter(Boolean).join(' ').trim() ||
-      u.name ||
-      '';
     setFormData((prev) => ({
-      fullName: prev.fullName || fullName,
       email: prev.email || u.email || '',
-      address: prev.address || u.address || '',
-      city: prev.city || u.city || '',
-      postalCode: prev.postalCode || u.zipCode || '',
-      country: prev.country || u.country || '',
       phone: prev.phone || u.phoneNumber || '',
     }));
   }, [session]);
 
-  const surchargeRate = paymentMethod
-    ? PAYMENT_OPTIONS[paymentMethod].rate
-    : null;
-  const mpSurcharge = surchargeRate !== null ? subtotal * surchargeRate : null;
-  const total = mpSurcharge !== null ? subtotal + mpSurcharge : null;
+  const surchargeRate =
+    PAYMENT_OPTIONS.find((o) => o.key === paymentMethod)?.rate ?? 0;
+  const surcharge = subtotal * surchargeRate;
+  const total = subtotal + surcharge;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.id]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
@@ -134,37 +112,32 @@ export function CheckoutClient() {
     setCurrentStep(2);
   };
 
-  // A preference is created only after the shopper picks a payment method
-  // (the surcharge and the methods MP offers depend on it). Switching
-  // methods discards the previous preference and creates a fresh one.
+  // MercadoPago: create the preference when the shopper lands on step 2 with
+  // MP selected (or switches back to it). Offline places the order on click
+  // instead (placeOfflineOrder), so it doesn't run here.
   useEffect(() => {
-    if (currentStep !== 2 || !paymentMethod) return;
+    if (currentStep !== 2 || paymentMethod !== 'mercadopago') return;
 
     const setupPayment = async () => {
-      setIsCreatingPreference(true);
+      setIsWorking(true);
       setError('');
       setPreferenceId('');
       const container = document.getElementById('payment-form');
       if (container) container.innerHTML = '';
-      try {
-        const result = await createCheckoutPreference(
-          userId,
-          {
-            customerEmail: formData.email.trim(),
-            customerPhone: formData.phone.trim(),
-          },
-          paymentMethod
-        );
-        if (result.error || !result.id) {
-          setError(result.error || 'Error al iniciar el pago');
-        } else {
-          setPreferenceId(result.id);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Error al iniciar el pago');
-      } finally {
-        setIsCreatingPreference(false);
+      const result = await createCheckoutPreference(
+        userId,
+        {
+          customerEmail: formData.email.trim(),
+          customerPhone: formData.phone.trim(),
+        },
+        'mercadopago'
+      );
+      if (result.error || !result.id) {
+        setError(result.error || 'No pudimos iniciar el pago.');
+      } else {
+        setPreferenceId(result.id);
       }
+      setIsWorking(false);
     };
 
     setupPayment();
@@ -173,21 +146,93 @@ export function CheckoutClient() {
   useEffect(() => {
     if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
       return;
-
-    const mp = new window.MercadoPago(
-      process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!,
-      { locale: 'es-AR' }
-    );
-
+    const mp = new window.MercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!, {
+      locale: 'es-AR',
+    });
     mp.checkout({
       preference: { id: preferenceId },
-      render: {
-        container: '#payment-form',
-        label: 'Pagar con MercadoPago',
-      },
+      render: { container: '#payment-form', label: 'Pagar con MercadoPago' },
     });
   }, [preferenceId]);
 
+  const placeOfflineOrder = async () => {
+    setIsWorking(true);
+    setError('');
+    const result = await createCheckoutPreference(
+      userId,
+      {
+        customerEmail: formData.email.trim(),
+        customerPhone: formData.phone.trim(),
+      },
+      'offline'
+    );
+    if (result.error || !result.orderId) {
+      setError(result.error || 'No pudimos registrar el pedido.');
+    } else {
+      // Backend already cleared the cart; sync the client badge.
+      clearCart();
+      setOfflineOrderId(result.orderId);
+    }
+    setIsWorking(false);
+  };
+
+  // ----- Offline success screen -----
+  if (offlineOrderId) {
+    const shortId = offlineOrderId.slice(0, 8).toUpperCase();
+    const waText = encodeURIComponent(
+      `Hola Legas! Acabo de hacer el pedido ${shortId} para pagar por transferencia/efectivo. ¿Cómo coordinamos?`
+    );
+    return (
+      <main className="flex-grow">
+        <div className="container mx-auto max-w-lg px-4 py-16 text-center">
+          <CheckCircle className="h-16 w-16 mx-auto text-primary mb-4" />
+          <h1 className="mb-2 text-3xl font-bold">¡Pedido registrado!</h1>
+          <p className="mb-1 text-muted-foreground">
+            Tu número de pedido es <strong>{shortId}</strong>.
+          </p>
+          <p className="mb-8 text-muted-foreground">
+            Te reservamos los productos. Escribinos por WhatsApp y coordinamos
+            el pago (transferencia o efectivo) y la entrega.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button asChild size="lg">
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-5 w-5 mr-2" />
+                Coordinar por WhatsApp
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/orders">Ver mis pedidos</Link>
+            </Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ----- Loading skeleton (cart still fetching) -----
+  if (loading) {
+    return (
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-8">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse mb-8" />
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="h-40 rounded-lg bg-muted animate-pulse" />
+              <div className="h-40 rounded-lg bg-muted animate-pulse" />
+            </div>
+            <div className="h-64 rounded-lg bg-muted animate-pulse" />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ----- Empty cart (only after loading resolves) -----
   if (items.length === 0) {
     return (
       <main className="flex-grow">
@@ -227,15 +272,14 @@ export function CheckoutClient() {
                     Estás comprando sin cuenta
                   </p>
                   <p className="text-muted-foreground">
-                    Tu pedido va a quedar asociado solo a este navegador.
-                    Si borrás cookies o cambiás de dispositivo, no vas a
-                    poder ver el estado en{' '}
+                    Tu pedido va a quedar asociado solo a este navegador. Si
+                    borrás cookies o cambiás de dispositivo, no vas a poder ver
+                    el estado en{' '}
                     <Link href="/orders" className="underline">
                       Mis pedidos
                     </Link>
-                    . Igual te vamos a contactar por WhatsApp con el
-                    teléfono que dejes acá abajo, así que cualquier
-                    coordinación o duda la resolvemos por ahí.
+                    . Igual te vamos a contactar por WhatsApp con el teléfono
+                    que dejes acá abajo.
                   </p>
                   <p className="text-muted-foreground pt-1">
                     Te conviene{' '}
@@ -245,7 +289,7 @@ export function CheckoutClient() {
                     >
                       iniciar sesión con Google
                     </Link>{' '}
-                    para tener todo tu historial siempre a mano.
+                    para tener tu historial siempre a mano.
                   </p>
                 </div>
               </div>
@@ -258,13 +302,9 @@ export function CheckoutClient() {
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
                 >
-                  {currentStep > 1 ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    '1'
-                  )}
+                  {currentStep > 1 ? <CheckCircle className="h-4 w-4" /> : '1'}
                 </div>
-                <span className="font-medium">Envío</span>
+                <span className="font-medium">Datos</span>
               </div>
               <div className="flex-1 h-px bg-border" />
               <div
@@ -286,17 +326,15 @@ export function CheckoutClient() {
                 <div className="rounded-lg border bg-card p-6">
                   <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Datos de envío
+                    Tus datos de contacto
                   </h2>
-                  <form
-                    onSubmit={handleShippingSubmit}
-                    className="grid gap-4 sm:grid-cols-2"
-                  >
-                    <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-                      Solo necesitamos tu email y teléfono para coordinar el
-                      envío. El resto es opcional.
+                  <form onSubmit={handleShippingSubmit} className="grid gap-4">
+                    <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                      Con tu email y teléfono coordinamos el pago y la entrega
+                      por WhatsApp. La dirección la arreglamos ahí, según la
+                      zona.
                     </div>
-                    <div className="sm:col-span-2">
+                    <div>
                       <Label htmlFor="email">
                         Email <span className="text-destructive">*</span>
                       </Label>
@@ -309,8 +347,13 @@ export function CheckoutClient() {
                         required
                         aria-invalid={!emailValid && formData.email.length > 0}
                       />
+                      {!emailValid && formData.email.length > 0 && (
+                        <p className="mt-1 text-xs text-destructive">
+                          Ingresá un email válido.
+                        </p>
+                      )}
                     </div>
-                    <div className="sm:col-span-2">
+                    <div>
                       <Label htmlFor="phone">
                         Teléfono <span className="text-destructive">*</span>
                       </Label>
@@ -323,62 +366,20 @@ export function CheckoutClient() {
                         required
                         aria-invalid={!phoneValid && formData.phone.length > 0}
                       />
+                      {!phoneValid && formData.phone.length > 0 && (
+                        <p className="mt-1 text-xs text-destructive">
+                          Ingresá un teléfono para coordinar por WhatsApp.
+                        </p>
+                      )}
                     </div>
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="fullName">Nombre completo</Label>
-                      <Input
-                        id="fullName"
-                        placeholder="Juan Pérez"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="address">Dirección</Label>
-                      <Input
-                        id="address"
-                        placeholder="Av. Corrientes 1234"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="city">Ciudad</Label>
-                      <Input
-                        id="city"
-                        placeholder="Buenos Aires"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="postalCode">Código postal</Label>
-                      <Input
-                        id="postalCode"
-                        placeholder="C1043"
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="country">País</Label>
-                      <Input
-                        id="country"
-                        placeholder="Argentina"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        size="lg"
-                        disabled={!canContinueToPayment}
-                      >
-                        Continuar al pago
-                      </Button>
-                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      size="lg"
+                      disabled={!canContinueToPayment}
+                    >
+                      Continuar al pago
+                    </Button>
                   </form>
                 </div>
               )}
@@ -387,23 +388,21 @@ export function CheckoutClient() {
                 <div className="rounded-lg border bg-card p-6">
                   <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    Método de pago
+                    ¿Cómo querés pagar?
                   </h2>
 
-                  <div className="grid gap-3 sm:grid-cols-2 mb-4">
-                    {(
-                      Object.entries(PAYMENT_OPTIONS) as [
-                        CheckoutPaymentMethod,
-                        (typeof PAYMENT_OPTIONS)[CheckoutPaymentMethod],
-                      ][]
-                    ).map(([method, option]) => (
+                  <div className="grid gap-3 sm:grid-cols-2 mb-6">
+                    {PAYMENT_OPTIONS.map((option) => (
                       <button
-                        key={method}
+                        key={option.key}
                         type="button"
-                        onClick={() => setPaymentMethod(method)}
-                        aria-pressed={paymentMethod === method}
+                        onClick={() => {
+                          setPaymentMethod(option.key);
+                          setError('');
+                        }}
+                        aria-pressed={paymentMethod === option.key}
                         className={`rounded-lg border p-4 text-left transition-colors cursor-pointer ${
-                          paymentMethod === method
+                          paymentMethod === option.key
                             ? 'border-ring bg-secondary'
                             : 'border-border hover:bg-muted/50'
                         }`}
@@ -419,33 +418,60 @@ export function CheckoutClient() {
                     ))}
                   </div>
 
-                  {!paymentMethod && (
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Elegí cómo vas a pagar para continuar.
-                    </p>
+                  {error && (
+                    <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4 flex items-center justify-between gap-3">
+                      <span>{error}</span>
+                      {paymentMethod === 'mercadopago' && (
+                        <button
+                          onClick={() => {
+                            // re-trigger the preference effect
+                            setError('');
+                            setPreferenceId('');
+                            setPaymentMethod('mercadopago');
+                            setCurrentStep(2);
+                            // force effect by toggling a no-op state
+                            setFormData((p) => ({ ...p }));
+                          }}
+                          className="shrink-0 inline-flex items-center gap-1 underline"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" /> Reintentar
+                        </button>
+                      )}
+                    </div>
                   )}
 
-                  {isCreatingPreference && (
+                  {isWorking && (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                       <span className="ml-3 text-muted-foreground">
-                        Preparando el pago...
+                        Procesando...
                       </span>
                     </div>
                   )}
-                  {error && (
-                    <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4">
-                      {error}
-                    </div>
+
+                  {/* MercadoPago button renders here */}
+                  {paymentMethod === 'mercadopago' && (
+                    <div id="payment-form"></div>
                   )}
-                  <div id="payment-form"></div>
+
+                  {/* Offline: place the order (coordinate by WhatsApp) */}
+                  {paymentMethod === 'offline' && !isWorking && (
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      onClick={placeOfflineOrder}
+                    >
+                      Confirmar pedido y coordinar por WhatsApp
+                    </Button>
+                  )}
+
                   <Button
                     variant="ghost"
                     className="mt-4"
                     onClick={() => setCurrentStep(1)}
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Volver al envío
+                    Volver
                   </Button>
                 </div>
               )}
@@ -488,34 +514,25 @@ export function CheckoutClient() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  {paymentMethod && mpSurcharge !== null && (
+                  {surcharge > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        Recargo{' '}
-                        {paymentMethod === 'credit_card'
-                          ? 'tarjeta de crédito (20%)'
-                          : 'dinero en cuenta / débito (10%)'}
+                        Recargo MercadoPago (20%)
                       </span>
-                      <span>{formatPrice(mpSurcharge)}</span>
+                      <span>{formatPrice(surcharge)}</span>
                     </div>
                   )}
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>
-                      {total !== null ? formatPrice(total) : 'según pago'}
-                    </span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  Los precios publicados son en efectivo o transferencia.
-                  Pagando online: dinero en cuenta o débito +10%, tarjeta de
-                  crédito +20% (hasta 3 cuotas).
-                </p>
-
-                <p className="mt-2 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  El envío se coordina con el vendedor después de la compra.
+                  Precios en efectivo o transferencia. Con MercadoPago se
+                  agrega 20% (hasta 3 cuotas). El envío se coordina por
+                  WhatsApp después de la compra.
                 </p>
               </div>
             </div>

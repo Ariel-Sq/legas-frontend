@@ -23,10 +23,16 @@ async function buildHeaders(sessionId?: string): Promise<Record<string, string>>
 
 // `userId` is kept for call-site compatibility; identity is resolved
 // server-side from the session (Bearer) or the anon session id.
-export type CheckoutPaymentMethod = 'account_money' | 'credit_card';
+// - mercadopago: pay online now (+20%, any MP method), returns a preference id.
+// - offline: transfer/cash, coordinated by WhatsApp, returns an order id.
+export type CheckoutPaymentMethod = 'mercadopago' | 'offline';
 
 export interface CheckoutPreferenceResult {
+  /** MercadoPago preference id (mercadopago mode). */
   id?: string;
+  /** Placed order id (offline mode). */
+  orderId?: string;
+  mode?: 'mercadopago' | 'offline';
   /**
    * Human-readable failure (e.g. insufficient stock). Returned instead of
    * thrown: Next.js masks thrown Server Action errors in production, which
@@ -74,7 +80,7 @@ export async function createCheckoutPreference(
     }
 
     const data = await response.json();
-    return { id: data.id };
+    return { id: data.id, orderId: data.orderId, mode: data.mode };
   } catch (err) {
     console.error('createCheckoutPreference failed', err);
     return {

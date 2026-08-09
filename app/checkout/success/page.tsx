@@ -5,8 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/components/cart-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+
+const WHATSAPP_NUMBER = '5491173666370';
 
 export default function SuccessPage() {
   return (
@@ -25,9 +27,11 @@ export default function SuccessPage() {
 function SuccessContent() {
   const { clearCart } = useCart();
   const searchParams = useSearchParams();
-  const paymentId = searchParams.get('payment_id');
-  const status = searchParams.get('status');
   const externalReference = searchParams.get('external_reference');
+  const shortId = externalReference?.slice(0, 8).toUpperCase();
+  const waText = encodeURIComponent(
+    `Hola Legas! Acabo de pagar mi pedido${shortId ? ` ${shortId}` : ''}. ¿Coordinamos la entrega?`
+  );
 
   useEffect(() => {
     clearCart();
@@ -35,33 +39,45 @@ function SuccessContent() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-lg mx-auto">
           <Card>
             <CardHeader>
               <div className="flex flex-col items-center text-center">
                 <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
                 <CardTitle className="text-2xl mb-2">
-                  ¡Pago exitoso!
+                  ¡Pago confirmado!
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center text-muted-foreground">
+            <CardContent className="space-y-6">
+              <div className="text-center text-muted-foreground space-y-1">
+                <p>Gracias por tu compra. Te enviamos un email de confirmación.</p>
+                {shortId && (
+                  <p>
+                    Tu número de pedido es{' '}
+                    <strong className="text-foreground">{shortId}</strong>.
+                  </p>
+                )}
                 <p>
-                  Gracias por tu compra. En breve te llega un email de
-                  confirmación.
+                  Ahora coordinamos la fabricación y la entrega por WhatsApp.
                 </p>
-                {paymentId && (
-                  <p className="mt-2">ID de pago: {paymentId}</p>
-                )}
-                {status && <p>Estado: {status}</p>}
-                {externalReference && (
-                  <p>Referencia de pedido: {externalReference}</p>
-                )}
               </div>
-              <div className="flex justify-center mt-6">
-                <Button asChild>
+              <div className="flex flex-col gap-3">
+                <Button asChild size="lg">
+                  <a
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    Coordinar entrega por WhatsApp
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/orders">Ver mis pedidos</Link>
+                </Button>
+                <Button asChild variant="ghost">
                   <Link href="/shop">Seguir comprando</Link>
                 </Button>
               </div>

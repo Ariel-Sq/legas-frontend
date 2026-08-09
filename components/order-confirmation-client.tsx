@@ -101,20 +101,9 @@ export function OrderConfirmationClient({
                     {order.shipping.phone}
                   </p>
                   <Separator className="my-3" />
-                  <p>
-                    <span className="font-medium">Dirección:</span>{' '}
-                    {order.shipping.address}
-                  </p>
-                  <p>
-                    {order.shipping.city}, {order.shipping.postalCode}
-                  </p>
-                  <p>{order.shipping.country}</p>
-                  <Separator className="my-3" />
-                  <p>
-                    <span className="font-medium">Método de envío:</span>{' '}
-                    {order.shipping.method === 'express'
-                      ? 'Envío express'
-                      : 'Envío estándar'}
+                  <p className="text-muted-foreground">
+                    Te vamos a escribir por WhatsApp para coordinar la
+                    dirección, el costo del envío según la zona y la entrega.
                   </p>
                 </div>
               </CardContent>
@@ -134,11 +123,7 @@ export function OrderConfirmationClient({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Envío</span>
-                    <span>
-                      {order.shippingCost === 0
-                        ? 'Gratis'
-                        : formatPrice(order.shippingCost)}
-                    </span>
+                    <span>a coordinar</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-base font-semibold">

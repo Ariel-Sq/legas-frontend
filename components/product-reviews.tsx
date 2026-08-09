@@ -39,6 +39,7 @@ export function ProductReviews({
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [signInPrompt, setSignInPrompt] = useState<
     { title: string; description: string } | null
   >(null);
@@ -55,6 +56,7 @@ export function ProductReviews({
     }
 
     setIsSubmitting(true);
+    setSubmitError('');
     try {
       await submitReview(userId, {
         productVariationId: productId,
@@ -70,7 +72,9 @@ export function ProductReviews({
       router.refresh();
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Error al enviar la reseña');
+      setSubmitError(
+        'No pudimos enviar tu reseña. Intentá de nuevo en unos minutos.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +113,7 @@ export function ProductReviews({
       {/* Rating Summary */}
       {ratingSummary && (
         <div className="border-t pt-8">
-          <h2 className="text-2xl font-bold mb-6">Reseñas de Clientes</h2>
+          <h2 className="text-2xl font-bold mb-6">Reseñas de clientes</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Average Rating */}
             <div className="flex flex-col items-center justify-center p-6 bg-muted/50 rounded-lg">
@@ -163,82 +167,87 @@ export function ProductReviews({
           {/* Write Review Button */}
           {!showReviewForm && (
             <Button onClick={() => setShowReviewForm(true)} className="mb-6">
-              Escribir una Reseña
+              Escribir una reseña
             </Button>
           )}
 
-          {/* Review Form */}
-          {showReviewForm && (
-            <Card className="p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Escribe tu Reseña</h3>
-              <form onSubmit={handleSubmitReview} className="space-y-4">
-                {/* Rating Stars */}
-                <div>
-                  <Label>Calificación *</Label>
-                  <div className="flex items-center gap-1 mt-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setRating(star)}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        className="focus:outline-none"
-                      >
-                        <Star
-                          className={`h-8 w-8 transition-colors ${
-                            star <= (hoverRating || rating)
-                              ? 'fill-primary text-primary'
-                              : 'text-muted'
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Title */}
-                <div>
-                  <Label htmlFor="title">Título *</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Resume tu experiencia"
-                    required
-                  />
-                </div>
-
-                {/* Comment */}
-                <div>
-                  <Label htmlFor="comment">Comentario *</Label>
-                  <Textarea
-                    id="comment"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Cuéntanos más sobre tu experiencia con este producto"
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={isSubmitting || rating === 0}>
-                    {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowReviewForm(false)}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          )}
         </div>
+      )}
+
+      {/* Review form — standalone (outside the ratingSummary block) so it
+          also works when there are no reviews yet, which is exactly when a
+          new store needs its first reviews. */}
+      {showReviewForm && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Escribí tu reseña</h3>
+          <form onSubmit={handleSubmitReview} className="space-y-4">
+            <div>
+              <Label>Calificación *</Label>
+              <div className="flex items-center gap-1 mt-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    aria-label={`${star} ${star === 1 ? 'estrella' : 'estrellas'}`}
+                    aria-pressed={rating === star}
+                    className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Star
+                      className={`h-8 w-8 transition-colors ${
+                        star <= (hoverRating || rating)
+                          ? 'fill-primary text-primary'
+                          : 'text-muted'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="title">Título *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Resumí tu experiencia"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="comment">Comentario *</Label>
+              <Textarea
+                id="comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Contanos más sobre tu experiencia con este producto"
+                rows={4}
+                required
+              />
+            </div>
+
+            {submitError && (
+              <p className="text-sm text-destructive">{submitError}</p>
+            )}
+
+            <div className="flex gap-2">
+              <Button type="submit" disabled={isSubmitting || rating === 0}>
+                {isSubmitting ? 'Enviando...' : 'Enviar reseña'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowReviewForm(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
 
       {/* Reviews List */}
@@ -287,7 +296,7 @@ export function ProductReviews({
                       ))}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {new Date(review.createdAt).toLocaleDateString('es-ES', {
+                      {new Date(review.createdAt).toLocaleDateString('es-AR', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',

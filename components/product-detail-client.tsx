@@ -197,6 +197,14 @@ export function ProductDetailClient({
                     )}
                   </p>
                 )}
+                {/* Surcharge upfront: no +20% surprise at the payment step. */}
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Precio en efectivo o transferencia. Con MercadoPago:{' '}
+                  <span className="font-medium text-foreground">
+                    {formatPrice(unitPrice * 1.2)}
+                  </span>{' '}
+                  (+20%, hasta 3 cuotas).
+                </p>
               </div>
             </div>
 
@@ -262,6 +270,7 @@ export function ProductDetailClient({
                     <button
                       key={variation.id}
                       onClick={() => handleVariationChange(variation)}
+                      aria-pressed={selectedVariation.id === variation.id}
                       className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors capitalize ${
                         selectedVariation.id === variation.id
                           ? 'border-primary bg-primary text-primary-foreground'
@@ -280,19 +289,26 @@ export function ProductDetailClient({
                 {initialTemplate.description || selectedVariation.name}
               </p>
 
-              {/* Stock Status */}
+              {/* Availability — made-to-order, so no misleading "N en stock". */}
               <div className="flex items-center gap-2">
                 <div
                   className={`h-2 w-2 rounded-full ${
-                    selectedVariation.stock > 0 ? 'bg-green-500' : 'bg-red-500'
+                    selectedVariation.stock > 0
+                      ? 'bg-green-500'
+                      : 'bg-amber-500'
                   }`}
                 />
                 <span className="text-sm text-muted-foreground">
                   {selectedVariation.stock > 0
-                    ? `${selectedVariation.stock} en stock`
-                    : 'Sin stock'}
+                    ? 'Disponible — fabricación y entrega a coordinar por WhatsApp'
+                    : 'Se fabrica a pedido — consultanos el plazo por WhatsApp'}
                 </span>
               </div>
+
+              {/* Buyer-confidence line: legal rights, always visible. */}
+              <p className="text-xs text-muted-foreground">
+                Garantía de 6 meses · 10 días de arrepentimiento sin costo.
+              </p>
             </div>
 
             {/* Quantity Selector */}

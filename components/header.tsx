@@ -36,7 +36,11 @@ export function Header() {
           <div className="flex items-center gap-4">
             <SearchBar />
             <ThemeToggle />
-            <PalettePicker />
+            {/* Palette picker is a nice-to-have, not a conversion driver:
+                keep it off the crowded mobile header. */}
+            <span className="hidden md:inline-flex">
+              <PalettePicker />
+            </span>
             <WishlistButton />
             <CartButton />
             <AuthSection />

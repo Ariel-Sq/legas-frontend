@@ -24,7 +24,7 @@ export function HeroSection({ featuredProduct }: HeroSectionProps) {
             Muebles de Madera Artesanales
           </h2>
           <p className="mt-4 max-w-xl mx-auto md:mx-0 text-lg text-muted-foreground text-pretty">
-            Descubre piezas atemporales que aportan calidez y elegancia a tu
+            Descubrí piezas atemporales que aportan calidez y elegancia a tu
             hogar
           </p>
           <div className="mt-8 flex gap-4 justify-center md:justify-start">
