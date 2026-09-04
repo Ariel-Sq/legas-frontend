@@ -6,6 +6,8 @@ import { useCart } from '@/components/cart-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -42,7 +44,7 @@ const WHATSAPP_NUMBER = '5491173666370';
  * Keep the MercadoPago rate in sync with the backend
  * (ecommerce-backend/src/payments/payment-method.config.ts).
  */
-const MP_SURCHARGE_RATE = 0.2;
+const MP_SURCHARGE_RATE = 0;
 const PAYMENT_OPTIONS: {
   key: CheckoutPaymentMethod;
   rate: number;
@@ -54,14 +56,14 @@ const PAYMENT_OPTIONS: {
     rate: MP_SURCHARGE_RATE,
     label: 'MercadoPago',
     description:
-      'Tarjeta, débito o dinero en cuenta. Hasta 3 cuotas. Recargo 20%.',
+      'Tarjeta, débito o dinero en cuenta. Elegís las cuotas en MercadoPago.',
   },
   {
     key: 'offline',
     rate: 0,
     label: 'Transferencia o efectivo',
     description:
-      'Precio de lista, sin recargo. Coordinamos el pago con vos por WhatsApp.',
+      'Coordinamos el pago con vos por WhatsApp.',
   },
 ];
 
@@ -78,18 +80,27 @@ export function CheckoutClient() {
   // Set once an offline order is placed → success screen with WhatsApp CTA.
   const [offlineOrderId, setOfflineOrderId] = useState('');
 
-  const [formData, setFormData] = useState({ email: '', phone: '' });
+  const [formData, setFormData] = useState({
+    email: '',
+    phone: '',
+    dni: '',
+    address: '',
+  });
+  // true → el comprador retira en persona y no hace falta dirección.
+  const [pickupInPerson, setPickupInPerson] = useState(false);
 
   // Pre-fill contact from the logged-in user (session is merged with the
   // backend user in lib/auth.ts). Only fills empty fields.
   useEffect(() => {
     const u = session?.user as
-      | (typeof session.user & { phoneNumber?: string })
+      | (NonNullable<typeof session>['user'] & { phoneNumber?: string })
       | undefined;
     if (!u) return;
     setFormData((prev) => ({
       email: prev.email || u.email || '',
       phone: prev.phone || u.phoneNumber || '',
+      dni: prev.dni,
+      address: prev.address,
     }));
   }, [session]);
 
@@ -98,13 +109,21 @@ export function CheckoutClient() {
   const surcharge = subtotal * surchargeRate;
   const total = subtotal + surcharge;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
   const phoneValid = formData.phone.trim().length >= 6;
-  const canContinueToPayment = emailValid && phoneValid;
+  // DNI argentino: 7 u 8 dígitos, sin puntos.
+  const dniDigits = formData.dni.replace(/\D/g, '');
+  const dniValid = /^\d{7,8}$/.test(dniDigits);
+  // Con retiro en persona no pedimos dirección; si es envío, es obligatoria.
+  const addressValid = pickupInPerson || formData.address.trim().length >= 8;
+  const canContinueToPayment =
+    emailValid && phoneValid && dniValid && addressValid;
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +148,9 @@ export function CheckoutClient() {
         {
           customerEmail: formData.email.trim(),
           customerPhone: formData.phone.trim(),
+          customerDni: dniDigits,
+          deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+          deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
         },
         'mercadopago'
       );
@@ -141,7 +163,16 @@ export function CheckoutClient() {
     };
 
     setupPayment();
-  }, [currentStep, paymentMethod, userId, formData.email, formData.phone]);
+  }, [
+    currentStep,
+    paymentMethod,
+    userId,
+    formData.email,
+    formData.phone,
+    formData.dni,
+    formData.address,
+    pickupInPerson,
+  ]);
 
   useEffect(() => {
     if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
@@ -163,6 +194,9 @@ export function CheckoutClient() {
       {
         customerEmail: formData.email.trim(),
         customerPhone: formData.phone.trim(),
+        customerDni: dniDigits,
+        deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+        deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
       },
       'offline'
     );
@@ -330,9 +364,9 @@ export function CheckoutClient() {
                   </h2>
                   <form onSubmit={handleShippingSubmit} className="grid gap-4">
                     <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-                      Con tu email y teléfono coordinamos el pago y la entrega
-                      por WhatsApp. La dirección la arreglamos ahí, según la
-                      zona.
+                      Con tu email y teléfono coordinamos el pago por WhatsApp.
+                      Dejanos la dirección de entrega, o marcá que retirás en
+                      persona.
                     </div>
                     <div>
                       <Label htmlFor="email">
@@ -372,6 +406,60 @@ export function CheckoutClient() {
                         </p>
                       )}
                     </div>
+                    <div>
+                      <Label htmlFor="dni">
+                        DNI <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="dni"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="30123456"
+                        value={formData.dni}
+                        onChange={handleInputChange}
+                        required
+                        aria-invalid={!dniValid && formData.dni.length > 0}
+                      />
+                      {!dniValid && formData.dni.length > 0 && (
+                        <p className="mt-1 text-xs text-destructive">
+                          Ingresá un DNI válido (7 u 8 dígitos, sin puntos).
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="pickup"
+                        checked={pickupInPerson}
+                        onCheckedChange={(v) => setPickupInPerson(v === true)}
+                      />
+                      <Label htmlFor="pickup" className="cursor-pointer">
+                        Retiro en persona (no necesito envío)
+                      </Label>
+                    </div>
+                    {!pickupInPerson && (
+                      <div>
+                        <Label htmlFor="address">
+                          Dirección de entrega{' '}
+                          <span className="text-destructive">*</span>
+                        </Label>
+                        <Textarea
+                          id="address"
+                          placeholder="Calle y altura, piso/depto, localidad y provincia"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          required
+                          rows={3}
+                          aria-invalid={
+                            !addressValid && formData.address.length > 0
+                          }
+                        />
+                        {!addressValid && formData.address.length > 0 && (
+                          <p className="mt-1 text-xs text-destructive">
+                            Ingresá una dirección completa para el envío.
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <Button
                       type="submit"
                       className="w-full"
@@ -514,14 +602,6 @@ export function CheckoutClient() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-                  {surcharge > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Recargo MercadoPago (20%)
-                      </span>
-                      <span>{formatPrice(surcharge)}</span>
-                    </div>
-                  )}
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
@@ -530,9 +610,9 @@ export function CheckoutClient() {
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  Precios en efectivo o transferencia. Con MercadoPago se
-                  agrega 20% (hasta 3 cuotas). El envío se coordina por
-                  WhatsApp después de la compra.
+                  Precio de lista para todos los medios de pago. Con
+                  MercadoPago elegís las cuotas (la financiación la define MP).
+                  El envío se coordina por WhatsApp después de la compra.
                 </p>
               </div>
             </div>

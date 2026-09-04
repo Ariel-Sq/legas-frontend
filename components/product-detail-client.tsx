@@ -197,13 +197,12 @@ export function ProductDetailClient({
                     )}
                   </p>
                 )}
-                {/* Surcharge upfront: no +20% surprise at the payment step. */}
+                {/* Same list price across every method; MP installments are
+                    financed by MercadoPago, not surcharged by us. */}
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Precio en efectivo o transferencia. Con MercadoPago:{' '}
-                  <span className="font-medium text-foreground">
-                    {formatPrice(unitPrice * 1.2)}
-                  </span>{' '}
-                  (+20%, hasta 3 cuotas).
+                  Mismo precio en efectivo, transferencia o MercadoPago. Con
+                  tarjeta elegís las cuotas en MercadoPago (hasta 12; la
+                  financiación la define MP).
                 </p>
               </div>
             </div>

@@ -23,7 +23,8 @@ async function buildHeaders(sessionId?: string): Promise<Record<string, string>>
 
 // `userId` is kept for call-site compatibility; identity is resolved
 // server-side from the session (Bearer) or the anon session id.
-// - mercadopago: pay online now (+20%, any MP method), returns a preference id.
+// - mercadopago: pay online now (list price, any MP method; buyer picks
+//   installments financed by MP), returns a preference id.
 // - offline: transfer/cash, coordinated by WhatsApp, returns an order id.
 export type CheckoutPaymentMethod = 'mercadopago' | 'offline';
 
@@ -43,7 +44,13 @@ export interface CheckoutPreferenceResult {
 
 export async function createCheckoutPreference(
   _userId?: string,
-  contact?: { customerEmail?: string; customerPhone?: string },
+  contact?: {
+    customerEmail?: string;
+    customerPhone?: string;
+    customerDni?: string;
+    deliveryMethod?: 'delivery' | 'pickup';
+    deliveryAddress?: string;
+  },
   paymentMethod?: CheckoutPaymentMethod,
 ): Promise<CheckoutPreferenceResult> {
   try {
@@ -52,6 +59,10 @@ export async function createCheckoutPreference(
     const body: Record<string, string> = {};
     if (contact?.customerEmail) body.customerEmail = contact.customerEmail;
     if (contact?.customerPhone) body.customerPhone = contact.customerPhone;
+    if (contact?.customerDni) body.customerDni = contact.customerDni;
+    if (contact?.deliveryMethod) body.deliveryMethod = contact.deliveryMethod;
+    if (contact?.deliveryAddress)
+      body.deliveryAddress = contact.deliveryAddress;
     if (paymentMethod) body.paymentMethod = paymentMethod;
 
     const response = await fetch(
