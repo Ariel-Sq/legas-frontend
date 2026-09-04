@@ -52,8 +52,20 @@ export function ProductImageGallery({
       <div className="space-y-4">
         {/* Main Image */}
         <div
-          className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted cursor-zoom-in"
+          className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           onClick={() => setIsZoomOpen(true)}
+          // Allow keyboard arrow navigation when the gallery has focus.
+          tabIndex={images.length > 1 ? 0 : undefined}
+          onKeyDown={(e) => {
+            if (images.length <= 1) return;
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              handlePrevious();
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              handleNext();
+            }
+          }}
         >
           <Image
             src={images[selectedImage] || '/placeholder.svg'}
@@ -61,6 +73,35 @@ export function ProductImageGallery({
             fill
             className="object-cover"
           />
+
+          {/* Prev / Next arrows overlaid on the main image */}
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevious();
+                }}
+                aria-label="Foto anterior"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-background/80 backdrop-blur shadow-md flex items-center justify-center text-foreground hover:bg-background transition-colors motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
+                aria-label="Foto siguiente"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-background/80 backdrop-blur shadow-md flex items-center justify-center text-foreground hover:bg-background transition-colors motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+
           {images.length > 1 && (
             <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full pointer-events-none">
               {selectedImage + 1} / {images.length}
