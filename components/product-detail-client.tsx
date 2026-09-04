@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ProductImageGallery } from '@/components/product-image-gallery';
 import { ProductCard } from '@/components/product-card';
 import { AddToCartSection } from '@/components/add-to-cart-section';
@@ -41,6 +41,12 @@ export function ProductDetailClient({
   const [selectedVariation, setSelectedVariation] =
     useState<ProductVariation>(initialVariation);
   const [quantity, setQuantity] = useState(1);
+
+  // Always land at the top when opening a product (and when switching from
+  // one product to another, which reuses this component instead of remounting).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [initialTemplate.id]);
 
   const activeVariations = initialTemplate.variations.filter((v) => v.is_active);
 
