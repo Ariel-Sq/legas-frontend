@@ -15,16 +15,19 @@ export default function TermsPage() {
         <div className="container mx-auto max-w-3xl">
           <h1 className="text-5xl font-bold mb-6">Términos del Servicio</h1>
           <p className="text-muted-foreground mb-12">
-            Última actualización: 7 de agosto de 2026
+            Última actualización: 4 de septiembre de 2026
           </p>
 
           <div className="space-y-8 text-base leading-relaxed">
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">1. Quiénes somos</h2>
               <p>
-                Legas Muebles vende muebles de madera fabricados a pedido, con
-                domicilio en Juan de Herrera 2542, B1614 Malvinas Argentinas,
-                Provincia de Buenos Aires, Argentina. Atención al cliente por{' '}
+                Legas Muebles es la marca comercial de{' '}
+                <strong>Leonardo Gastón Gamarra</strong> (CUIT 20-32319747-5,
+                monotributista), con domicilio en Juan de Herrera 2542, B1614
+                Malvinas Argentinas, Provincia de Buenos Aires, Argentina.
+                Vende muebles de madera fabricados a pedido. Atención al
+                cliente por{' '}
                 <a
                   href="https://wa.me/5491173666370"
                   target="_blank"

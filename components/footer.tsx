@@ -34,7 +34,8 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground text-center md:text-right">
-            © 2026 Legas. Todos los derechos reservados
+            © 2026 Legas · Leonardo Gastón Gamarra · CUIT 20-32319747-5.
+            Todos los derechos reservados
           </p>
         </div>
 
