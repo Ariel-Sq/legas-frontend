@@ -27,7 +27,7 @@ export function Header() {
                 priority
                 className="h-11 w-11 rounded-full"
               />
-              <h1 className="text-2xl font-bold">Legas</h1>
+              <span className="text-2xl font-bold">Legas</span>
             </Link>
             <HeaderNav />
           </div>

@@ -346,7 +346,7 @@ export function ProductDetailClient({
             {/* Specifications */}
             {Object.keys(initialTemplate.specifications || {}).length > 0 && (
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Especificaciones</h3>
+                <h2 className="text-lg font-semibold mb-4">Especificaciones</h2>
                 <dl className="space-y-3">
                   {Object.entries(initialTemplate.specifications || {}).map(
                     ([label, value]) => (

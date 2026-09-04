@@ -110,9 +110,10 @@ export function AddToCartSection({
           <button
             onClick={handleDecrement}
             disabled={quantity <= 1}
+            aria-label="Restar uno"
             className="h-10 w-10 flex items-center justify-center hover:bg-muted cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Minus className="h-4 w-4" />
+            <Minus className="h-4 w-4" aria-hidden="true" />
           </button>
           <span className="h-10 w-12 flex items-center justify-center border-x">
             {quantity}
@@ -120,9 +121,10 @@ export function AddToCartSection({
           <button
             onClick={handleIncrement}
             disabled={!!product.stock && quantity >= product.stock}
+            aria-label="Sumar uno"
             className="h-10 w-10 flex items-center justify-center hover:bg-muted cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -177,10 +179,15 @@ export function AddToCartSection({
               onClick={handleToggleWishlist}
               variant="outline"
               size="lg"
+              aria-label={
+                inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'
+              }
+              aria-pressed={inWishlist}
               className="h-12 w-12 p-0 cursor-pointer bg-transparent"
             >
               <Heart
                 className={`h-5 w-5 ${inWishlist ? 'fill-primary text-primary' : ''}`}
+                aria-hidden="true"
               />
             </Button>
           </div>
@@ -190,7 +197,7 @@ export function AddToCartSection({
           asChild
           variant="outline"
           size="lg"
-          className="w-full h-12 text-base cursor-pointer border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]"
+          className="w-full h-12 text-base cursor-pointer border-[#0F7A3D] text-[#0F7A3D] hover:bg-[#0F7A3D]/10 hover:text-[#0F7A3D]"
         >
           <a
             href={whatsappProductInquiryUrl(product.name, product.price, quantity)}

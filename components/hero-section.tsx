@@ -20,9 +20,9 @@ export function HeroSection({ featuredProduct }: HeroSectionProps) {
     <section className="bg-primary/20 py-12 sm:py-20 md:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 items-center">
         <div className="text-center md:text-left">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
             Muebles de Madera Artesanales
-          </h2>
+          </h1>
           <p className="mt-4 max-w-xl mx-auto md:mx-0 text-lg text-muted-foreground text-pretty">
             Descubrí piezas atemporales que aportan calidez y elegancia a tu
             hogar

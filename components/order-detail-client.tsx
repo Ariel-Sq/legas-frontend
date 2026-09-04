@@ -184,7 +184,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
         <div className="mt-6">
           <Button
             asChild
-            className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90"
+            className="w-full bg-[#0F7A3D] text-white hover:bg-[#0F7A3D]/90"
             size="lg"
           >
             <a
