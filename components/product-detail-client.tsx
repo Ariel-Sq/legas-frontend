@@ -12,7 +12,12 @@ import type {
   Product,
 } from '@/lib/products';
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, formatPriceDecimal } from '@/lib/utils';
+import {
+  INSTALLMENT_COUNT,
+  installmentAmount,
+  transferPrice,
+} from '@/lib/pricing';
 
 interface ProductUser {
   id: string;
@@ -48,7 +53,9 @@ export function ProductDetailClient({
     window.scrollTo(0, 0);
   }, [initialTemplate.id]);
 
-  const activeVariations = initialTemplate.variations.filter((v) => v.is_active);
+  const activeVariations = initialTemplate.variations.filter(
+    (v) => v.is_active
+  );
 
   const activeTiers = (selectedVariation.priceTiers ?? [])
     .filter((t) => t.is_active)
@@ -157,7 +164,7 @@ export function ProductDetailClient({
                   .join(' > ')}
               </p>
               <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-                {selectedVariation.name}
+                {initialTemplate.name}
               </h1>
 
               {/* Rating */}
@@ -183,33 +190,37 @@ export function ProductDetailClient({
               ) : null}
 
               <div className="mb-6">
-                <p className="text-4xl font-bold text-primary">
+                <p className="text-4xl font-bold text-foreground">
                   {formatPrice(unitPrice)}
                   <span className="text-base font-normal text-muted-foreground">
                     {' '}
                     / unidad
                   </span>
                 </p>
+                <p className="mt-2 text-lg text-foreground">
+                  En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
+                  <span className="font-semibold">
+                    {formatPriceDecimal(installmentAmount(unitPrice))}
+                  </span>
+                </p>
+                <p className="mt-1 text-lg font-semibold text-primary">
+                  {formatPriceDecimal(transferPrice(unitPrice))} con
+                  Transferencia
+                </p>
                 {quantity > 1 && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-2">
                     {quantity} × {formatPrice(unitPrice)} ={' '}
                     <span className="font-semibold text-foreground">
                       {formatPrice(lineTotal)}
                     </span>
                     {matchedTier && (
                       <span className="ml-2 text-primary">
-                        (ahorrás {formatPrice((basePrice - unitPrice) * quantity)})
+                        (ahorrás{' '}
+                        {formatPrice((basePrice - unitPrice) * quantity)})
                       </span>
                     )}
                   </p>
                 )}
-                {/* Same list price across every method; MP installments are
-                    financed by MercadoPago, not surcharged by us. */}
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Mismo precio en efectivo, transferencia o MercadoPago. Con
-                  tarjeta elegís las cuotas en MercadoPago (hasta 12; la
-                  financiación la define MP).
-                </p>
               </div>
             </div>
 
@@ -249,9 +260,7 @@ export function ProductDetailClient({
                       >
                         <span>{row.label}</span>
                         <span
-                          className={
-                            row.key === 'base' ? '' : 'text-primary'
-                          }
+                          className={row.key === 'base' ? '' : 'text-primary'}
                         >
                           {formatPrice(row.price)} / unidad
                         </span>

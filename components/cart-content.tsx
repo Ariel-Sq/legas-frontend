@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, formatPriceDecimal } from '@/lib/utils';
+import {
+  INSTALLMENT_COUNT,
+  TRANSFER_DISCOUNT_RATE,
+  installmentAmount,
+  transferPrice,
+} from '@/lib/pricing';
 
 export function CartContent() {
   const { items, itemCount, subtotal, loading } = useCart();
@@ -63,9 +69,12 @@ export function CartContent() {
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Carrito de compras</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            Carrito de compras
+          </h1>
           <p className="text-muted-foreground">
-            {itemCount} {itemCount === 1 ? 'producto' : 'productos'} en tu carrito
+            {itemCount} {itemCount === 1 ? 'producto' : 'productos'} en tu
+            carrito
           </p>
         </div>
 
@@ -104,17 +113,30 @@ export function CartContent() {
                   <span className="text-primary">{formatPrice(subtotal)}</span>
                 </div>
 
+                <p className="text-sm text-foreground">
+                  En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
+                  <span className="font-semibold">
+                    {formatPriceDecimal(installmentAmount(subtotal))}
+                  </span>
+                </p>
+                <p className="text-sm font-semibold text-primary">
+                  {formatPriceDecimal(transferPrice(subtotal))} con
+                  Transferencia
+                </p>
+
                 <Separator />
 
                 <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg">
                   <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>El envío se coordina con el vendedor después de la compra.</span>
+                  <span>
+                    El envío se coordina con el vendedor después de la compra.
+                  </span>
                 </div>
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                  Precios en efectivo o transferencia. Con MercadoPago se
-                  agrega un 20% (hasta 3 cuotas). Elegís el medio en el
-                  checkout.
+                  Transferencia o efectivo:{' '}
+                  {Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. Con
+                  MercadoPago elegís las cuotas en el checkout.
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>

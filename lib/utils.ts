@@ -15,3 +15,15 @@ const priceFormatter = new Intl.NumberFormat('es-AR', {
 export function formatPrice(value: number): string {
   return priceFormatter.format(value);
 }
+
+const priceFormatterDecimal = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** Same as formatPrice but keeps cents, e.g. 23515.1666 → "$ 23.515,17". */
+export function formatPriceDecimal(value: number): string {
+  return priceFormatterDecimal.format(value);
+}

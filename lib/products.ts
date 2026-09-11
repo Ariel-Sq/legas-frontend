@@ -172,11 +172,7 @@ export interface GetShopProductsPageParams {
   sort?: ShopSortOption;
 }
 
-export type ShopSortOption =
-  | 'default'
-  | 'newest'
-  | 'price-low'
-  | 'price-high';
+export type ShopSortOption = 'default' | 'newest' | 'price-low' | 'price-high';
 
 /**
  * Merchandising order for the "Por default" sort — a fixed category ranking
@@ -186,13 +182,13 @@ export type ShopSortOption =
  * not match a known category sorts last.
  */
 const DEFAULT_CATEGORY_RANK: Record<string, number> = {
-  'combos': 0,
+  combos: 0,
   sillas: 4,
   racks: 5,
   vajilleros: 6,
   'mesas ratonas': 7,
   'mesas de luz': 8,
-  'cómodas': 9,
+  cómodas: 9,
   recibidores: 10,
   escritorios: 11,
 };
@@ -391,7 +387,6 @@ export async function getProductTemplateBySlugOrId(
 }
 
 export async function getShopProducts(): Promise<Product[]> {
-
   const productTemplates = await getProductTemplates();
 
   // Flatten variations from templates into products
@@ -458,7 +453,7 @@ export async function getProductById(id: string): Promise<Product | null> {
         price: parseFloat(variation.price),
         image: mainImage?.url || '',
         category: template.categories[0]?.name || 'Uncategorized',
-          slug: template.slug,
+        slug: template.slug,
         material: variation.attributes?.material,
         color: variation.attributes?.color,
         images: variation.images.map((img) => img.url),
@@ -482,7 +477,6 @@ export async function getProductById(id: string): Promise<Product | null> {
 }
 
 export async function getAllProducts(): Promise<Product[]> {
-
   const productTemplates = await getProductTemplates();
 
   // Flatten variations from templates into products
@@ -494,7 +488,7 @@ export async function getAllProducts(): Promise<Product[]> {
           variation.images.find((img) => img.isMain) || variation.images[0];
         products.push({
           id: variation.id,
-          name: variation.name,
+          name: template.name,
           description: template.description || '',
           fullDescription: template.description || '',
           price: parseFloat(variation.price),
@@ -597,7 +591,7 @@ export async function getNewArrivals(): Promise<Product[]> {
       price: parseFloat(variation.price),
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Uncategorized',
-          slug: template.slug,
+      slug: template.slug,
       material: variation.attributes?.material,
       color: variation.attributes?.color,
       images: variation.images.map((img) => img.url),
