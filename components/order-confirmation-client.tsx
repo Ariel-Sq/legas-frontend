@@ -63,6 +63,7 @@ export function OrderConfirmationClient({
                           src={item.image || '/placeholder.svg'}
                           alt={item.name}
                           fill
+                          sizes="80px"
                           className="object-cover"
                         />
                       </div>

@@ -71,6 +71,8 @@ export function ProductImageGallery({
             src={images[selectedImage] || '/placeholder.svg'}
             alt={`${productName} — imagen ${selectedImage + 1}`}
             fill
+            priority
+            sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
           />
 
@@ -126,6 +128,7 @@ export function ProductImageGallery({
                   src={image || '/placeholder.svg'}
                   alt={`${productName} — miniatura ${index + 1}`}
                   fill
+                  sizes="(min-width: 1024px) 12vw, 24vw"
                   className="object-cover"
                 />
               </button>

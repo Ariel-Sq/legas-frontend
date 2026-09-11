@@ -590,6 +590,7 @@ export function CheckoutClient() {
                           src={item.image || '/placeholder.svg'}
                           alt={item.name}
                           fill
+                          sizes="64px"
                           className="object-cover"
                         />
                       </div>

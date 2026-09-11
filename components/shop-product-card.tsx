@@ -59,6 +59,7 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
               src={product.image || '/placeholder.svg'}
               alt={product.name}
               fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>

@@ -53,7 +53,7 @@ export function OrdersClient({
   const router = useRouter();
   const [orders] = useState<Order[]>(initialOrders);
   const [locallyReviewed, setLocallyReviewed] = useState<Set<string>>(
-    new Set(reviewedVariationIds),
+    new Set(reviewedVariationIds)
   );
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [rating, setRating] = useState(0);
@@ -225,7 +225,9 @@ export function OrdersClient({
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">Mis pedidos</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Mis pedidos
+            </h1>
             <p className="text-muted-foreground">
               Mirá y seguí el historial de tus compras
             </p>
@@ -250,7 +252,9 @@ export function OrdersClient({
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Package className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Todavía no hay pedidos</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  Todavía no hay pedidos
+                </h3>
                 <p className="text-muted-foreground mb-6">
                   Empezá a comprar y los vas a ver acá
                 </p>
@@ -267,115 +271,120 @@ export function OrdersClient({
                   href={`/orders/${order.id}`}
                   className="block rounded-lg transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                <Card className="cursor-pointer">
-                  <CardHeader>
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          Pedido #{order.orderNumber}
-                          <Badge
-                            variant="outline"
-                            className={STATUS_COLOR[order.status]}
-                          >
-                            <span className="flex items-center gap-1">
-                              {getStatusIcon(order.status)}
-                              {STATUS_LABEL[order.status]}
-                            </span>
-                          </Badge>
-                        </CardTitle>
-                        <CardDescription>
-                          Realizado el{' '}
-                          {new Date(order.date).toLocaleDateString('es-AR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </CardDescription>
+                  <Card className="cursor-pointer">
+                    <CardHeader>
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            Pedido #{order.orderNumber}
+                            <Badge
+                              variant="outline"
+                              className={STATUS_COLOR[order.status]}
+                            >
+                              <span className="flex items-center gap-1">
+                                {getStatusIcon(order.status)}
+                                {STATUS_LABEL[order.status]}
+                              </span>
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription>
+                            Realizado el{' '}
+                            {new Date(order.date).toLocaleDateString('es-AR', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </CardDescription>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-2xl font-bold text-primary">
+                            {formatPrice(order.total)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {order.items.reduce(
+                              (sum, item) => sum + item.quantity,
+                              0
+                            )}{' '}
+                            productos
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-left md:text-right">
-                        <p className="text-2xl font-bold text-primary">
-                          {formatPrice(order.total)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {order.items.reduce(
-                            (sum, item) => sum + item.quantity,
-                            0
-                          )}{' '}
-                          productos
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Order Items */}
-                      <div className="grid gap-4">
-                        {order.items.map((item) => (
-                          <div key={item.id} className="flex gap-4">
-                            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border">
-                              <Image
-                                src={item.image || '/placeholder.svg'}
-                                alt={item.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="flex-grow">
-                              <h4 className="font-medium">{item.name}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                Cantidad: {item.quantity}
-                              </p>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <div className="text-right">
-                                <p className="font-semibold">
-                                  {formatPrice(item.price * item.quantity)}
-                                </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Order Items */}
+                        <div className="grid gap-4">
+                          {order.items.map((item) => (
+                            <div key={item.id} className="flex gap-4">
+                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border">
+                                <Image
+                                  src={item.image || '/placeholder.svg'}
+                                  alt={item.name}
+                                  fill
+                                  sizes="80px"
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div className="flex-grow">
+                                <h4 className="font-medium">{item.name}</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  {formatPrice(item.price)} c/u
+                                  Cantidad: {item.quantity}
                                 </p>
                               </div>
-                              {order.status === 'paid_delivered' &&
-                                (locallyReviewed.has(item.productVariationId) ? (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                                    Ya reseñaste
-                                  </span>
-                                ) : (
-                                  <Button
-                                    size="sm"
-                                    className="cursor-pointer gap-1 shadow-sm hover:shadow"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleReviewClick(item);
-                                    }}
-                                  >
-                                    <Star className="h-4 w-4 fill-current" />
-                                    Dejar reseña
-                                  </Button>
-                                ))}
+                              <div className="flex flex-col items-end gap-2">
+                                <div className="text-right">
+                                  <p className="font-semibold">
+                                    {formatPrice(item.price * item.quantity)}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatPrice(item.price)} c/u
+                                  </p>
+                                </div>
+                                {order.status === 'paid_delivered' &&
+                                  (locallyReviewed.has(
+                                    item.productVariationId
+                                  ) ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                                      Ya reseñaste
+                                    </span>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      className="cursor-pointer gap-1 shadow-sm hover:shadow"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleReviewClick(item);
+                                      }}
+                                    >
+                                      <Star className="h-4 w-4 fill-current" />
+                                      Dejar reseña
+                                    </Button>
+                                  ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
 
-                      {/* Shipping Info */}
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold mb-2">Dirección de envío</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {order.shipping.name}
-                          <br />
-                          {order.shipping.address}
-                          <br />
-                          {order.shipping.city}, {order.shipping.postalCode}
-                          <br />
-                          {order.shipping.country}
-                        </p>
+                        {/* Shipping Info */}
+                        <div className="border-t pt-4">
+                          <h4 className="font-semibold mb-2">
+                            Dirección de envío
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {order.shipping.name}
+                            <br />
+                            {order.shipping.address}
+                            <br />
+                            {order.shipping.city}, {order.shipping.postalCode}
+                            <br />
+                            {order.shipping.country}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 </Link>
               ))}
             </div>

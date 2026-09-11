@@ -39,6 +39,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             src={item.image || '/placeholder.svg'}
             alt={item.name}
             fill
+            sizes="(min-width: 768px) 128px, 96px"
             className="object-cover hover:scale-105 transition-transform duration-300"
           />
         </div>
@@ -52,7 +53,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
             </h3>
           </Link>
           {item.category && (
-            <p className="text-sm text-muted-foreground mt-1">{item.category}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {item.category}
+            </p>
           )}
           <p className="text-lg font-semibold text-primary mt-2">
             {formatPrice(item.price)}

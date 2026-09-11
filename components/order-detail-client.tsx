@@ -12,12 +12,7 @@ import {
 } from '@/lib/orders-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, formatPrice } from '@/lib/utils';
 import { whatsappOrderUrl } from '@/lib/whatsapp';
 
@@ -34,8 +29,11 @@ const TIMELINE_STEPS: { status: OrderStatus; label: string }[] = [
 ];
 
 export function OrderDetailClient({ order }: OrderDetailClientProps) {
-  const isTerminal = order.status === 'cancelled' || order.status === 'refunded';
-  const currentIndex = TIMELINE_STEPS.findIndex((s) => s.status === order.status);
+  const isTerminal =
+    order.status === 'cancelled' || order.status === 'refunded';
+  const currentIndex = TIMELINE_STEPS.findIndex(
+    (s) => s.status === order.status
+  );
 
   return (
     <main className="flex-grow bg-background">
@@ -90,7 +88,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                               ? 'bg-transparent'
                               : isDone || isCurrent
                                 ? 'bg-primary'
-                                : 'bg-muted',
+                                : 'bg-muted'
                           )}
                         />
                         <div
@@ -102,7 +100,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                               'bg-background border-primary text-primary',
                             !isDone &&
                               !isCurrent &&
-                              'bg-background border-muted text-muted-foreground',
+                              'bg-background border-muted text-muted-foreground'
                           )}
                         >
                           {index + 1}
@@ -114,7 +112,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                               ? 'bg-transparent'
                               : isDone
                                 ? 'bg-primary'
-                                : 'bg-muted',
+                                : 'bg-muted'
                           )}
                         />
                       </div>
@@ -125,7 +123,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                             ? 'text-foreground font-medium'
                             : isDone
                               ? 'text-foreground'
-                              : 'text-muted-foreground',
+                              : 'text-muted-foreground'
                         )}
                       >
                         {step.label}
@@ -151,6 +149,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                       src={item.image || '/placeholder.svg'}
                       alt={item.name}
                       fill
+                      sizes="80px"
                       className="object-cover"
                     />
                   </div>

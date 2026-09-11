@@ -48,7 +48,7 @@ export default function WishlistPage() {
           image: item.image,
           category: item.category,
         },
-        1,
+        1
       );
     }
   };
@@ -78,7 +78,11 @@ export default function WishlistPage() {
                 Tu lista se guarda en tu cuenta y la podés ver desde cualquier
                 dispositivo.
               </p>
-              <Button onClick={promptSignIn} size="lg" className="cursor-pointer">
+              <Button
+                onClick={promptSignIn}
+                size="lg"
+                className="cursor-pointer"
+              >
                 Iniciar sesión
               </Button>
             </div>
@@ -117,6 +121,7 @@ export default function WishlistPage() {
                           src={item.image || '/placeholder.svg'}
                           alt={item.name}
                           fill
+                          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>

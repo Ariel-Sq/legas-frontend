@@ -29,6 +29,7 @@ export default async function AboutPage() {
                 src={aboutContent.workshopImage || '/placeholder.svg'}
                 alt="Taller Legas"
                 fill
+                sizes="(min-width: 1024px) 800px, 100vw"
                 className="object-cover"
               />
             </div>

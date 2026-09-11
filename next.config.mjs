@@ -7,6 +7,12 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // Serve the smallest workable format; AVIF is usually ~20-30% lighter
+    // than WebP. The optimizer caches the result at the edge.
+    formats: ['image/avif', 'image/webp'],
+    // Cache optimized images for 31 days (Next's default is 60s, which made
+    // repeat views re-optimize and feel slow).
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: 'http',

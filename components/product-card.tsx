@@ -52,13 +52,16 @@ export function ProductCard({
               src={product.image || '/placeholder.svg'}
               alt={product.name}
               fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <button
               className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background opacity-100 lg:opacity-0 ${
                 isHovered ? 'lg:opacity-100' : ''
               }`}
-              aria-label={inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              aria-label={
+                inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'
+              }
               aria-pressed={inWishlist}
               onClick={handleWishlistClick}
             >
@@ -95,13 +98,16 @@ export function ProductCard({
             src={product.image || '/placeholder.svg'}
             alt={product.name}
             fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <button
             className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background opacity-100 lg:opacity-0 ${
               isHovered ? 'lg:opacity-100' : ''
             }`}
-            aria-label={inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            aria-label={
+              inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'
+            }
             aria-pressed={inWishlist}
             onClick={handleWishlistClick}
           >
