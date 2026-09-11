@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { PaletteControls } from '@/components/palette-picker';
 import { useTheme } from 'next-themes';
 
 export default function SettingsPage() {
@@ -39,9 +40,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Tema</CardTitle>
-                <CardDescription>
-                  Personalizá cómo se ve Legas
-                </CardDescription>
+                <CardDescription>Personalizá cómo se ve Legas</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -67,6 +66,19 @@ export default function SettingsPage() {
                     preferencias de tu sistema
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Color Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Colores</CardTitle>
+                <CardDescription>
+                  Elegí un tema completo, o armá tu combinación de base y acento
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PaletteControls />
               </CardContent>
             </Card>
 

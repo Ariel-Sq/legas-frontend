@@ -1,18 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Palette } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { logPaletteChoice } from '@/lib/metrics';
 
 /**
- * User-facing color customization: a header popover to pick the surface
- * scheme (base) and brand color (accent) of the storefront. The choice is
- * persisted in localStorage:
+ * User-facing color customization (mounted in the account settings page):
+ * pick the surface scheme (base) and brand color (accent) of the storefront.
+ * The choice is persisted in localStorage:
  *  - `legas-palette`     → { base, accent } keys (drives the picker UI)
  *  - `legas-palette-css` → the compiled CSS override, injected before first
  *    paint by the inline boot script in app/layout.tsx so there is no flash.
@@ -229,7 +223,12 @@ export const PALETTE_PRESETS: {
 }[] = [
   { key: 'legas', label: 'Legas', base: 'calida', accent: 'dorado' },
   { key: 'galeria', label: 'Galería', base: 'neutra', accent: 'tinta' },
-  { key: 'escandinavo', label: 'Escandinavo', base: 'piedra', accent: 'salvia' },
+  {
+    key: 'escandinavo',
+    label: 'Escandinavo',
+    base: 'piedra',
+    accent: 'salvia',
+  },
   { key: 'oceano', label: 'Océano', base: 'noche', accent: 'petroleo' },
   { key: 'bosque', label: 'Bosque', base: 'bosque', accent: 'salvia' },
   { key: 'atardecer', label: 'Atardecer', base: 'arena', accent: 'terracota' },
@@ -358,8 +357,7 @@ const STYLE_ID = 'palette-style';
 
 function compileCss(baseKey: string, accentKey: string): string {
   const baseCss = PALETTE_BASES.find((b) => b.key === baseKey)?.css ?? '';
-  const accentCss =
-    PALETTE_ACCENTS.find((a) => a.key === accentKey)?.css ?? '';
+  const accentCss = PALETTE_ACCENTS.find((a) => a.key === accentKey)?.css ?? '';
   return baseCss + accentCss;
 }
 
@@ -413,12 +411,12 @@ function SwatchRow({
   );
 }
 
-export function PalettePicker() {
+export function PaletteControls() {
   const [base, setBase] = useState('calida');
   const [accent, setAccent] = useState('dorado');
-  // Latest chosen combo, read at popover-close time (see handleOpenChange).
-  // A ref, not state, so closing reads the final value without re-renders.
-  const chosen = useRef({ base: 'calida', accent: 'dorado' });
+  // Last combo already counted, so re-clicking the same swatches doesn't
+  // re-count. Kept in a ref so select() reads it without re-rendering.
+  const lastLogged = useRef<string | null>(null);
 
   // The boot script in app/layout.tsx already applied the stored CSS before
   // first paint; here we only sync the picker UI with the stored choice.
@@ -427,15 +425,10 @@ export function PalettePicker() {
       const saved = JSON.parse(
         localStorage.getItem(PALETTE_STORAGE_KEY) ?? '{}'
       );
-      if (PALETTE_BASES.some((b) => b.key === saved.base)) {
-        chosen.current.base = saved.base;
-      }
-      if (PALETTE_ACCENTS.some((a) => a.key === saved.accent)) {
-        chosen.current.accent = saved.accent;
-      }
       if (PALETTE_BASES.some((b) => b.key === saved.base)) setBase(saved.base);
       if (PALETTE_ACCENTS.some((a) => a.key === saved.accent))
         setAccent(saved.accent);
+      lastLogged.current = localStorage.getItem(PALETTE_LOGGED_KEY);
     } catch {
       /* ignore corrupt storage */
     }
@@ -455,28 +448,11 @@ export function PalettePicker() {
     } catch {
       /* storage may be unavailable (private mode) — still applied for the session */
     }
-    // Only remember the choice; the analytics vote is committed once, when
-    // the popover closes (handleOpenChange) — so click-through tanteo counts
-    // as a single vote for the resting combo, and a decisive user who closes
-    // fast is still counted.
-    chosen.current = { base: nextBase, accent: nextAccent };
-  };
-
-  // Commit-on-close: count the resting combo once, and only if it differs
-  // from what this browser last counted (dedupes repeat visits and never
-  // counts the untouched default).
-  const handleOpenChange = (open: boolean) => {
-    if (open) return;
-    const { base: b, accent: a } = chosen.current;
-    const key = `${b}+${a}`;
-    let last: string | null = null;
-    try {
-      last = localStorage.getItem(PALETTE_LOGGED_KEY);
-    } catch {
-      /* ignore */
-    }
-    if (key === last) return;
-    void logPaletteChoice(b, a);
+    // Count each genuine change once (dedupes repeat selections).
+    const key = `${nextBase}+${nextAccent}`;
+    if (key === lastLogged.current) return;
+    lastLogged.current = key;
+    void logPaletteChoice(nextBase, nextAccent);
     try {
       localStorage.setItem(PALETTE_LOGGED_KEY, key);
     } catch {
@@ -485,77 +461,57 @@ export function PalettePicker() {
   };
 
   return (
-    <Popover onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label="Personalizar colores"
-          className="relative p-2 rounded-full hover:bg-muted/50 transition-colors cursor-pointer"
-        >
-          <Palette className="h-5 w-5" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 space-y-4">
-        <div>
-          <p className="text-sm font-semibold">Personalizá los colores</p>
-          <p className="text-xs text-muted-foreground">
-            Elegí un tema completo, o armá tu combinación de base y acento.
-          </p>
+    <div className="space-y-5">
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Temas
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {PALETTE_PRESETS.map((preset) => {
+            const presetBase = PALETTE_BASES.find((b) => b.key === preset.base);
+            const presetAccent = PALETTE_ACCENTS.find(
+              (a) => a.key === preset.accent
+            );
+            const isActive = base === preset.base && accent === preset.accent;
+            return (
+              <button
+                key={preset.key}
+                onClick={() => select(preset.base, preset.accent)}
+                aria-pressed={isActive}
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                  isActive
+                    ? 'border-ring bg-secondary text-foreground'
+                    : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                <span className="flex -space-x-1">
+                  <span
+                    className="h-3.5 w-3.5 rounded-full border border-border"
+                    style={{ backgroundColor: presetBase?.swatch }}
+                  />
+                  <span
+                    className="h-3.5 w-3.5 rounded-full border border-border"
+                    style={{ backgroundColor: presetAccent?.swatch }}
+                  />
+                </span>
+                {preset.label}
+              </button>
+            );
+          })}
         </div>
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Temas
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {PALETTE_PRESETS.map((preset) => {
-              const presetBase = PALETTE_BASES.find(
-                (b) => b.key === preset.base
-              );
-              const presetAccent = PALETTE_ACCENTS.find(
-                (a) => a.key === preset.accent
-              );
-              const isActive =
-                base === preset.base && accent === preset.accent;
-              return (
-                <button
-                  key={preset.key}
-                  onClick={() => select(preset.base, preset.accent)}
-                  aria-pressed={isActive}
-                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                    isActive
-                      ? 'border-ring bg-secondary text-foreground'
-                      : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <span className="flex -space-x-1">
-                    <span
-                      className="h-3.5 w-3.5 rounded-full border border-border"
-                      style={{ backgroundColor: presetBase?.swatch }}
-                    />
-                    <span
-                      className="h-3.5 w-3.5 rounded-full border border-border"
-                      style={{ backgroundColor: presetAccent?.swatch }}
-                    />
-                  </span>
-                  {preset.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        <SwatchRow
-          title="Base"
-          options={PALETTE_BASES}
-          active={base}
-          onSelect={(option) => select(option.key, accent)}
-        />
-        <SwatchRow
-          title="Acento"
-          options={PALETTE_ACCENTS}
-          active={accent}
-          onSelect={(option) => select(base, option.key)}
-        />
-      </PopoverContent>
-    </Popover>
+      </div>
+      <SwatchRow
+        title="Base"
+        options={PALETTE_BASES}
+        active={base}
+        onSelect={(option) => select(option.key, accent)}
+      />
+      <SwatchRow
+        title="Acento"
+        options={PALETTE_ACCENTS}
+        active={accent}
+        onSelect={(option) => select(base, option.key)}
+      />
+    </div>
   );
 }

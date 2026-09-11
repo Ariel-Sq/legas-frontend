@@ -7,7 +7,6 @@ import { CartButton } from '@/components/cart-button';
 import { HeaderNav } from '@/components/header-client';
 import { WishlistButton } from '@/components/wishlist-button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { PalettePicker } from '@/components/palette-picker';
 
 export function Header() {
   return (
@@ -34,11 +33,6 @@ export function Header() {
           <div className="flex items-center gap-4">
             <SearchBar />
             <ThemeToggle />
-            {/* Palette picker is a nice-to-have, not a conversion driver:
-                keep it off the crowded mobile header. */}
-            <span className="hidden md:inline-flex">
-              <PalettePicker />
-            </span>
             <WishlistButton />
             <CartButton />
             <AuthSection />

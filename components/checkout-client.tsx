@@ -18,7 +18,13 @@ import {
   createCheckoutPreference,
   type CheckoutPaymentMethod,
 } from '@/lib/checkout';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, formatPriceDecimal } from '@/lib/utils';
+import {
+  INSTALLMENT_COUNT,
+  TRANSFER_DISCOUNT_RATE,
+  installmentAmount,
+  transferPrice,
+} from '@/lib/pricing';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -40,30 +46,27 @@ declare global {
 const WHATSAPP_NUMBER = '5491173666370';
 
 /**
- * How the shopper pays. Catalogue prices are the cash/transfer prices.
- * Keep the MercadoPago rate in sync with the backend
- * (ecommerce-backend/src/payments/payment-method.config.ts).
+ * How the shopper pays. Catalogue prices are the list price:
+ *  - MercadoPago charges the list price, split into 6 interest-free
+ *    installments.
+ *  - Transfer/cash gets a discount.
+ * Keep these rates in sync with the backend
+ * (ecommerce-backend/src/payments/payment-method.config.ts) and lib/pricing.ts.
  */
-const MP_SURCHARGE_RATE = 0;
 const PAYMENT_OPTIONS: {
   key: CheckoutPaymentMethod;
-  rate: number;
   label: string;
   description: string;
 }[] = [
   {
     key: 'mercadopago',
-    rate: MP_SURCHARGE_RATE,
     label: 'MercadoPago',
-    description:
-      'Tarjeta, débito o dinero en cuenta. Elegís las cuotas en MercadoPago.',
+    description: `Tarjeta, débito o dinero en cuenta. Hasta ${INSTALLMENT_COUNT} cuotas sin interés.`,
   },
   {
     key: 'offline',
-    rate: 0,
     label: 'Transferencia o efectivo',
-    description:
-      'Coordinamos el pago con vos por WhatsApp.',
+    description: `${Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. Coordinamos por WhatsApp.`,
   },
 ];
 
@@ -104,13 +107,13 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  const surchargeRate =
-    PAYMENT_OPTIONS.find((o) => o.key === paymentMethod)?.rate ?? 0;
-  const surcharge = subtotal * surchargeRate;
-  const total = subtotal + surcharge;
+  // Transfer/cash pays the discounted price; MercadoPago pays the list price.
+  const isTransfer = paymentMethod === 'offline';
+  const transferDiscount = isTransfer ? subtotal * TRANSFER_DISCOUNT_RATE : 0;
+  const total = subtotal - transferDiscount;
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
@@ -499,9 +502,17 @@ export function CheckoutClient() {
                         <p className="mt-1 text-sm text-muted-foreground">
                           {option.description}
                         </p>
-                        <p className="mt-2 text-sm font-semibold text-primary">
-                          Total: {formatPrice(subtotal * (1 + option.rate))}
-                        </p>
+                        {option.key === 'offline' ? (
+                          <p className="mt-2 text-sm font-semibold text-primary">
+                            {formatPriceDecimal(transferPrice(subtotal))} con
+                            transferencia
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-sm font-semibold text-primary">
+                            En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
+                            {formatPriceDecimal(installmentAmount(subtotal))}
+                          </p>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -567,7 +578,9 @@ export function CheckoutClient() {
 
             <div className="lg:col-span-1">
               <div className="rounded-lg border bg-card p-6 sticky top-4">
-                <h2 className="mb-4 text-xl font-semibold">Resumen del pedido</h2>
+                <h2 className="mb-4 text-xl font-semibold">
+                  Resumen del pedido
+                </h2>
 
                 <div className="space-y-4 mb-4">
                   {items.map((item) => (
@@ -602,6 +615,22 @@ export function CheckoutClient() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
+                  {isTransfer ? (
+                    <div className="flex justify-between text-sm text-primary">
+                      <span>
+                        Descuento transferencia (
+                        {Math.round(TRANSFER_DISCOUNT_RATE * 100)}%)
+                      </span>
+                      <span>-{formatPrice(transferDiscount)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{INSTALLMENT_COUNT} cuotas sin interés de</span>
+                      <span>
+                        {formatPriceDecimal(installmentAmount(subtotal))}
+                      </span>
+                    </div>
+                  )}
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
@@ -610,9 +639,10 @@ export function CheckoutClient() {
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  Precio de lista para todos los medios de pago. Con
-                  MercadoPago elegís las cuotas (la financiación la define MP).
-                  El envío se coordina por WhatsApp después de la compra.
+                  Con MercadoPago pagás en {INSTALLMENT_COUNT} cuotas sin
+                  interés. Por transferencia o efectivo tenés{' '}
+                  {Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. El
+                  envío se coordina por WhatsApp después de la compra.
                 </p>
               </div>
             </div>

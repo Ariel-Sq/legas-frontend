@@ -2,7 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle2, MessageCircle, Package, Truck, ArrowRight } from 'lucide-react';
+import {
+  CheckCircle2,
+  MessageCircle,
+  Package,
+  Truck,
+  ArrowRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -115,12 +121,20 @@ export function OrderConfirmationClient({
             {/* Order Summary */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold mb-4">Resumen del pedido</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  Resumen del pedido
+                </h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(order.subtotal)}</span>
                   </div>
+                  {order.total < order.subtotal && (
+                    <div className="flex justify-between text-primary">
+                      <span>Descuento transferencia</span>
+                      <span>-{formatPrice(order.subtotal - order.total)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Envío</span>
                     <span>a coordinar</span>
