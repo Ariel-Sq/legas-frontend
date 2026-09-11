@@ -87,7 +87,7 @@ function buildShopHref(opts: ShopFilterState): string {
   if (opts.color) sp.set('color', opts.color);
   if (opts.minPrice !== undefined) sp.set('minPrice', String(opts.minPrice));
   if (opts.maxPrice !== undefined) sp.set('maxPrice', String(opts.maxPrice));
-  if (opts.sort && opts.sort !== 'newest') sp.set('sort', opts.sort);
+  if (opts.sort && opts.sort !== 'default') sp.set('sort', opts.sort);
   const qs = sp.toString();
   return qs ? `/shop?${qs}` : '/shop';
 }
@@ -139,7 +139,12 @@ export function ShopContent({
   };
 
   const pushFilters = (next: Partial<ShopFilterState>) => {
-    router.push(buildShopHref({ ...currentFilters, ...next }));
+    // Filter/category changes must not jump the page to the top — the user is
+    // usually mid-list. Product links still scroll to top (Next's default for
+    // <Link>), so opening a product keeps that behaviour.
+    router.push(buildShopHref({ ...currentFilters, ...next }), {
+      scroll: false,
+    });
   };
 
   const handleCategoryChange = (category: string) => {
@@ -281,6 +286,9 @@ export function ShopContent({
                 <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="default" className="cursor-pointer">
+                  Por default
+                </SelectItem>
                 <SelectItem value="newest" className="cursor-pointer">
                   Más recientes
                 </SelectItem>

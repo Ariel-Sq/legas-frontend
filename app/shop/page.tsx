@@ -60,10 +60,14 @@ export default async function ShopPage({
   const color = params.color?.trim() || undefined;
   const minPrice = parsePrice(params.minPrice);
   const maxPrice = parsePrice(params.maxPrice);
-  const sort: ShopSortOption =
-    params.sort === 'price-low' || params.sort === 'price-high'
-      ? params.sort
-      : 'newest';
+  const sort: ShopSortOption = [
+    'default',
+    'newest',
+    'price-low',
+    'price-high',
+  ].includes(params.sort ?? '')
+    ? (params.sort as ShopSortOption)
+    : 'default';
 
   const { products, total, page: safePage, totalPages, filterOptions } =
     await getShopProductsPage({

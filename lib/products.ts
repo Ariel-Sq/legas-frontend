@@ -172,7 +172,44 @@ export interface GetShopProductsPageParams {
   sort?: ShopSortOption;
 }
 
-export type ShopSortOption = 'newest' | 'price-low' | 'price-high';
+export type ShopSortOption =
+  | 'default'
+  | 'newest'
+  | 'price-low'
+  | 'price-high';
+
+/**
+ * Merchandising order for the "Por default" sort — a fixed category ranking
+ * that mirrors how the store wants the catalogue browsed. Dining tables are
+ * split by shape (round → rectangular → oval) and the round ones are further
+ * ordered by material (álamo → álamo premium → petiribí). Anything that does
+ * not match a known category sorts last.
+ */
+const DEFAULT_CATEGORY_RANK: Record<string, number> = {
+  'combos': 0,
+  sillas: 4,
+  racks: 5,
+  vajilleros: 6,
+  'mesas ratonas': 7,
+  'mesas de luz': 8,
+  'cómodas': 9,
+  recibidores: 10,
+  escritorios: 11,
+};
+
+function defaultSortRank(p: ShopDisplayProduct): [number, number] {
+  const name = p.name.toLowerCase();
+  const category = p.category.toLowerCase();
+  if (category === 'mesas de comedor') {
+    if (name.includes('ovalada')) return [3, 0];
+    if (/griega|tradicional|trapecio|rectangular/.test(name)) return [2, 0];
+    // Round tables (Gerbasoni): álamo → álamo premium (sin nudos) → petiribí.
+    if (name.includes('petirib')) return [1, 2];
+    if (name.includes('sin nudos')) return [1, 1];
+    return [1, 0];
+  }
+  return [DEFAULT_CATEGORY_RANK[category] ?? 99, 0];
+}
 
 /**
  * Server-side paginated + searchable + filterable fetch for the /shop page.
@@ -264,7 +301,7 @@ export async function getShopProductsPage(
   // would only reorder the 12 visible products. Price sorts use the
   // variation range (min for ascending, max for descending) so a product
   // whose top variation is the most expensive ranks first.
-  const sort = params.sort ?? 'newest';
+  const sort = params.sort ?? 'default';
   switch (sort) {
     case 'price-low':
       matchedProducts.sort((a, b) => a.minPrice - b.minPrice);
@@ -273,12 +310,21 @@ export async function getShopProductsPage(
       matchedProducts.sort((a, b) => b.maxPrice - a.maxPrice);
       break;
     case 'newest':
-    default:
       matchedProducts.sort(
         (a, b) =>
           new Date(b.createdAt ?? 0).getTime() -
           new Date(a.createdAt ?? 0).getTime()
       );
+      break;
+    case 'default':
+    default:
+      matchedProducts.sort((a, b) => {
+        const [catA, subA] = defaultSortRank(a);
+        const [catB, subB] = defaultSortRank(b);
+        if (catA !== catB) return catA - catB;
+        if (subA !== subB) return subA - subB;
+        return a.minPrice - b.minPrice;
+      });
       break;
   }
 
@@ -585,11 +631,18 @@ export async function getFilterOptions(templates: ProductTemplate[]) {
   let maxPrice = 0;
 
   for (const t of templates) {
+    // Only active templates that actually have buyable variations can appear
+    // in the shop, so facets must ignore everything else — otherwise the
+    // sidebar/quick tags would list categories that render zero products
+    // (e.g. disabled ones like Espejos, Pie de cama, Respaldos, Percheros).
+    if (!t.is_active) continue;
+    const activeVariations = (t.variations || []).filter((v) => v.is_active);
+    if (activeVariations.length === 0) continue;
+
     for (const c of t.categories || []) {
       if (c?.name) categories.add(c.name);
     }
-    for (const v of t.variations || []) {
-      if (!v.is_active) continue;
+    for (const v of activeVariations) {
       const price = parseFloat(v.price);
       if (Number.isFinite(price) && price > maxPrice) maxPrice = price;
       const mat = v.attributes?.material;
