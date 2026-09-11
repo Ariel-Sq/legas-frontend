@@ -24,13 +24,15 @@ export interface Review {
 
 interface BackendReview {
   id: string;
-  userId: string;
+  userId: string | null;
   user?: {
     id: string;
     email: string;
     firstName?: string;
     lastName?: string;
   } | null;
+  /** Name snapshot kept after the reviewer's account is deleted. */
+  authorName?: string | null;
   productVariationId: string;
   productVariation?: {
     id: string;
@@ -57,8 +59,8 @@ function mapReview(r: BackendReview): Review {
     id: r.id,
     productVariationId: r.productVariationId,
     productTemplateId: r.productVariation?.template_id ?? '',
-    userId: r.userId,
-    userName: fullName || r.user?.email || 'Anonymous',
+    userId: r.userId ?? '',
+    userName: fullName || r.authorName || r.user?.email || 'Anonymous',
     rating: r.rating,
     title: r.title,
     comment: r.content,
@@ -154,7 +156,12 @@ export async function getProductRatingSummary(
   let sum = 0;
   for (const r of reviews) {
     sum += r.rating;
-    const bucket = Math.max(1, Math.min(5, Math.round(r.rating))) as 1 | 2 | 3 | 4 | 5;
+    const bucket = Math.max(1, Math.min(5, Math.round(r.rating))) as
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5;
     distribution[bucket] += 1;
   }
   return {
@@ -168,7 +175,7 @@ export async function getProductRatingSummary(
 // Returns the set of productVariationIds the current user has already
 // reviewed. Used to swap the "Dejar reseña" CTA for an "Ya reseñado" pill.
 export async function getMyReviewedVariationIds(
-  _userId?: string,
+  _userId?: string
 ): Promise<Set<string>> {
   try {
     const resp = await fetch(`${BACKEND_URL}/api/reviews/mine`, {

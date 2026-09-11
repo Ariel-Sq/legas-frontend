@@ -16,13 +16,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 import { PaletteControls } from '@/components/palette-picker';
+import { deleteAccountAction } from '@/lib/account';
+import { signOut } from 'next-auth/react';
+import { useState, useTransition } from 'react';
 import { useTheme } from 'next-themes';
+
+const DELETE_CONFIRM_PHRASE = 'ELIMINAR';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeleting, startDelete] = useTransition();
+
+  const canDelete = confirmText.trim().toUpperCase() === DELETE_CONFIRM_PHRASE;
+
+  const handleDeleteAccount = () => {
+    setDeleteError('');
+    startDelete(async () => {
+      const result = await deleteAccountAction();
+      if (!result.ok) {
+        setDeleteError(
+          result.message ??
+            `No pudimos eliminar la cuenta (HTTP ${result.status}).`
+        );
+        return;
+      }
+      await signOut({ callbackUrl: '/' });
+    });
+  };
+
+  const resetDeleteConfirm = () => {
+    setShowDeleteConfirm(false);
+    setConfirmText('');
+    setDeleteError('');
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -97,17 +130,74 @@ export default function SettingsPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Advertencia</AlertTitle>
                   <AlertDescription>
-                    Una vez que elimines tu cuenta, no hay vuelta atrás. Por
-                    favor, asegúrate.
+                    Una vez que elimines tu cuenta, no hay vuelta atrás. Se
+                    borran tus datos personales, carrito y favoritos. Tus
+                    reseñas quedan publicadas con tu nombre. Los pedidos se
+                    conservan por obligación contable, sin tus datos personales.
                   </AlertDescription>
                 </Alert>
-                <Button variant="destructive" className="cursor-pointer">
-                  Eliminar Cuenta
-                </Button>
+
+                {!showDeleteConfirm ? (
+                  <Button
+                    variant="destructive"
+                    className="cursor-pointer"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    Eliminar Cuenta
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-delete">
+                        Escribí{' '}
+                        <span className="font-mono font-semibold">
+                          {DELETE_CONFIRM_PHRASE}
+                        </span>{' '}
+                        para confirmar
+                      </Label>
+                      <Input
+                        id="confirm-delete"
+                        value={confirmText}
+                        onChange={(e) => setConfirmText(e.target.value)}
+                        placeholder={DELETE_CONFIRM_PHRASE}
+                        autoComplete="off"
+                        disabled={isDeleting}
+                      />
+                    </div>
+                    {deleteError && (
+                      <p className="text-sm text-destructive">{deleteError}</p>
+                    )}
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        variant="destructive"
+                        className="cursor-pointer"
+                        disabled={!canDelete || isDeleting}
+                        onClick={handleDeleteAccount}
+                      >
+                        {isDeleting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Eliminando…
+                          </>
+                        ) : (
+                          'Eliminar mi cuenta'
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer"
+                        disabled={isDeleting}
+                        onClick={resetDeleteConfirm}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm text-muted-foreground">
-                  {/* TODO: Implement OAuth logout and account deletion flow */}
                   La cuenta está gestionada a través de OAuth. La eliminación
-                  revocará todo el acceso.
+                  cierra tu sesión y revoca el acceso.
                 </p>
               </CardContent>
             </Card>
