@@ -23,6 +23,7 @@ export default async function ProfilePage() {
     firstName?: string;
     lastName?: string;
     phoneNumber?: string;
+    dni?: string;
     address?: string;
     city?: string;
     zipCode?: string;
@@ -84,6 +85,7 @@ export default async function ProfilePage() {
                 name: composedName,
                 email: user.email ?? '',
                 phoneNumber: user.phoneNumber ?? '',
+                dni: user.dni ?? '',
                 address: user.address ?? '',
                 city: user.city ?? '',
                 zipCode: user.zipCode ?? '',

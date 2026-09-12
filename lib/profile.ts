@@ -7,6 +7,7 @@ export interface ProfileUpdate {
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
+  dni?: string;
   address?: string;
   city?: string;
   state?: string;
@@ -24,7 +25,7 @@ export interface UpdateProfileResult {
 // target user from the Bearer token (PATCH /users/me).
 export async function updateProfileAction(
   _userId: string,
-  update: ProfileUpdate,
+  update: ProfileUpdate
 ): Promise<UpdateProfileResult> {
   const resp = await fetch(`${BACKEND_URL}/api/users/me`, {
     method: 'PATCH',

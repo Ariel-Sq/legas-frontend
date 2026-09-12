@@ -109,6 +109,7 @@ export const authOptions: NextAuthOptions = {
             'firstName',
             'lastName',
             'phoneNumber',
+            'dni',
             'address',
             'city',
             'state',

@@ -93,17 +93,19 @@ export function CheckoutClient() {
   const [pickupInPerson, setPickupInPerson] = useState(false);
 
   // Pre-fill contact from the logged-in user (session is merged with the
-  // backend user in lib/auth.ts). Only fills empty fields.
+  // backend user in lib/auth.ts). Only fills empty fields, so the shopper can
+  // still override anything.
   useEffect(() => {
-    const u = session?.user as
-      | (NonNullable<typeof session>['user'] & { phoneNumber?: string })
-      | undefined;
+    const u = session?.user;
     if (!u) return;
+    const profileAddress = [u.address, u.city, u.state, u.zipCode, u.country]
+      .filter(Boolean)
+      .join(', ');
     setFormData((prev) => ({
       email: prev.email || u.email || '',
       phone: prev.phone || u.phoneNumber || '',
-      dni: prev.dni,
-      address: prev.address,
+      dni: prev.dni || u.dni || '',
+      address: prev.address || profileAddress,
     }));
   }, [session]);
 

@@ -21,6 +21,7 @@ interface ProfileFormProps {
     name: string;
     email: string;
     phoneNumber: string;
+    dni: string;
     address: string;
     city: string;
     zipCode: string;
@@ -51,6 +52,7 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
 
   const [name, setName] = useState(initial.name);
   const [phoneNumber, setPhoneNumber] = useState(initial.phoneNumber);
+  const [dni, setDni] = useState(initial.dni);
   const [address, setAddress] = useState(initial.address);
   const [city, setCity] = useState(initial.city);
   const [zipCode, setZipCode] = useState(initial.zipCode);
@@ -78,7 +80,12 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
   const handleSaveInfo = (e: React.FormEvent) => {
     e.preventDefault();
     const { firstName, lastName } = splitName(name);
-    submit('info', { firstName, lastName, phoneNumber: phoneNumber || '' });
+    submit('info', {
+      firstName,
+      lastName,
+      phoneNumber: phoneNumber || '',
+      dni: dni || '',
+    });
   };
 
   const handleSaveAddress = (e: React.FormEvent) => {
@@ -113,12 +120,7 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={initial.email}
-                  disabled
-                />
+                <Input id="email" type="email" value={initial.email} disabled />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
@@ -127,6 +129,16 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
                   type="tel"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dni">DNI</Label>
+                <Input
+                  id="dni"
+                  inputMode="numeric"
+                  placeholder="30123456"
+                  value={dni}
+                  onChange={(e) => setDni(e.target.value)}
                 />
               </div>
             </div>

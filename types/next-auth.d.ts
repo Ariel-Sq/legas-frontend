@@ -9,6 +9,7 @@ declare module 'next-auth' {
       firstName?: string;
       lastName?: string;
       phoneNumber?: string;
+      dni?: string;
       address?: string;
       city?: string;
       state?: string;
@@ -30,6 +31,7 @@ declare module 'next-auth/jwt' {
       firstName?: string;
       lastName?: string;
       phoneNumber?: string;
+      dni?: string;
       address?: string;
       city?: string;
       state?: string;
