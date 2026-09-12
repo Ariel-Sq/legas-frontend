@@ -1,21 +1,34 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/components/cart-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, MessageCircle } from 'lucide-react';
+import {
+  CheckCircle,
+  Clock,
+  Loader2,
+  MessageCircle,
+  XCircle,
+} from 'lucide-react';
 import Link from 'next/link';
+import { getOrderStatusAction } from '@/lib/order-actions';
 
 const WHATSAPP_NUMBER = '5491173666370';
+const PAID_STATUSES = [
+  'paid_preparing',
+  'paid_ready_to_ship',
+  'paid_shipped',
+  'paid_delivered',
+];
 
 export default function SuccessPage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <CheckCircle className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       }
     >
@@ -30,12 +43,58 @@ function SuccessContent() {
   const externalReference = searchParams.get('external_reference');
   const shortId = externalReference?.slice(0, 8).toUpperCase();
   const waText = encodeURIComponent(
-    `Hola Legas! Acabo de pagar mi pedido${shortId ? ` ${shortId}` : ''}. ¿Coordinamos la entrega?`
+    `Hola Legas! Acabo de hacer el pedido${shortId ? ` ${shortId}` : ''}. ¿Coordinamos la entrega?`
   );
+
+  // undefined = loading, null = not found
+  const [status, setStatus] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
     clearCart();
-  }, [clearCart]);
+    if (!externalReference) {
+      setStatus(null);
+      return;
+    }
+    let active = true;
+    getOrderStatusAction(externalReference).then((r) => {
+      if (active) setStatus(r?.status ?? null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [clearCart, externalReference]);
+
+  const isPaid = status ? PAID_STATUSES.includes(status) : false;
+  const isPending =
+    status === 'processing_payment' || status === 'pending_transfer';
+  const isFailed =
+    status === 'cancelled' || status === 'expired' || status === 'refunded';
+
+  const heading = isPaid
+    ? '¡Pago confirmado!'
+    : isPending
+      ? 'Estamos confirmando tu pago'
+      : isFailed
+        ? 'El pago no se pudo confirmar'
+        : 'Pedido recibido';
+
+  const description = isPaid
+    ? 'Gracias por tu compra. Te enviamos un email de confirmación.'
+    : isPending
+      ? 'MercadoPago todavía está procesando el pago. Te avisamos cuando se acredite.'
+      : isFailed
+        ? 'No registramos el pago. Si ya pagaste, escribinos por WhatsApp y lo revisamos.'
+        : 'Te vamos a contactar para coordinar.';
+
+  const icon = isPaid ? (
+    <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+  ) : isPending ? (
+    <Clock className="h-16 w-16 text-amber-500 mb-4" />
+  ) : isFailed ? (
+    <XCircle className="h-16 w-16 text-red-500 mb-4" />
+  ) : (
+    <Loader2 className="h-16 w-16 text-muted-foreground mb-4 animate-spin" />
+  );
 
   return (
     <main className="min-h-screen bg-background">
@@ -44,24 +103,24 @@ function SuccessContent() {
           <Card>
             <CardHeader>
               <div className="flex flex-col items-center text-center">
-                <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-                <CardTitle className="text-2xl mb-2">
-                  ¡Pago confirmado!
-                </CardTitle>
+                {icon}
+                <CardTitle className="text-2xl mb-2">{heading}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center text-muted-foreground space-y-1">
-                <p>Gracias por tu compra. Te enviamos un email de confirmación.</p>
+                <p>{description}</p>
                 {shortId && (
                   <p>
                     Tu número de pedido es{' '}
                     <strong className="text-foreground">{shortId}</strong>.
                   </p>
                 )}
-                <p>
-                  Ahora coordinamos la fabricación y la entrega por WhatsApp.
-                </p>
+                {isPaid && (
+                  <p>
+                    Ahora coordinamos la fabricación y la entrega por WhatsApp.
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-3">
                 <Button asChild size="lg">

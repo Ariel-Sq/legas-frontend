@@ -11,11 +11,13 @@ import { createElement, type ReactElement } from 'react';
 
 export type OrderStatus =
   | 'processing_payment'
+  | 'pending_transfer'
   | 'paid_preparing'
   | 'paid_ready_to_ship'
   | 'paid_shipped'
   | 'paid_delivered'
   | 'cancelled'
+  | 'expired'
   | 'refunded';
 
 export interface Order {
@@ -70,16 +72,22 @@ export interface BackendOrder {
   status: string;
   totalAmount: string | number;
   createdAt: string;
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+  deliveryMethod?: string | null;
+  deliveryAddress?: string | null;
   items: BackendOrderItem[];
 }
 
 export const KNOWN_STATUSES: OrderStatus[] = [
   'processing_payment',
+  'pending_transfer',
   'paid_preparing',
   'paid_ready_to_ship',
   'paid_shipped',
   'paid_delivered',
   'cancelled',
+  'expired',
   'refunded',
 ];
 
@@ -112,12 +120,12 @@ export function mapOrder(o: BackendOrder): Order {
     items,
     shipping: {
       name: '',
-      email: '',
-      address: '',
+      email: o.customerEmail ?? '',
+      address: o.deliveryAddress ?? '',
       city: '',
       postalCode: '',
       country: '',
-      phone: '',
+      phone: o.customerPhone ?? '',
       method: 'standard',
       cost: 0,
     },
@@ -129,21 +137,25 @@ export function mapOrder(o: BackendOrder): Order {
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
   processing_payment: 'Procesando pago',
+  pending_transfer: 'Pendiente de transferencia',
   paid_preparing: 'Pagado y preparando el producto',
   paid_ready_to_ship: 'Pagado y listo para enviar',
   paid_shipped: 'Pagado y en camino',
   paid_delivered: 'Pagado y entregado',
   cancelled: 'Cancelado',
+  expired: 'Expirado',
   refunded: 'Reembolsado',
 };
 
 export const STATUS_COLOR: Record<OrderStatus, string> = {
   processing_payment: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  pending_transfer: 'bg-amber-100 text-amber-800 border-amber-200',
   paid_preparing: 'bg-blue-100 text-blue-800 border-blue-200',
   paid_ready_to_ship: 'bg-indigo-100 text-indigo-800 border-indigo-200',
   paid_shipped: 'bg-purple-100 text-purple-800 border-purple-200',
   paid_delivered: 'bg-green-100 text-green-800 border-green-200',
   cancelled: 'bg-red-100 text-red-800 border-red-200',
+  expired: 'bg-zinc-100 text-zinc-700 border-zinc-200',
   refunded: 'bg-zinc-200 text-zinc-800 border-zinc-300',
 };
 
@@ -151,6 +163,8 @@ export function getStatusIcon(status: OrderStatus): ReactElement {
   const iconProps = { className: 'h-4 w-4' };
   switch (status) {
     case 'processing_payment':
+      return createElement(Clock, iconProps);
+    case 'pending_transfer':
       return createElement(Clock, iconProps);
     case 'paid_preparing':
       return createElement(Wrench, iconProps);
@@ -161,6 +175,8 @@ export function getStatusIcon(status: OrderStatus): ReactElement {
     case 'paid_delivered':
       return createElement(CheckCircle, iconProps);
     case 'cancelled':
+      return createElement(XCircle, iconProps);
+    case 'expired':
       return createElement(XCircle, iconProps);
     case 'refunded':
       return createElement(RotateCcw, iconProps);

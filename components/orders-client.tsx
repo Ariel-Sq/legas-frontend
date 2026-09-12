@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   STATUS_COLOR,
@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SignInPromptDialog } from '@/components/sign-in-prompt-dialog';
-import { CheckCircle2, Package, Star } from 'lucide-react';
+import { CheckCircle2, Package, RefreshCw, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
@@ -51,7 +51,10 @@ export function OrdersClient({
   reviewedVariationIds = [],
 }: OrdersClientProps) {
   const router = useRouter();
-  const [orders] = useState<Order[]>(initialOrders);
+  // Use the server-provided prop directly (not a snapshot in useState) so a
+  // router.refresh() actually updates the list.
+  const orders = initialOrders;
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [locallyReviewed, setLocallyReviewed] = useState<Set<string>>(
     new Set(reviewedVariationIds)
   );
@@ -63,6 +66,30 @@ export function OrdersClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+
+  const refresh = () => {
+    setIsRefreshing(true);
+    router.refresh();
+    setTimeout(() => setIsRefreshing(false), 800);
+  };
+
+  // Order statuses change asynchronously (MercadoPago webhook), and the
+  // shopper may return to this tab after paying. Refresh on focus and every
+  // 15s so the list (and statuses) stay current.
+  useEffect(() => {
+    const onFocus = () => router.refresh();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') router.refresh();
+    };
+    const interval = setInterval(() => router.refresh(), 15000);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [router]);
 
   const resetReviewForm = () => {
     setRating(0);
@@ -224,13 +251,27 @@ export function OrdersClient({
 
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Mis pedidos
-            </h1>
-            <p className="text-muted-foreground">
-              Mirá y seguí el historial de tus compras
-            </p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">
+                Mis pedidos
+              </h1>
+              <p className="text-muted-foreground">
+                Mirá y seguí el historial de tus compras
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refresh}
+              disabled={isRefreshing}
+              className="cursor-pointer shrink-0"
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+              />
+              Actualizar
+            </Button>
           </div>
 
           {!isAuthenticated && (
@@ -368,20 +409,22 @@ export function OrdersClient({
                         </div>
 
                         {/* Shipping Info */}
-                        <div className="border-t pt-4">
-                          <h4 className="font-semibold mb-2">
-                            Dirección de envío
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {order.shipping.name}
-                            <br />
-                            {order.shipping.address}
-                            <br />
-                            {order.shipping.city}, {order.shipping.postalCode}
-                            <br />
-                            {order.shipping.country}
-                          </p>
-                        </div>
+                        {(order.shipping.address || order.shipping.phone) && (
+                          <div className="border-t pt-4">
+                            <h4 className="font-semibold mb-2">
+                              Datos de entrega
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {order.shipping.address || 'Retiro en persona'}
+                              {order.shipping.phone && (
+                                <>
+                                  <br />
+                                  Tel: {order.shipping.phone}
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

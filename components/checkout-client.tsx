@@ -11,8 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
-import Script from 'next/script';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   createCheckoutPreference,
@@ -36,12 +35,6 @@ import {
   MessageCircle,
   RefreshCw,
 } from 'lucide-react';
-
-declare global {
-  interface Window {
-    MercadoPago: any;
-  }
-}
 
 const WHATSAPP_NUMBER = '5491173666370';
 
@@ -77,7 +70,6 @@ export function CheckoutClient() {
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutPaymentMethod>('mercadopago');
-  const [preferenceId, setPreferenceId] = useState('');
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
   // Set once an offline order is placed → success screen with WhatsApp CTA.
@@ -136,62 +128,55 @@ export function CheckoutClient() {
     setCurrentStep(2);
   };
 
-  // MercadoPago: create the preference when the shopper lands on step 2 with
-  // MP selected (or switches back to it). Offline places the order on click
-  // instead (placeOfflineOrder), so it doesn't run here.
-  useEffect(() => {
-    if (currentStep !== 2 || paymentMethod !== 'mercadopago') return;
+  // Deterministic idempotency key for the current cart + method: a re-click
+  // (or retry) reuses the live order/preference instead of creating another.
+  // The key changes when the cart or the payment method changes.
+  const checkoutSignature = `${items
+    .map((i) => `${i.id}:${i.quantity}`)
+    .sort()
+    .join(',')}|${paymentMethod}`;
+  const idempotencyKey = useMemo(() => {
+    // Small djb2 hash → stable key without a hashing lib.
+    let h = 5381;
+    for (let i = 0; i < checkoutSignature.length; i++) {
+      h = (h * 33) ^ checkoutSignature.charCodeAt(i);
+    }
+    return `co-${(h >>> 0).toString(36)}`;
+  }, [checkoutSignature]);
 
-    const setupPayment = async () => {
-      setIsWorking(true);
-      setError('');
-      setPreferenceId('');
-      const container = document.getElementById('payment-form');
-      if (container) container.innerHTML = '';
-      const result = await createCheckoutPreference(
-        userId,
-        {
-          customerEmail: formData.email.trim(),
-          customerPhone: formData.phone.trim(),
-          customerDni: dniDigits,
-          deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
-          deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
-        },
-        'mercadopago'
-      );
-      if (result.error || !result.id) {
-        setError(result.error || 'No pudimos iniciar el pago.');
-      } else {
-        setPreferenceId(result.id);
-      }
+  // Guards double clicks / concurrent calls.
+  const submittingRef = useRef(false);
+
+  const payWithMercadoPago = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsWorking(true);
+    setError('');
+    const result = await createCheckoutPreference(
+      userId,
+      {
+        customerEmail: formData.email.trim(),
+        customerPhone: formData.phone.trim(),
+        customerDni: dniDigits,
+        deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+        deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
+      },
+      'mercadopago',
+      idempotencyKey
+    );
+    if (result.error || !result.checkoutUrl) {
+      setError(result.error || 'No pudimos iniciar el pago.');
       setIsWorking(false);
-    };
-
-    setupPayment();
-  }, [
-    currentStep,
-    paymentMethod,
-    userId,
-    formData.email,
-    formData.phone,
-    formData.dni,
-    formData.address,
-    pickupInPerson,
-  ]);
-
-  useEffect(() => {
-    if (!preferenceId || typeof window === 'undefined' || !window.MercadoPago)
+      submittingRef.current = false;
       return;
-    const mp = new window.MercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!, {
-      locale: 'es-AR',
-    });
-    mp.checkout({
-      preference: { id: preferenceId },
-      render: { container: '#payment-form', label: 'Pagar con MercadoPago' },
-    });
-  }, [preferenceId]);
+    }
+    // Order + preference created (once); go straight to MercadoPago.
+    window.location.href = result.checkoutUrl;
+  };
 
   const placeOfflineOrder = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsWorking(true);
     setError('');
     const result = await createCheckoutPreference(
@@ -207,6 +192,7 @@ export function CheckoutClient() {
     );
     if (result.error || !result.orderId) {
       setError(result.error || 'No pudimos registrar el pedido.');
+      submittingRef.current = false;
     } else {
       // Backend already cleared the cart; sync the client badge.
       clearCart();
@@ -291,7 +277,6 @@ export function CheckoutClient() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Script src="https://sdk.mercadopago.com/js/v2" />
       <main className="flex-grow bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
@@ -522,22 +507,16 @@ export function CheckoutClient() {
                   {error && (
                     <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4 flex items-center justify-between gap-3">
                       <span>{error}</span>
-                      {paymentMethod === 'mercadopago' && (
-                        <button
-                          onClick={() => {
-                            // re-trigger the preference effect
-                            setError('');
-                            setPreferenceId('');
-                            setPaymentMethod('mercadopago');
-                            setCurrentStep(2);
-                            // force effect by toggling a no-op state
-                            setFormData((p) => ({ ...p }));
-                          }}
-                          className="shrink-0 inline-flex items-center gap-1 underline"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" /> Reintentar
-                        </button>
-                      )}
+                      <button
+                        onClick={
+                          paymentMethod === 'mercadopago'
+                            ? payWithMercadoPago
+                            : placeOfflineOrder
+                        }
+                        className="shrink-0 inline-flex items-center gap-1 underline"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" /> Reintentar
+                      </button>
                     </div>
                   )}
 
@@ -550,9 +529,16 @@ export function CheckoutClient() {
                     </div>
                   )}
 
-                  {/* MercadoPago button renders here */}
-                  {paymentMethod === 'mercadopago' && (
-                    <div id="payment-form"></div>
+                  {/* MercadoPago: explicit button — creates the order once and
+                      redirects to Checkout Pro (no auto-create, no SDK). */}
+                  {paymentMethod === 'mercadopago' && !isWorking && (
+                    <Button
+                      size="lg"
+                      className="w-full bg-[#009EE3] text-white hover:bg-[#008FCC]"
+                      onClick={payWithMercadoPago}
+                    >
+                      Pagar con MercadoPago
+                    </Button>
                   )}
 
                   {/* Offline: place the order (coordinate by WhatsApp) */}

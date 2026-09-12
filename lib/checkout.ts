@@ -9,7 +9,9 @@ async function getSessionId(): Promise<string | undefined> {
   return cookieStore.get('legas-session-id')?.value;
 }
 
-async function buildHeaders(sessionId?: string): Promise<Record<string, string>> {
+async function buildHeaders(
+  sessionId?: string
+): Promise<Record<string, string>> {
   const auth = await getAuthHeaders();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -34,6 +36,8 @@ export interface CheckoutPreferenceResult {
   /** Placed order id (offline mode). */
   orderId?: string;
   mode?: 'mercadopago' | 'offline';
+  /** URL to redirect the shopper to (Checkout Pro). */
+  checkoutUrl?: string;
   /**
    * Human-readable failure (e.g. insufficient stock). Returned instead of
    * thrown: Next.js masks thrown Server Action errors in production, which
@@ -52,6 +56,7 @@ export async function createCheckoutPreference(
     deliveryAddress?: string;
   },
   paymentMethod?: CheckoutPaymentMethod,
+  idempotencyKey?: string
 ): Promise<CheckoutPreferenceResult> {
   try {
     const sessionId = await getSessionId();
@@ -64,6 +69,7 @@ export async function createCheckoutPreference(
     if (contact?.deliveryAddress)
       body.deliveryAddress = contact.deliveryAddress;
     if (paymentMethod) body.paymentMethod = paymentMethod;
+    if (idempotencyKey) body.idempotencyKey = idempotencyKey;
 
     const response = await fetch(
       `${BACKEND_URL}/api/payments/mercadopago/checkout`,
@@ -91,7 +97,12 @@ export async function createCheckoutPreference(
     }
 
     const data = await response.json();
-    return { id: data.id, orderId: data.orderId, mode: data.mode };
+    return {
+      id: data.id,
+      orderId: data.orderId,
+      mode: data.mode,
+      checkoutUrl: data.checkoutUrl,
+    };
   } catch (err) {
     console.error('createCheckoutPreference failed', err);
     return {

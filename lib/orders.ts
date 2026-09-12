@@ -52,8 +52,24 @@ export async function getUserOrders(_userId?: string): Promise<Order[]> {
 
 export async function getOrderById(
   id: string,
-  _userId?: string,
+  _userId?: string
 ): Promise<Order | null> {
-  const orders = await fetchOrders();
-  return orders.find((o) => o.id === id) ?? null;
+  try {
+    const auth = await getAuthHeaders();
+    const headers: Record<string, string> = { ...auth };
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('legas-session-id')?.value;
+    if (!('Authorization' in auth) && sessionCookie) {
+      headers['x-session-id'] = sessionCookie;
+    }
+    const resp = await fetch(
+      `${BACKEND_URL}/api/orders/${encodeURIComponent(id)}`,
+      { headers, cache: 'no-store' }
+    );
+    if (!resp.ok) return null;
+    const data: BackendOrder = await resp.json();
+    return mapOrder(data);
+  } catch {
+    return null;
+  }
 }

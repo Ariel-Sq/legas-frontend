@@ -29,8 +29,12 @@ const TIMELINE_STEPS: { status: OrderStatus; label: string }[] = [
 ];
 
 export function OrderDetailClient({ order }: OrderDetailClientProps) {
-  const isTerminal =
-    order.status === 'cancelled' || order.status === 'refunded';
+  const hideTimeline =
+    order.status === 'cancelled' ||
+    order.status === 'refunded' ||
+    order.status === 'expired' ||
+    order.status === 'pending_transfer' ||
+    order.status === 'processing_payment';
   const currentIndex = TIMELINE_STEPS.findIndex(
     (s) => s.status === order.status
   );
@@ -68,7 +72,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           </p>
         </div>
 
-        {!isTerminal && (
+        {!hideTimeline && (
           <Card className="mb-8">
             <CardContent className="py-6">
               <ol className="flex items-start justify-between gap-2">
