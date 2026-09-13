@@ -329,12 +329,14 @@ export function OrdersClient({
                             </Badge>
                           </CardTitle>
                           <CardDescription>
-                            Realizado el{' '}
-                            {new Date(order.date).toLocaleDateString('es-AR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
+Realizado el{' '}
+                             {new Date(order.date).toLocaleDateString('es-AR', {
+                               year: 'numeric',
+                               month: 'long',
+                               day: 'numeric',
+                               hour: '2-digit',
+                               minute: '2-digit',
+                             })}
                           </CardDescription>
                         </div>
                         <div className="text-left md:text-right">
