@@ -85,11 +85,7 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
           <p className="text-base font-medium">{product.name}</p>
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
-              {product.minPrice &&
-              product.maxPrice &&
-              product.minPrice !== product.maxPrice
-                ? `${formatPrice(product.minPrice)} - ${formatPrice(product.maxPrice)}`
-                : formatPrice(product.price)}
+              {formatPrice(product.price)}
             </p>
             {product.variations && product.variations.length > 1 && (
               <span className="text-xs text-muted-foreground">
