@@ -14,9 +14,7 @@ import type {
 import type { Review, ProductRatingSummary } from '@/lib/reviews';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
-  INSTALLMENT_COUNT,
   listPrice,
-  installmentAmount,
 } from '@/lib/pricing';
 
 interface ProductUser {
@@ -196,17 +194,12 @@ export function ProductDetailClient({
                 <p className="mt-0.5 text-base text-muted-foreground">
                   Precio con descuento en efectivo o transferencia
                 </p>
-                <p className="mt-1 text-lg text-foreground">
-                  Precio de lista{' '}
-                  <span className="font-semibold">
-                    {formatPriceDecimal(listPrice(unitPrice))}
-                  </span>
+                <p className="mt-1 text-lg text-primary font-semibold">
+                  {formatPriceDecimal(unitPrice)}
                 </p>
-                <p className="mt-0.5 text-base text-foreground">
-                  En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
-                  <span className="font-semibold">
-                    {formatPriceDecimal(installmentAmount(unitPrice))}
-                  </span>
+                <p className="mt-0.5 text-sm text-foreground">
+                  Precio de lista{' '}
+                  {formatPriceDecimal(listPrice(unitPrice))}
                 </p>
                 {quantity > 1 && (
                   <p className="text-sm text-muted-foreground mt-2">

@@ -9,10 +9,8 @@ import { ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
-  INSTALLMENT_COUNT,
   LIST_PRICE_MARKUP,
   listPrice,
-  installmentAmount,
 } from '@/lib/pricing';
 
 export function CartContent() {
@@ -135,8 +133,8 @@ export function CartContent() {
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
                   Transferencia o efectivo: precio de contado sin recargo. Con
-                  MercadoPago pagás en {INSTALLMENT_COUNT} cuotas sin interés
-                  con un {Math.round(LIST_PRICE_MARKUP * 100)}% de recargo.
+                  MercadoPago: recargo del{' '}
+                  {Math.round(LIST_PRICE_MARKUP * 100)}% sobre el precio de contado. Con
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>

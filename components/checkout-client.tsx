@@ -19,10 +19,8 @@ import {
 } from '@/lib/checkout';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
-  INSTALLMENT_COUNT,
   LIST_PRICE_MARKUP,
   listPrice,
-  installmentAmount,
 } from '@/lib/pricing';
 import {
   AlertTriangle,
@@ -54,7 +52,7 @@ const PAYMENT_OPTIONS: {
   {
     key: 'mercadopago',
     label: 'MercadoPago',
-    description: `Tarjeta, débito o dinero en cuenta. Hasta ${INSTALLMENT_COUNT} cuotas sin interés.`,
+    description: `Tarjeta, débito o dinero en cuenta.`,
   },
   {
     key: 'offline',
@@ -496,8 +494,8 @@ export function CheckoutClient() {
                           </p>
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
-                            {formatPriceDecimal(installmentAmount(subtotal))}
+                            {formatPriceDecimal(listPrice(subtotal))} Precio de
+                            lista
                           </p>
                         )}
                       </button>
