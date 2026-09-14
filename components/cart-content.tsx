@@ -117,10 +117,6 @@ export function CartContent() {
                     {formatPriceDecimal(listPrice(subtotal))}
                   </span>
                 </p>
-                <p className="text-sm font-semibold text-primary">
-                  {formatPriceDecimal(subtotal)} Precio con descuento en
-                  efectivo o transferencia
-                </p>
 
                 <Separator />
 
