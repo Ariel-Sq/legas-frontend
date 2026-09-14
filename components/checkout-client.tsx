@@ -621,8 +621,7 @@ export function CheckoutClient() {
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  Con MercadoPago pagás en {INSTALLMENT_COUNT} cuotas sin
-                  interés con un recargo del{' '}
+                  Con MercadoPago pagás en cuotas con un recargo del{' '}
                   {Math.round(LIST_PRICE_MARKUP * 100)}% sobre el precio de
                   contado. Por transferencia o efectivo pagás el precio de
                   contado sin recargo. El envío se coordina por WhatsApp
