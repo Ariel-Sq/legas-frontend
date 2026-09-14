@@ -191,6 +191,9 @@ export function ProductDetailClient({
                 <p className="text-4xl font-bold text-primary">
                   {formatPrice(unitPrice)}
                 </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Precio con descuento en efectivo o transferencia
+                </p>
                 <p className="mt-1 text-sm text-foreground">
                   Precio de lista{' '}
                   {formatPriceDecimal(listPrice(unitPrice))}
