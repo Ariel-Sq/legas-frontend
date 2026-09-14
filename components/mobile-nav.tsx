@@ -22,7 +22,7 @@ export function MobileNav() {
 
   const navItems = [
     { href: '/', label: 'Inicio', icon: Home },
-    { href: '/shop', label: 'Tienda', icon: ShoppingBag },
+    { href: '/shop', label: 'Productos', icon: ShoppingBag },
     // 'Nosotros' hidden until it has real content — see TODO.md
     { href: '/contact', label: 'Contacto', icon: Mail },
   ];

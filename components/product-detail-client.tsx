@@ -15,8 +15,8 @@ import type { Review, ProductRatingSummary } from '@/lib/reviews';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
   INSTALLMENT_COUNT,
+  listPrice,
   installmentAmount,
-  transferPrice,
 } from '@/lib/pricing';
 
 interface ProductUser {
@@ -190,22 +190,23 @@ export function ProductDetailClient({
               ) : null}
 
               <div className="mb-6">
-                <p className="text-4xl font-bold text-foreground">
+                <p className="text-4xl font-bold text-primary">
                   {formatPrice(unitPrice)}
-                  <span className="text-base font-normal text-muted-foreground">
-                    {' '}
-                    / unidad
+                </p>
+                <p className="mt-0.5 text-base text-muted-foreground">
+                  Precio con descuento en efectivo o transferencia
+                </p>
+                <p className="mt-1 text-lg text-foreground">
+                  Precio de lista{' '}
+                  <span className="font-semibold">
+                    {formatPriceDecimal(listPrice(unitPrice))}
                   </span>
                 </p>
-                <p className="mt-2 text-lg text-foreground">
+                <p className="mt-0.5 text-base text-foreground">
                   En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
                   <span className="font-semibold">
                     {formatPriceDecimal(installmentAmount(unitPrice))}
                   </span>
-                </p>
-                <p className="mt-1 text-lg font-semibold text-primary">
-                  {formatPriceDecimal(transferPrice(unitPrice))} con
-                  Transferencia
                 </p>
                 {quantity > 1 && (
                   <p className="text-sm text-muted-foreground mt-2">
@@ -299,7 +300,7 @@ export function ProductDetailClient({
             )}
 
             <div className="border-t border-b py-6 space-y-4">
-              <p className="text-foreground leading-relaxed">
+              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                 {initialTemplate.description || selectedVariation.name}
               </p>
 

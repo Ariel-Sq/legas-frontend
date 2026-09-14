@@ -75,7 +75,7 @@ export function ProductCard({
           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2 whitespace-pre-wrap">
             {product.description}
           </p>
           <p className="mt-2 font-bold text-primary text-xl">
@@ -121,7 +121,7 @@ export function ProductCard({
         <h3 className="text-lg font-semibold text-card-foreground">
           {product.name}
         </h3>
-        <p className="mt-1 text-sm text-muted-foreground flex-grow">
+        <p className="mt-1 text-sm text-muted-foreground flex-grow whitespace-pre-wrap">
           {product.description}
         </p>
         <p className="mt-4 font-bold text-primary text-xl">

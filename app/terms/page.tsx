@@ -51,12 +51,11 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">3. Precios y pagos</h2>
               <p>
-                Los precios publicados son el precio de lista. Con MercadoPago
-                podés pagar en hasta 6 cuotas sin interés (sujeto a las
-                promociones y tarjetas vigentes que ofrece MercadoPago). Pagando
-                por transferencia o efectivo tenés un 30% de descuento sobre el
-                precio de lista. El precio final según el medio de pago elegido
-                se muestra siempre en el resumen antes de confirmar la compra.
+                Los precios publicados son el precio de contado (efectivo o transferencia).
+                Con MercadoPago podés pagar en hasta 6 cuotas sin interés con un
+                recargo del 20% sobre el precio de contado (precio de lista). El
+                precio final según el medio de pago elegido se muestra siempre en
+                el resumen antes de confirmar la compra.
                 Los precios pueden actualizarse, pero las compras ya confirmadas
                 se respetan al precio pagado. Ante un error manifiesto de
                 publicación te contactaremos antes de procesar el pedido para

@@ -7,7 +7,7 @@ export function HeaderNav() {
         href="/shop"
         className="text-sm font-medium hover:text-primary transition-colors"
       >
-        Tienda
+        Productos
       </Link>
       {/* "Nosotros" hidden until it has real content — see TODO.md */}
       <Link

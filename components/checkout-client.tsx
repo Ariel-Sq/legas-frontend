@@ -20,9 +20,9 @@ import {
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
   INSTALLMENT_COUNT,
-  TRANSFER_DISCOUNT_RATE,
+  LIST_PRICE_MARKUP,
+  listPrice,
   installmentAmount,
-  transferPrice,
 } from '@/lib/pricing';
 import {
   AlertTriangle,
@@ -59,7 +59,7 @@ const PAYMENT_OPTIONS: {
   {
     key: 'offline',
     label: 'Transferencia o efectivo',
-    description: `${Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. Coordinamos por WhatsApp.`,
+    description: `Precio con descuento. Coordinamos por WhatsApp.`,
   },
 ];
 
@@ -101,10 +101,10 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  // Transfer/cash pays the discounted price; MercadoPago pays the list price.
+  // Transfer/cash pays the catalogue price. MercadoPago pays list price (+20%).
   const isTransfer = paymentMethod === 'offline';
-  const transferDiscount = isTransfer ? subtotal * TRANSFER_DISCOUNT_RATE : 0;
-  const total = subtotal - transferDiscount;
+  const mpSurcharge = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
+  const total = subtotal + mpSurcharge;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -491,8 +491,8 @@ export function CheckoutClient() {
                         </p>
                         {option.key === 'offline' ? (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(transferPrice(subtotal))} con
-                            transferencia
+                            {formatPriceDecimal(subtotal)} Precio con descuento
+                            en efectivo o transferencia
                           </p>
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
@@ -606,18 +606,13 @@ export function CheckoutClient() {
                   </div>
                   {isTransfer ? (
                     <div className="flex justify-between text-sm text-primary">
-                      <span>
-                        Descuento transferencia (
-                        {Math.round(TRANSFER_DISCOUNT_RATE * 100)}%)
-                      </span>
-                      <span>-{formatPrice(transferDiscount)}</span>
+                      <span>Precio con descuento en efectivo o transferencia</span>
+                      <span>{formatPrice(total)}</span>
                     </div>
                   ) : (
                     <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>{INSTALLMENT_COUNT} cuotas sin interés de</span>
-                      <span>
-                        {formatPriceDecimal(installmentAmount(subtotal))}
-                      </span>
+                      <span>Incluye recargo MercadoPago ({Math.round(LIST_PRICE_MARKUP * 100)}%)</span>
+                      <span>{formatPrice(mpSurcharge)}</span>
                     </div>
                   )}
                   <Separator className="my-2" />
@@ -629,9 +624,11 @@ export function CheckoutClient() {
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Con MercadoPago pagás en {INSTALLMENT_COUNT} cuotas sin
-                  interés. Por transferencia o efectivo tenés{' '}
-                  {Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. El
-                  envío se coordina por WhatsApp después de la compra.
+                  interés con un recargo del{' '}
+                  {Math.round(LIST_PRICE_MARKUP * 100)}% sobre el precio de
+                  contado. Por transferencia o efectivo pagás el precio de
+                  contado sin recargo. El envío se coordina por WhatsApp
+                  después de la compra.
                 </p>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { ShopContent } from '@/components/shop-content';
 import { getShopProductsPage, type ShopSortOption } from '@/lib/products';
 
 export const metadata: Metadata = {
-  title: 'Tienda',
+  title: 'Productos',
   description:
     'Catálogo completo de muebles de madera: mesas de comedor, sillas, racks, vajilleros, escritorios, cómodas y más. Petiribí macizo y álamo.',
   alternates: { canonical: '/shop' },

@@ -10,9 +10,9 @@ import Link from 'next/link';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
   INSTALLMENT_COUNT,
-  TRANSFER_DISCOUNT_RATE,
+  LIST_PRICE_MARKUP,
+  listPrice,
   installmentAmount,
-  transferPrice,
 } from '@/lib/pricing';
 
 export function CartContent() {
@@ -114,14 +114,14 @@ export function CartContent() {
                 </div>
 
                 <p className="text-sm text-foreground">
-                  En {INSTALLMENT_COUNT} cuotas sin interés de{' '}
+                  Precio de lista{' '}
                   <span className="font-semibold">
-                    {formatPriceDecimal(installmentAmount(subtotal))}
+                    {formatPriceDecimal(listPrice(subtotal))}
                   </span>
                 </p>
                 <p className="text-sm font-semibold text-primary">
-                  {formatPriceDecimal(transferPrice(subtotal))} con
-                  Transferencia
+                  {formatPriceDecimal(subtotal)} Precio con descuento en
+                  efectivo o transferencia
                 </p>
 
                 <Separator />
@@ -134,9 +134,9 @@ export function CartContent() {
                 </div>
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                  Transferencia o efectivo:{' '}
-                  {Math.round(TRANSFER_DISCOUNT_RATE * 100)}% de descuento. Con
-                  MercadoPago elegís las cuotas en el checkout.
+                  Transferencia o efectivo: precio de contado sin recargo. Con
+                  MercadoPago pagás en {INSTALLMENT_COUNT} cuotas sin interés
+                  con un {Math.round(LIST_PRICE_MARKUP * 100)}% de recargo.
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>
