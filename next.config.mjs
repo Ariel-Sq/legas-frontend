@@ -26,7 +26,7 @@ const nextConfig = {
       {
         // Vercel Blob CDN — product images are served straight from here.
         protocol: 'https',
-        hostname: '0mqx9o0nbcz0tpwh.public.blob.vercel-storage.com',
+        hostname: 'vuc1kji60ug9rvd6.public.blob.vercel-storage.com',
       },
       {
         protocol: 'https',
