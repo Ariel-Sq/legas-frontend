@@ -21,7 +21,7 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
   const template = await getProductTemplateBySlugOrId(id);
-  if (!template) return {};
+  if (!template || !template.is_active) return {};
 
   const variation =
     template.variations.find((v) => v.is_active) || template.variations[0];
@@ -51,11 +51,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const foundTemplate = await getProductTemplateBySlugOrId(id);
 
-  const foundVariation =
-    foundTemplate?.variations.find((v) => v.is_active) ||
-    foundTemplate?.variations[0];
+  // Hidden products (is_active = false) must not be reachable by direct URL.
+  if (!foundTemplate || !foundTemplate.is_active) {
+    notFound();
+  }
 
-  if (!foundVariation || !foundTemplate) {
+  const foundVariation =
+    foundTemplate.variations.find((v) => v.is_active) ||
+    foundTemplate.variations[0];
+
+  if (!foundVariation) {
     notFound();
   }
 
