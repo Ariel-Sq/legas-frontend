@@ -9,7 +9,6 @@ import { ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
-  LIST_PRICE_MARKUP,
   listPrice,
 } from '@/lib/pricing';
 
@@ -112,7 +111,7 @@ export function CartContent() {
                 </div>
 
                 <p className="text-sm text-foreground">
-                  Precio de lista{' '}
+                  Precio con tarjeta hasta 6 cuotas{' '}
                   <span className="font-semibold">
                     {formatPriceDecimal(listPrice(subtotal))}
                   </span>
@@ -128,9 +127,9 @@ export function CartContent() {
                 </div>
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                  Transferencia o efectivo: precio de contado sin recargo. Con
-                  MercadoPago: recargo del{' '}
-                  {Math.round(LIST_PRICE_MARKUP * 100)}% sobre el precio de contado. Con
+                  Tenés dos precios: en efectivo o transferencia, y con tarjeta
+                  hasta 6 cuotas (15% más). El envío no está incluido: se cotiza
+                  según la zona antes del despacho.
                 </p>
 
                 <Button size="lg" className="w-full cursor-pointer" asChild>

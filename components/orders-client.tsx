@@ -416,7 +416,7 @@ Realizado el{' '}
                             <h4 className="font-semibold mb-2">
                               Datos de entrega
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">
                               {order.shipping.address || 'Retiro en persona'}
                               {order.shipping.phone && (
                                 <>

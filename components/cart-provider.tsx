@@ -11,7 +11,8 @@ import {
   useRef,
   startTransition,
 } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+import { toast } from 'sonner';
 import {
   type CartItem,
   type CartData,
@@ -106,6 +107,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setServerItems(data.items);
   }
 
+  const handleStaleSession = useCallback(() => {
+    setServerItems([]);
+    toast.error('Tu sesión quedó desactualizada', {
+      description: 'Volvé a iniciar sesión para seguir comprando.',
+    });
+    // Drops the stale next-auth cookie so the next login issues a fresh token.
+    void signOut({ redirect: false });
+  }, []);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (prevUserIdRef.current === userId) return;
@@ -142,15 +152,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       startTransition(async () => {
         setOptimisticItems({ type: 'add', item: optimisticItem });
-        try {
-          const data = await addToCartAction(product.id, quantity, userId);
-          applyCartData(data);
-        } catch (error) {
-          console.error('Failed to add to cart:', error);
+        const result = await addToCartAction(product.id, quantity, userId);
+        if (result.cart) {
+          applyCartData(result.cart);
+          return;
         }
+        if (result.error === 'session') {
+          handleStaleSession();
+          return;
+        }
+        console.error('Failed to add to cart:', result.message);
+        toast.error('No pudimos agregar el producto al carrito', {
+          description:
+            'Revisá tu conexión e intentá de nuevo. Si sigue fallando, escribinos por WhatsApp.',
+        });
       });
     },
-    [userId, setOptimisticItems]
+    [userId, setOptimisticItems, handleStaleSession]
   );
 
   const removeFromCart = useCallback(
@@ -160,15 +178,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       startTransition(async () => {
         setOptimisticItems({ type: 'remove', productId });
-        try {
-          const data = await removeFromCartAction(item.cartItemId, userId);
-          applyCartData(data);
-        } catch (error) {
-          console.error('Failed to remove from cart:', error);
+        const result = await removeFromCartAction(item.cartItemId, userId);
+        if (result.cart) {
+          applyCartData(result.cart);
+          return;
         }
+        if (result.error === 'session') {
+          handleStaleSession();
+          return;
+        }
+        console.error('Failed to remove from cart:', result.message);
+        toast.error('No pudimos quitar el producto del carrito');
       });
     },
-    [serverItems, userId, setOptimisticItems]
+    [serverItems, userId, setOptimisticItems, handleStaleSession]
   );
 
   const updateQuantity = useCallback(
@@ -178,24 +201,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       startTransition(async () => {
         setOptimisticItems({ type: 'update', productId, quantity });
-        try {
-          if (quantity <= 0) {
-            const data = await removeFromCartAction(item.cartItemId, userId);
-            applyCartData(data);
-          } else {
-            const data = await updateCartItemAction(
-              item.cartItemId,
-              quantity,
-              userId
-            );
-            applyCartData(data);
-          }
-        } catch (error) {
-          console.error('Failed to update cart:', error);
+        const result =
+          quantity <= 0
+            ? await removeFromCartAction(item.cartItemId, userId)
+            : await updateCartItemAction(item.cartItemId, quantity, userId);
+        if (result.cart) {
+          applyCartData(result.cart);
+          return;
         }
+        if (result.error === 'session') {
+          handleStaleSession();
+          return;
+        }
+        console.error('Failed to update cart:', result.message);
+        toast.error('No pudimos actualizar la cantidad');
       });
     },
-    [serverItems, userId, setOptimisticItems]
+    [serverItems, userId, setOptimisticItems, handleStaleSession]
   );
 
   const clearCart = useCallback(() => {
@@ -206,6 +228,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         applyCartData({ items: [], itemCount: 0, subtotal: 0 });
       } catch (error) {
         console.error('Failed to clear cart:', error);
+        toast.error('No pudimos vaciar el carrito');
       }
     });
   }, [userId, setOptimisticItems]);

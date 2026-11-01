@@ -132,12 +132,7 @@ export function OrderConfirmationClient({
                   </div>
                   {order.total > order.subtotal ? (
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Recargo MercadoPago</span>
-                      <span>{formatPrice(order.total - order.subtotal)}</span>
-                    </div>
-                  ) : order.total < order.subtotal ? (
-                    <div className="flex justify-between text-primary">
-                      <span>Precio de contado</span>
+                      <span>Precio con tarjeta hasta 6 cuotas</span>
                       <span>{formatPrice(order.total)}</span>
                     </div>
                   ) : null}

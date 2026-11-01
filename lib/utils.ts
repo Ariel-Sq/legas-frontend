@@ -27,3 +27,14 @@ const priceFormatterDecimal = new Intl.NumberFormat('es-AR', {
 export function formatPriceDecimal(value: number): string {
   return priceFormatterDecimal.format(value);
 }
+
+/**
+ * Main copy of a product description, without the "INFORMACION IMPORTANTE"
+ * block that every product repeats at the bottom (shipping, tints, care…).
+ * Cards only show this teaser; the full text lives on the product page.
+ */
+export function getMainDescription(description?: string | null): string {
+  if (!description) return '';
+  const [main] = description.split(/INFORMACI[OÓ]N\s+IMPORTANTE/i);
+  return main.replace(/\s+/g, ' ').trim();
+}

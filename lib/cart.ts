@@ -146,59 +146,122 @@ export async function fetchCart(userId?: string): Promise<CartData> {
   }
 }
 
+/**
+ * Outcome of a cart mutation. Failures are returned instead of thrown: Next
+ * masks thrown Server Action errors behind a full-page dev overlay (and an
+ * opaque digest in production), so an expected case like "your session is
+ * stale" would look like a crash.
+ */
+export interface CartActionResult {
+  cart?: CartData;
+  /** `session` → the login is stale and the caller should sign out. */
+  error?: 'session' | 'generic';
+  message?: string;
+}
+
+async function runCartMutation(
+  path: string,
+  init: RequestInit,
+  actionLabel: string
+): Promise<CartActionResult> {
+  try {
+    const cart = await mutateCart(path, init, actionLabel);
+    return { cart: mapBackendCart(cart) };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'SESSION_STALE') return { error: 'session' };
+    return { error: 'generic', message };
+  }
+}
+
 export async function addToCartAction(
   productId: string,
   quantity: number,
   userId?: string
-): Promise<CartData> {
+): Promise<CartActionResult> {
+  return runCartMutation(
+    '/api/cart/items',
+    { method: 'POST', body: JSON.stringify({ productId, quantity }) },
+    'agregar el producto al carrito'
+  );
+}
+
+/**
+ * Cart mutation against the backend.
+ *
+ * Retries once on network errors and 5xx: the backend restarts on every deploy
+ * (and on `start:dev` file saves), and a request that lands mid-restart used to
+ * surface as a hard "no se pudo agregar" with no way to recover. Anything else
+ * (4xx) is a real answer and is reported as-is.
+ */
+async function mutateCart(
+  path: string,
+  init: RequestInit,
+  actionLabel: string
+): Promise<BackendCart> {
   const sessionId = await getSessionId();
-  const res = await fetch(`${BACKEND_URL}/api/cart/items`, {
-    method: 'POST',
-    headers: await buildHeaders(sessionId),
-    body: JSON.stringify({ productId, quantity }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to add to cart');
+  const headers = await buildHeaders(sessionId);
+  const url = `${BACKEND_URL}${path}`;
+  const pause = () => new Promise((resolve) => setTimeout(resolve, 400));
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let res: Response;
+    try {
+      res = await fetch(url, { ...init, headers });
+    } catch (error) {
+      // Transport failure (backend restarting, DNS, etc.) — retry once.
+      console.error(`cart: ${actionLabel} transport error`, error);
+      if (attempt === 1) throw error;
+      await pause();
+      continue;
+    }
+
+    if (res.ok) return (await res.json()) as BackendCart;
+
+    if (res.status < 500) {
+      const err = await res.json().catch(() => ({}));
+      const detail = Array.isArray(err.message)
+        ? err.message.join(', ')
+        : err.message;
+      // Stale session: the JWT is valid but its user no longer exists, so the
+      // backend refuses to attach a cart. Signalling it lets the provider drop
+      // the session and send the shopper through login again.
+      if (res.status === 401) throw new Error('SESSION_STALE');
+      throw new Error(detail || `No se pudo ${actionLabel}`);
+    }
+
+    // Only gateway/availability codes are safe to retry: a generic 500 may have
+    // already committed the mutation, and retrying a POST would double it.
+    const retryable = [502, 503, 504].includes(res.status);
+    console.error(`cart: ${actionLabel} failed with ${res.status}`);
+    if (!retryable || attempt === 1) break;
+    await pause();
   }
-  const cart: BackendCart = await res.json();
-  return mapBackendCart(cart);
+
+  throw new Error(`No se pudo ${actionLabel}. Probá de nuevo.`);
 }
 
 export async function updateCartItemAction(
   cartItemId: string,
   quantity: number,
   userId?: string
-): Promise<CartData> {
-  const sessionId = await getSessionId();
-  const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
-    method: 'PATCH',
-    headers: await buildHeaders(sessionId),
-    body: JSON.stringify({ quantity }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to update cart');
-  }
-  const cart: BackendCart = await res.json();
-  return mapBackendCart(cart);
+): Promise<CartActionResult> {
+  return runCartMutation(
+    `/api/cart/items/${cartItemId}`,
+    { method: 'PATCH', body: JSON.stringify({ quantity }) },
+    'actualizar el carrito'
+  );
 }
 
 export async function removeFromCartAction(
   cartItemId: string,
   userId?: string
-): Promise<CartData> {
-  const sessionId = await getSessionId();
-  const res = await fetch(`${BACKEND_URL}/api/cart/items/${cartItemId}`, {
-    method: 'DELETE',
-    headers: await buildHeaders(sessionId),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to remove from cart');
-  }
-  const cart: BackendCart = await res.json();
-  return mapBackendCart(cart);
+): Promise<CartActionResult> {
+  return runCartMutation(
+    `/api/cart/items/${cartItemId}`,
+    { method: 'DELETE' },
+    'quitar el producto'
+  );
 }
 
 export async function clearCartAction(userId?: string): Promise<void> {

@@ -6,8 +6,14 @@ import { useCart } from '@/components/cart-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,8 +39,8 @@ import {
   MessageCircle,
   RefreshCw,
 } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
-const WHATSAPP_NUMBER = '5491173666370';
 
 /**
  * How the shopper pays. Catalogue prices are the list price:
@@ -57,9 +63,37 @@ const PAYMENT_OPTIONS: {
   {
     key: 'offline',
     label: 'Transferencia o efectivo',
-    description: `Precio con descuento. Coordinamos por WhatsApp.`,
+    description: `Precio pagando en efectivo o transferencia. Coordinamos por WhatsApp.`,
   },
 ];
+
+/** Argentine jurisdictions for the delivery address. */
+const ARGENTINIAN_PROVINCES = [
+  'Ciudad Autónoma de Buenos Aires',
+  'Buenos Aires',
+  'Catamarca',
+  'Chaco',
+  'Chubut',
+  'Córdoba',
+  'Corrientes',
+  'Entre Ríos',
+  'Formosa',
+  'Jujuy',
+  'La Pampa',
+  'La Rioja',
+  'Mendoza',
+  'Misiones',
+  'Neuquén',
+  'Río Negro',
+  'Salta',
+  'San Juan',
+  'San Luis',
+  'Santa Cruz',
+  'Santa Fe',
+  'Santiago del Estero',
+  'Tierra del Fuego',
+  'Tucumán',
+] as const;
 
 export function CheckoutClient() {
   const { items, subtotal, loading, clearCart } = useCart();
@@ -77,7 +111,13 @@ export function CheckoutClient() {
     email: '',
     phone: '',
     dni: '',
-    address: '',
+    street: '',
+    streetNumber: '',
+    apartment: '',
+    locality: '',
+    zipCode: '',
+    province: '',
+    reference: '',
   });
   // true → el comprador retira en persona y no hace falta dirección.
   const [pickupInPerson, setPickupInPerson] = useState(false);
@@ -88,21 +128,42 @@ export function CheckoutClient() {
   useEffect(() => {
     const u = session?.user;
     if (!u) return;
-    const profileAddress = [u.address, u.city, u.state, u.zipCode, u.country]
-      .filter(Boolean)
-      .join(', ');
     setFormData((prev) => ({
+      ...prev,
       email: prev.email || u.email || '',
       phone: prev.phone || u.phoneNumber || '',
       dni: prev.dni || u.dni || '',
-      address: prev.address || profileAddress,
+      street: prev.street || u.address || '',
+      locality: prev.locality || u.city || '',
+      province: prev.province || u.state || '',
+      zipCode: prev.zipCode || u.zipCode || '',
     }));
   }, [session]);
 
-  // Transfer/cash pays the catalogue price. MercadoPago pays list price (+15%).
+  // Structured form → one readable address string for the order (shipping and
+  // the WhatsApp hand-off both read this text, so it must stay complete).
+  const deliveryAddress = [
+    [formData.street.trim(), formData.streetNumber.trim()]
+      .filter(Boolean)
+      .join(' ') +
+      (formData.apartment.trim() ? `, ${formData.apartment.trim()}` : ''),
+    [formData.locality.trim(), formData.province.trim()]
+      .filter(Boolean)
+      .join(', ') +
+      (formData.zipCode.trim() ? ` (CP ${formData.zipCode.trim()})` : ''),
+    formData.reference.trim()
+      ? `Entre calles / referencia: ${formData.reference.trim()}`
+      : '',
+  ]
+    .filter((line) => line.trim().length > 0)
+    .join('\n');
+
+  // Two prices: cash/transfer pays the catalogue price, card pays the card
+  // price (catalogue + markup). Framed as two prices, never as a card
+  // surcharge — charging extra for card use is prohibited (Ley 25.065).
   const isTransfer = paymentMethod === 'offline';
-  const mpSurcharge = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
-  const total = subtotal + mpSurcharge;
+  const cardPriceDifference = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
+  const total = subtotal + cardPriceDifference;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -115,8 +176,18 @@ export function CheckoutClient() {
   // DNI argentino: 7 u 8 dígitos, sin puntos.
   const dniDigits = formData.dni.replace(/\D/g, '');
   const dniValid = /^\d{7,8}$/.test(dniDigits);
+  // CPA (B1614) or plain 4-digit postal code, both accepted.
+  const zipCodeValid = /^[A-Za-z]?\d{4}[A-Za-z]{0,3}$/.test(
+    formData.zipCode.trim()
+  );
   // Con retiro en persona no pedimos dirección; si es envío, es obligatoria.
-  const addressValid = pickupInPerson || formData.address.trim().length >= 8;
+  const addressValid =
+    pickupInPerson ||
+    (formData.street.trim().length >= 3 &&
+      formData.streetNumber.trim().length > 0 &&
+      formData.locality.trim().length >= 3 &&
+      zipCodeValid &&
+      formData.province.trim().length > 0);
   const canContinueToPayment =
     emailValid && phoneValid && dniValid && addressValid;
 
@@ -157,7 +228,7 @@ export function CheckoutClient() {
         customerPhone: formData.phone.trim(),
         customerDni: dniDigits,
         deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
-        deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
+        deliveryAddress: pickupInPerson ? '' : deliveryAddress,
       },
       'mercadopago',
       idempotencyKey
@@ -184,7 +255,7 @@ export function CheckoutClient() {
         customerPhone: formData.phone.trim(),
         customerDni: dniDigits,
         deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
-        deliveryAddress: pickupInPerson ? '' : formData.address.trim(),
+        deliveryAddress: pickupInPerson ? '' : deliveryAddress,
       },
       'offline'
     );
@@ -348,13 +419,14 @@ export function CheckoutClient() {
                 <div className="rounded-lg border bg-card p-6">
                   <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Tus datos de contacto
+                    Datos de entrega
                   </h2>
                   <form onSubmit={handleShippingSubmit} className="grid gap-4">
                     <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-                      Con tu email y teléfono coordinamos el pago por WhatsApp.
-                      Dejanos la dirección de entrega, o marcá que retirás en
-                      persona.
+                      Con tu email y teléfono coordinamos el envío. Si pagás en
+                      efectivo o por transferencia, también coordinamos el
+                      pago. Completá la dirección de entrega, o marcá que
+                      retirás en persona.
                     </div>
                     <div>
                       <Label htmlFor="email">
@@ -425,27 +497,132 @@ export function CheckoutClient() {
                       </Label>
                     </div>
                     {!pickupInPerson && (
-                      <div>
-                        <Label htmlFor="address">
-                          Dirección de entrega{' '}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Textarea
-                          id="address"
-                          placeholder="Calle y altura, piso/depto, localidad y provincia"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                          required
-                          rows={3}
-                          aria-invalid={
-                            !addressValid && formData.address.length > 0
-                          }
-                        />
-                        {!addressValid && formData.address.length > 0 && (
-                          <p className="mt-1 text-xs text-destructive">
-                            Ingresá una dirección completa para el envío.
+                      <div className="space-y-4 rounded-lg border p-4">
+                        <p className="text-sm font-medium">
+                          Dirección de entrega
+                        </p>
+                        <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
+                          <div>
+                            <Label htmlFor="street">
+                              Calle <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                              id="street"
+                              placeholder="Juan de Herrera"
+                              value={formData.street}
+                              onChange={handleInputChange}
+                              autoComplete="address-line1"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="streetNumber">
+                              Número <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                              id="streetNumber"
+                              placeholder="2651"
+                              value={formData.streetNumber}
+                              onChange={handleInputChange}
+                              autoComplete="address-line2"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="apartment">Depto / piso</Label>
+                            <Input
+                              id="apartment"
+                              placeholder="3º B (opcional)"
+                              value={formData.apartment}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="locality">
+                              Localidad{' '}
+                              <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                              id="locality"
+                              placeholder="Villa de Mayo"
+                              value={formData.locality}
+                              onChange={handleInputChange}
+                              autoComplete="address-level2"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="zipCode">
+                              Código postal{' '}
+                              <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                              id="zipCode"
+                              placeholder="B1614"
+                              value={formData.zipCode}
+                              onChange={handleInputChange}
+                              autoComplete="postal-code"
+                              required
+                              aria-invalid={
+                                !zipCodeValid && formData.zipCode.length > 0
+                              }
+                            />
+                            {!zipCodeValid && formData.zipCode.length > 0 && (
+                              <p className="mt-1 text-xs text-destructive">
+                                Ingresá un código postal válido (4 dígitos,
+                                ej. 1614 o B1614).
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <Label htmlFor="province">
+                              Provincia{' '}
+                              <span className="text-destructive">*</span>
+                            </Label>
+                            <Select
+                              value={formData.province}
+                              onValueChange={(value) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  province: value,
+                                }))
+                              }
+                            >
+                              <SelectTrigger
+                                id="province"
+                                className="w-full cursor-pointer"
+                              >
+                                <SelectValue placeholder="Elegí la provincia" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ARGENTINIAN_PROVINCES.map((province) => (
+                                  <SelectItem key={province} value={province}>
+                                    {province}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="reference">
+                            Entre calles / referencia
+                          </Label>
+                          <Input
+                            id="reference"
+                            placeholder="Entre San Martín y Belgrano, portón verde"
+                            value={formData.reference}
+                            onChange={handleInputChange}
+                          />
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Nos ayuda a encontrar el domicilio el día de la
+                            entrega.
                           </p>
-                        )}
+                        </div>
                       </div>
                     )}
                     <Button
@@ -466,6 +643,28 @@ export function CheckoutClient() {
                     <CreditCard className="h-5 w-5" />
                     ¿Cómo querés pagar?
                   </h2>
+
+                  <div className="mb-6 rounded-lg bg-muted/50 p-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium">Entrega</span>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="text-primary underline cursor-pointer"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                    {pickupInPerson ? (
+                      <p className="mt-1 text-muted-foreground">
+                        Retiro en persona
+                      </p>
+                    ) : (
+                      <p className="mt-1 whitespace-pre-line text-muted-foreground">
+                        {deliveryAddress}
+                      </p>
+                    )}
+                  </div>
 
                   <div className="grid gap-3 sm:grid-cols-2 mb-6">
                     {PAYMENT_OPTIONS.map((option) => (
@@ -489,13 +688,13 @@ export function CheckoutClient() {
                         </p>
                         {option.key === 'offline' ? (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(subtotal)} Precio con descuento
-                            en efectivo o transferencia
+                            {formatPriceDecimal(subtotal)} pagando en efectivo o
+                            transferencia
                           </p>
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(listPrice(subtotal))} Precio de
-                            lista
+                            {formatPriceDecimal(listPrice(subtotal))} con
+                            tarjeta hasta 6 cuotas
                           </p>
                         )}
                       </button>
@@ -604,13 +803,13 @@ export function CheckoutClient() {
                   </div>
                   {isTransfer ? (
                     <div className="flex justify-between text-sm text-primary">
-                      <span>Precio con descuento en efectivo o transferencia</span>
+                      <span>Precio en efectivo o transferencia</span>
                       <span>{formatPrice(total)}</span>
                     </div>
                   ) : (
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Incluye recargo MercadoPago ({Math.round(LIST_PRICE_MARKUP * 100)}%)</span>
-                      <span>{formatPrice(mpSurcharge)}</span>
+                    <div className="flex justify-between text-sm text-primary">
+                      <span>Precio con tarjeta hasta 6 cuotas</span>
+                      <span>{formatPrice(total)}</span>
                     </div>
                   )}
                   <Separator className="my-2" />
@@ -621,11 +820,11 @@ export function CheckoutClient() {
                 </div>
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
-                  Con MercadoPago pagás en cuotas con un recargo del{' '}
-                  {Math.round(LIST_PRICE_MARKUP * 100)}% sobre el precio de
-                  contado. Por transferencia o efectivo pagás el precio de
-                  contado sin recargo. El envío se coordina por WhatsApp
-                  después de la compra.
+                  Los productos tienen dos precios: en efectivo o transferencia,
+                  y con tarjeta hasta 6 cuotas. El envío no está incluido: se
+                  cotiza según la zona antes del despacho. Si no aceptás el
+                  costo del envío, podés cancelar la compra sin cargo y te
+                  reintegramos el total.
                 </p>
               </div>
             </div>
