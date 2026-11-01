@@ -11,6 +11,14 @@
 
 ### Open
 
+- **Pickup deposit (cash/transfer + retiro en persona): handled manually.**
+  Rule: 50% deposit by transfer within 48 hs, balance on pickup. There is
+  NO automatic cancellation at 48 hs (decision: A) — the shop coordinates by
+  WhatsApp and asks for the order to be cancelled. Two SQL moments:
+  acreditada → `UPDATE orders SET "depositPaidAt" = now(),
+  status = 'paid_preparing'`; no pagó → cancel + restore stock (see
+  `compensateFailedCheckout`). The 14-day sweep remains as a backstop.
+
 - **Post-MercadoPago (end of project): order notifications + admin panel.**
   Two options, to decide once real MP credentials are configured:
   1. Automatic notice to the shop: include address + order detail in the
