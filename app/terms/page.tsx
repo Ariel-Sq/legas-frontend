@@ -78,8 +78,10 @@ export default function TermsPage() {
                 <strong>Retiro en persona con pago en efectivo o por
                 transferencia:</strong> se abona una <strong>seña del 50%</strong>{' '}
                 del total por transferencia para reservar el pedido, y el saldo
-                se paga al retirar, en efectivo o por transferencia. La seña se
-                imputa al precio total. Si ejercés el derecho de arrepentimiento
+                se paga al retirar, en efectivo o por transferencia. La seña debe
+                abonarse <strong>dentro de las 48 horas</strong> de realizada la
+                compra; si no se acredita en ese plazo, el pedido se cancela y se
+                libera el stock. La seña se imputa al precio total. Si ejercés el derecho de arrepentimiento
                 dentro de los 10 días corridos, te reintegramos la seña completa;
                 vencido ese plazo, la seña no se reintegra si desistís de la
                 compra. Esto no afecta la garantía legal por defectos. La seña no

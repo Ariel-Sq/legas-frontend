@@ -39,9 +39,11 @@ export default function ShippingPage() {
                 Podés retirar tu pedido por el taller, en Juan de Herrera 2651,
                 Villa de Mayo, Malvinas Argentinas, coordinando día y horario por
                 WhatsApp. Si elegís pagar en efectivo o por transferencia, se
-                abona una <strong>seña del 50%</strong> por transferencia para
-                reservar la pieza y el saldo se paga al retirar. La seña no
-                aplica a compras con envío.
+                abona una <strong>seña del 50%</strong> por transferencia dentro
+                de las 48 horas para reservar la pieza, y el saldo se paga al
+                retirar. Si la seña no se acredita en ese plazo, el pedido se
+                cancela y se libera el stock. La seña no aplica a compras con
+                envío.
               </p>
             </section>
 

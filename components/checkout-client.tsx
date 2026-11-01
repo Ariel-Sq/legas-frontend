@@ -282,7 +282,7 @@ export function CheckoutClient() {
     const shortId = offlineOrderId.slice(0, 8).toUpperCase();
     const waText = encodeURIComponent(
       isPickupDeposit
-        ? `Hola Legas! Hice el pedido ${shortId} para retirar en persona y pagar en efectivo/transferencia. La seña del 50% es ${formatPrice(deposit)} y el saldo al retirar ${formatPrice(balance)}. ¿Me pasás los datos para transferir?`
+        ? `Hola Legas! Hice el pedido ${shortId} para retirar en persona y pagar en efectivo/transferencia. La seña del 50% es ${formatPrice(deposit)} (la abono dentro de las 48 hs) y el saldo al retirar ${formatPrice(balance)}. ¿Me pasás los datos para transferir?`
         : `Hola Legas! Acabo de hacer el pedido ${shortId} para pagar por transferencia/efectivo. ¿Cómo coordinamos?`
     );
     return (
@@ -298,7 +298,8 @@ export function CheckoutClient() {
               Te reservamos los productos. Para confirmar el pedido transferí la
               seña de <strong>{formatPrice(deposit)}</strong> (50%); el saldo de{' '}
               <strong>{formatPrice(balance)}</strong> lo pagás al retirar.
-              Escribinos por WhatsApp y te pasamos los datos para transferir.
+              La seña se abona dentro de las 48 horas: escribinos por WhatsApp
+              y te pasamos los datos para transferir.
             </p>
           ) : (
             <p className="mb-8 text-muted-foreground">
@@ -742,7 +743,8 @@ export function CheckoutClient() {
                         transferencia para reservar la pieza. Los{' '}
                         <strong>{formatPriceDecimal(balance)}</strong> restantes
                         los pagás al retirar, en efectivo o por transferencia.
-                        Al confirmar te enviamos los datos por WhatsApp.
+                        Al confirmar te enviamos los datos por WhatsApp; la seña
+                        se abona <strong>dentro de las 48 horas</strong>.
                       </p>
                     </div>
                   )}

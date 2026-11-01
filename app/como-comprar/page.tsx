@@ -144,7 +144,8 @@ export default function HowToBuyPage() {
                     persona&rdquo; en el checkout y coordinamos día y horario por
                     WhatsApp. Si además pagás en efectivo o por transferencia,
                     abonás una <strong>seña del 50%</strong> por transferencia
-                    para reservar la pieza y el saldo lo pagás al retirar.
+                    dentro de las 48 horas para reservar la pieza, y el saldo lo
+                    pagás al retirar.
                   </p>
                 </div>
               </div>
