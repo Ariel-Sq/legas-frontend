@@ -198,7 +198,8 @@ function defaultSortRank(p: ShopDisplayProduct): [number, number] {
   const category = p.category.toLowerCase();
   if (category === 'mesas de comedor') {
     if (name.includes('ovalada')) return [3, 0];
-    if (/griega|tradicional|trapecio|rectangular/.test(name)) return [2, 0];
+    if (/griega|tradicional|trapecio|rectangular|carpintera/.test(name))
+      return [2, 0];
     // Round tables (Gerbasoni): álamo → álamo premium (sin nudos) → petiribí.
     if (name.includes('petirib')) return [1, 2];
     if (name.includes('sin nudos')) return [1, 1];
