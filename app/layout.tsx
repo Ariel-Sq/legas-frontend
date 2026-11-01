@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { Work_Sans } from 'next/font/google';
 import { GeistMono } from 'geist/font/mono';
 import { Analytics } from '@vercel/analytics/next';
-import { Suspense } from 'react';
 import { CartProvider } from '@/components/cart-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { WishlistProvider } from '@/components/wishlist-provider';
@@ -77,12 +76,10 @@ export default function RootLayout({
           <AuthProvider>
             <WishlistProvider>
               <CartProvider>
-                <Suspense fallback={null}>
-                  <Header />
-                  {children}
-                  <Footer />
-                  <WhatsAppFab />
-                </Suspense>
+                <Header />
+                {children}
+                <Footer />
+                <WhatsAppFab />
                 <Toaster position="top-center" richColors />
               </CartProvider>
             </WishlistProvider>

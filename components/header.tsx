@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { AuthSection } from '@/components/auth-section';
@@ -31,7 +32,13 @@ export function Header() {
             <HeaderNav />
           </div>
           <div className="flex items-center gap-4">
-            <SearchBar />
+            {/* useSearchParams() must sit in its own Suspense boundary,
+                otherwise the whole page bails out to client rendering. */}
+            <Suspense
+              fallback={<div className="hidden md:block h-10 w-56" />}
+            >
+              <SearchBar />
+            </Suspense>
             <ThemeToggle />
             <WishlistButton />
             <CartButton />
