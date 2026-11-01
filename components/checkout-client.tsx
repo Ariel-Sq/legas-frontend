@@ -106,7 +106,15 @@ export function CheckoutClient() {
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
   // Set once an offline order is placed → success screen with WhatsApp CTA.
-  const [offlineOrderId, setOfflineOrderId] = useState('');
+  // Snapshot taken when the order is placed: the backend clears the cart, so
+  // the totals derived from it become 0 and cannot feed the success screen.
+  const [offlineOrder, setOfflineOrder] = useState<{
+    orderId: string;
+    isPickupDeposit: boolean;
+    total: number;
+    deposit: number;
+    balance: number;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -255,6 +263,13 @@ export function CheckoutClient() {
     submittingRef.current = true;
     setIsWorking(true);
     setError('');
+    // Snapshot before the request: placing the order empties the cart.
+    const amounts = {
+      isPickupDeposit,
+      total,
+      deposit,
+      balance,
+    };
     const result = await createCheckoutPreference(
       userId,
       {
@@ -271,18 +286,18 @@ export function CheckoutClient() {
       submittingRef.current = false;
     } else {
       // Backend already cleared the cart; sync the client badge.
+      setOfflineOrder({ orderId: result.orderId, ...amounts });
       clearCart();
-      setOfflineOrderId(result.orderId);
     }
     setIsWorking(false);
   };
 
   // ----- Offline success screen -----
-  if (offlineOrderId) {
-    const shortId = offlineOrderId.slice(0, 8).toUpperCase();
+  if (offlineOrder) {
+    const shortId = offlineOrder.orderId.slice(0, 8).toUpperCase();
     const waText = encodeURIComponent(
-      isPickupDeposit
-        ? `Hola Legas! Hice el pedido ${shortId} para retirar en persona y pagar en efectivo/transferencia. La seña del 50% es ${formatPrice(deposit)} (la abono dentro de las 48 hs) y el saldo al retirar ${formatPrice(balance)}. ¿Me pasás los datos para transferir?`
+      offlineOrder.isPickupDeposit
+        ? `Hola Legas! Hice el pedido ${shortId} para retirar en persona y pagar en efectivo/transferencia. La seña del 50% es ${formatPrice(offlineOrder.deposit)} (la abono dentro de las 48 hs) y el saldo al retirar ${formatPrice(offlineOrder.balance)}. ¿Me pasás los datos para transferir?`
         : `Hola Legas! Acabo de hacer el pedido ${shortId} para pagar por transferencia/efectivo. ¿Cómo coordinamos?`
     );
     return (
@@ -293,11 +308,12 @@ export function CheckoutClient() {
           <p className="mb-1 text-muted-foreground">
             Tu número de pedido es <strong>{shortId}</strong>.
           </p>
-          {isPickupDeposit ? (
+          {offlineOrder.isPickupDeposit ? (
             <p className="mb-8 text-muted-foreground">
               Te reservamos los productos. Para confirmar el pedido transferí la
-              seña de <strong>{formatPrice(deposit)}</strong> (50%); el saldo de{' '}
-              <strong>{formatPrice(balance)}</strong> lo pagás al retirar.
+              seña de <strong>{formatPrice(offlineOrder.deposit)}</strong> (50%);
+              el saldo de{' '}
+              <strong>{formatPrice(offlineOrder.balance)}</strong> lo pagás al retirar.
               La seña se abona dentro de las 48 horas: escribinos por WhatsApp
               y te pasamos los datos para transferir.
             </p>
