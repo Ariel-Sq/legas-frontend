@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/hero-section';
 import { FeaturedProducts } from '@/components/featured-products';
 import { NewArrivals } from '@/components/new-arrivals';
 import { CTASection } from '@/components/cta-section';
+import { InstagramSection } from '@/components/instagram-section';
 import { SITE_URL } from '@/utils/environments';
 
 // Organization + WebSite structured data (schema.org) for the home page —
@@ -14,6 +15,7 @@ const ORGANIZATION_JSON_LD = {
       '@type': 'FurnitureStore',
       name: 'Legas Muebles',
       url: SITE_URL,
+      sameAs: ['https://www.instagram.com/legasmuebles/'],
       description:
         'Muebles de madera artesanales: mesas de comedor, sillas, racks y más. Petiribí macizo y álamo.',
       currenciesAccepted: 'ARS',
@@ -45,6 +47,7 @@ export default async function Home() {
         <HeroSection featuredProduct={featuredProducts[0]} />
         <FeaturedProducts products={featuredProducts} />
         <NewArrivals products={newArrivals} />
+        <InstagramSection />
         <CTASection />
       </main>
     </div>

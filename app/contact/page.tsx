@@ -1,4 +1,5 @@
-import { Phone, MapPin } from 'lucide-react';
+import { Phone, MapPin, Instagram } from 'lucide-react';
+import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from '@/lib/company';
 import { ContactForm } from '@/components/contact-form';
 import { getContactInfo } from '@/lib/company';
 import type { Metadata } from 'next';
@@ -55,6 +56,27 @@ export default async function ContactPage() {
                       <h3 className="font-semibold mb-1">Teléfono</h3>
                       <p className="text-muted-foreground">
                         {contactInfo.phone}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-primary/20">
+                      <Instagram className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Instagram</h3>
+                      <a
+                        href={INSTAGRAM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary hover:underline transition-colors"
+                      >
+                        {INSTAGRAM_HANDLE}
+                      </a>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Seguinos para ver las piezas terminadas y las novedades
+                        del taller.
                       </p>
                     </div>
                   </div>

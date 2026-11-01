@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { Instagram } from 'lucide-react';
+import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from '@/lib/company';
 
 export function Footer() {
   return (
@@ -38,6 +40,15 @@ export function Footer() {
             >
               Botón de arrepentimiento
             </Link>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Instagram className="h-4 w-4" aria-hidden="true" />
+              {INSTAGRAM_HANDLE}
+            </a>
           </div>
           <p className="text-sm text-muted-foreground text-center md:text-right">
             © 2026 Legas. Todos los derechos reservados

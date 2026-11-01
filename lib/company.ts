@@ -96,6 +96,10 @@ export async function getContactInfo(): Promise<ContactInfo> {
   };
 }
 
+/** Social profiles, used by the footer, contact page and structured data. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/legasmuebles/';
+export const INSTAGRAM_HANDLE = '@legasmuebles';
+
 export async function getFooterLinks(): Promise<FooterLinks[]> {
   return [
     { label: 'Cómo comprar', href: '/como-comprar' },
