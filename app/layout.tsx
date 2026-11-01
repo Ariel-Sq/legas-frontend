@@ -1,6 +1,6 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import { Work_Sans } from 'next/font/google';
+import localFont from 'next/font/local';
 import { GeistMono } from 'geist/font/mono';
 import { Analytics } from '@vercel/analytics/next';
 import { CartProvider } from '@/components/cart-provider';
@@ -15,10 +15,12 @@ import { Toaster } from 'sonner';
 import { CookieNotice } from '@/components/cookie-notice';
 import { SITE_URL } from '@/utils/environments';
 
-const workSans = Work_Sans({
-  subsets: ['latin'],
+// Self-hosted (app/fonts) so the build never depends on fetching Google Fonts.
+const workSans = localFont({
+  src: './fonts/WorkSans-Variable.woff2',
   variable: '--font-work-sans',
-  weight: ['400', '500', '600', '700', '800'],
+  weight: '400 800',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
