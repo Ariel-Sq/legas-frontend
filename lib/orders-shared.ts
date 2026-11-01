@@ -47,6 +47,9 @@ export interface Order {
   subtotal: number;
   shippingCost: number;
   total: number;
+  /** Pickup deposit (cash/transfer + retiro): 50% up front, rest on pickup. */
+  depositAmount?: number;
+  balanceAmount?: number;
 }
 
 export interface BackendImage {
@@ -76,6 +79,8 @@ export interface BackendOrder {
   customerPhone?: string | null;
   deliveryMethod?: string | null;
   deliveryAddress?: string | null;
+  depositAmount?: string | number | null;
+  balanceAmount?: string | number | null;
   items: BackendOrderItem[];
 }
 
@@ -132,6 +137,14 @@ export function mapOrder(o: BackendOrder): Order {
     subtotal,
     shippingCost: 0,
     total,
+    depositAmount:
+      o.depositAmount === null || o.depositAmount === undefined
+        ? undefined
+        : Number(o.depositAmount),
+    balanceAmount:
+      o.balanceAmount === null || o.balanceAmount === undefined
+        ? undefined
+        : Number(o.balanceAmount),
   };
 }
 

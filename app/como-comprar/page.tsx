@@ -142,7 +142,9 @@ export default function HowToBuyPage() {
                     Podés retirar por el taller, en Juan de Herrera 2651, Villa
                     de Mayo, Malvinas Argentinas. Marcá &ldquo;Retiro en
                     persona&rdquo; en el checkout y coordinamos día y horario por
-                    WhatsApp.
+                    WhatsApp. Si además pagás en efectivo o por transferencia,
+                    abonás una <strong>seña del 50%</strong> por transferencia
+                    para reservar la pieza y el saldo lo pagás al retirar.
                   </p>
                 </div>
               </div>

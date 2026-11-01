@@ -177,6 +177,25 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
               ))}
             </div>
 
+            {order.depositAmount ? (
+              <div className="mt-4 space-y-1 text-sm">
+                <div className="flex justify-between text-primary">
+                  <span>Seña a transferir (50%)</span>
+                  <span className="font-semibold">
+                    {formatPrice(order.depositAmount)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Saldo al retirar</span>
+                  <span>
+                    {formatPrice(
+                      order.balanceAmount ?? order.total - order.depositAmount
+                    )}
+                  </span>
+                </div>
+              </div>
+            ) : null}
+
             <div className="border-t mt-6 pt-4 flex items-center justify-between">
               <span className="text-lg font-semibold">Total</span>
               <span className="text-2xl font-bold text-primary">

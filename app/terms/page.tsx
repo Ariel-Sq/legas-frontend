@@ -75,6 +75,17 @@ export default function TermsPage() {
                 compra sin cargo y te reintegramos el total abonado.
               </p>
               <p>
+                <strong>Retiro en persona con pago en efectivo o por
+                transferencia:</strong> se abona una <strong>seña del 50%</strong>{' '}
+                del total por transferencia para reservar el pedido, y el saldo
+                se paga al retirar, en efectivo o por transferencia. La seña se
+                imputa al precio total. Si ejercés el derecho de arrepentimiento
+                dentro de los 10 días corridos, te reintegramos la seña completa;
+                vencido ese plazo, la seña no se reintegra si desistís de la
+                compra. Esto no afecta la garantía legal por defectos. La seña no
+                aplica a compras con envío.
+              </p>
+              <p>
                 Los precios pueden actualizarse, pero las compras ya confirmadas
                 se respetan al precio pagado. Ante un error manifiesto de
                 publicación te contactaremos antes de procesar el pedido para

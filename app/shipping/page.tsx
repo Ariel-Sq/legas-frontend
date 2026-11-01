@@ -34,6 +34,18 @@ export default function ShippingPage() {
             </section>
 
             <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">Retiro en persona</h2>
+              <p>
+                Podés retirar tu pedido por el taller, en Juan de Herrera 2651,
+                Villa de Mayo, Malvinas Argentinas, coordinando día y horario por
+                WhatsApp. Si elegís pagar en efectivo o por transferencia, se
+                abona una <strong>seña del 50%</strong> por transferencia para
+                reservar la pieza y el saldo se paga al retirar. La seña no
+                aplica a compras con envío.
+              </p>
+            </section>
+
+            <section className="space-y-3">
               <h2 className="text-2xl font-semibold">Seguimiento</h2>
               <p>
                 El estado de tu pedido se actualiza en{' '}

@@ -19,3 +19,14 @@ export function listPrice(price: number): number {
 export function transferPrice(price: number): number {
   return price;
 }
+/**
+ * Pickup deposit: paying cash/transfer AND picking the order up at the shop
+ * requires half the total up front by transfer; the rest is paid on pickup.
+ * Exact half — no rounding. Shipments never use a deposit.
+ */
+export const PICKUP_DEPOSIT_RATE = 0.5;
+
+/** Deposit to transfer when the order is picked up (cash/transfer). */
+export function pickupDeposit(total: number): number {
+  return Math.round(total * PICKUP_DEPOSIT_RATE * 100) / 100;
+}

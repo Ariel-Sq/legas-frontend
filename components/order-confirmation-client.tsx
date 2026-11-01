@@ -136,6 +136,22 @@ export function OrderConfirmationClient({
                       <span>{formatPrice(order.total)}</span>
                     </div>
                   ) : null}
+                  {order.depositAmount ? (
+                    <>
+                      <div className="flex justify-between text-primary">
+                        <span>Seña a transferir (50%)</span>
+                        <span>{formatPrice(order.depositAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Saldo al retirar</span>
+                        <span>
+                          {formatPrice(
+                            order.balanceAmount ?? order.total - order.depositAmount
+                          )}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Envío</span>
                     <span>a coordinar</span>

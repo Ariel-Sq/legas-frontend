@@ -27,6 +27,7 @@ import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import {
   LIST_PRICE_MARKUP,
   listPrice,
+  pickupDeposit,
 } from '@/lib/pricing';
 import {
   AlertTriangle,
@@ -165,6 +166,12 @@ export function CheckoutClient() {
   const cardPriceDifference = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
   const total = subtotal + cardPriceDifference;
 
+  // Pickup + cash/transfer: 50% deposit by transfer to reserve the piece, the
+  // rest is paid when the shopper picks it up. Exact half, no rounding.
+  const isPickupDeposit = pickupInPerson && isTransfer;
+  const deposit = isPickupDeposit ? pickupDeposit(total) : 0;
+  const balance = isPickupDeposit ? total - deposit : 0;
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -274,7 +281,9 @@ export function CheckoutClient() {
   if (offlineOrderId) {
     const shortId = offlineOrderId.slice(0, 8).toUpperCase();
     const waText = encodeURIComponent(
-      `Hola Legas! Acabo de hacer el pedido ${shortId} para pagar por transferencia/efectivo. ¿Cómo coordinamos?`
+      isPickupDeposit
+        ? `Hola Legas! Hice el pedido ${shortId} para retirar en persona y pagar en efectivo/transferencia. La seña del 50% es ${formatPrice(deposit)} y el saldo al retirar ${formatPrice(balance)}. ¿Me pasás los datos para transferir?`
+        : `Hola Legas! Acabo de hacer el pedido ${shortId} para pagar por transferencia/efectivo. ¿Cómo coordinamos?`
     );
     return (
       <main className="flex-grow">
@@ -284,10 +293,19 @@ export function CheckoutClient() {
           <p className="mb-1 text-muted-foreground">
             Tu número de pedido es <strong>{shortId}</strong>.
           </p>
-          <p className="mb-8 text-muted-foreground">
-            Te reservamos los productos. Escribinos por WhatsApp y coordinamos
-            el pago (transferencia o efectivo) y la entrega.
-          </p>
+          {isPickupDeposit ? (
+            <p className="mb-8 text-muted-foreground">
+              Te reservamos los productos. Para confirmar el pedido transferí la
+              seña de <strong>{formatPrice(deposit)}</strong> (50%); el saldo de{' '}
+              <strong>{formatPrice(balance)}</strong> lo pagás al retirar.
+              Escribinos por WhatsApp y te pasamos los datos para transferir.
+            </p>
+          ) : (
+            <p className="mb-8 text-muted-foreground">
+              Te reservamos los productos. Escribinos por WhatsApp y coordinamos
+              el pago (transferencia o efectivo) y la entrega.
+            </p>
+          )}
           <div className="flex flex-col gap-3">
             <Button asChild size="lg">
               <a
@@ -687,10 +705,21 @@ export function CheckoutClient() {
                           {option.description}
                         </p>
                         {option.key === 'offline' ? (
-                          <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(subtotal)} pagando en efectivo o
-                            transferencia
-                          </p>
+                          isPickupDeposit ? (
+                            <>
+                              <p className="mt-2 text-sm font-semibold text-primary">
+                                Seña 50%: {formatPriceDecimal(deposit)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Saldo al retirar: {formatPriceDecimal(balance)}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="mt-2 text-sm font-semibold text-primary">
+                              {formatPriceDecimal(subtotal)} pagando en efectivo
+                              o transferencia
+                            </p>
+                          )
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
                             {formatPriceDecimal(listPrice(subtotal))} con
@@ -700,6 +729,23 @@ export function CheckoutClient() {
                       </button>
                     ))}
                   </div>
+
+                  {isPickupDeposit && (
+                    <div className="mb-4 rounded-lg border bg-muted/40 p-4 text-sm">
+                      <p className="font-semibold">
+                        Seña del 50% para reservar el pedido
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        Como retirás en persona y pagás en efectivo o por
+                        transferencia, abonás{' '}
+                        <strong>{formatPriceDecimal(deposit)}</strong> por
+                        transferencia para reservar la pieza. Los{' '}
+                        <strong>{formatPriceDecimal(balance)}</strong> restantes
+                        los pagás al retirar, en efectivo o por transferencia.
+                        Al confirmar te enviamos los datos por WhatsApp.
+                      </p>
+                    </div>
+                  )}
 
                   {error && (
                     <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4 flex items-center justify-between gap-3">
@@ -811,6 +857,26 @@ export function CheckoutClient() {
                       <span>Precio con tarjeta hasta 6 cuotas</span>
                       <span>{formatPrice(total)}</span>
                     </div>
+                  )}
+                  {isPickupDeposit && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Seña a transferir (50%)
+                        </span>
+                        <span className="font-semibold">
+                          {formatPrice(deposit)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Saldo al retirar
+                        </span>
+                        <span className="font-semibold">
+                          {formatPrice(balance)}
+                        </span>
+                      </div>
+                    </>
                   )}
                   <Separator className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
