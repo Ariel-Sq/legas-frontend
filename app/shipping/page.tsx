@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
 export const metadata: Metadata = {
   title: 'Envíos & Devoluciones',
@@ -40,6 +41,22 @@ export default function ShippingPage() {
                 </Link>{' '}
                 y te vamos avisando por WhatsApp en cada etapa (en fabricación,
                 listo para enviar, enviado, entregado).
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">
+                Costo de envío y cancelación
+              </h2>
+              <p>
+                El precio del producto no incluye el envío. El costo depende de
+                la zona y del tamaño del mueble, y te lo informamos por WhatsApp
+                antes del despacho, junto con la fecha estimada de entrega. Si
+                no aceptás ese costo,{' '}
+                <strong>
+                  podés cancelar la compra sin cargo y te reintegramos el total
+                </strong>{' '}
+                por el mismo medio de pago.
               </p>
             </section>
 
@@ -91,7 +108,7 @@ export default function ShippingPage() {
               <p>
                 Escribinos por{' '}
                 <a
-                  href="https://wa.me/5491173666370"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"

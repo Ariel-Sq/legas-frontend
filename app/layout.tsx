@@ -12,6 +12,7 @@ import './globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { WhatsAppFab } from '@/components/whatsapp-fab';
+import { Toaster } from 'sonner';
 import { SITE_URL } from '@/utils/environments';
 
 const workSans = Work_Sans({
@@ -82,6 +83,7 @@ export default function RootLayout({
                   <Footer />
                   <WhatsAppFab />
                 </Suspense>
+                <Toaster position="top-center" richColors />
               </CartProvider>
             </WishlistProvider>
           </AuthProvider>

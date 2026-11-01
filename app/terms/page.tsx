@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 
 export const metadata: Metadata = {
   title: 'Términos del Servicio',
@@ -24,16 +25,16 @@ export default function TermsPage() {
               <p>
                 Legas Muebles es la marca comercial de{' '}
                 <strong>Leonardo Gastón Gamarra</strong> (CUIT 20-32319747-5,
-                monotributista), con domicilio en Juan de Herrera 2542, B1614
-                Malvinas Argentinas, Provincia de Buenos Aires, Argentina. Vende
+                monotributista), con domicilio en Juan de Herrera 2651, Villa de Mayo,
+                B1614 Malvinas Argentinas, Provincia de Buenos Aires, Argentina. Vende
                 muebles de madera fabricados a pedido. Atención al cliente por{' '}
                 <a
-                  href="https://wa.me/5491173666370"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  WhatsApp (+54 11 7366-6370)
+                  WhatsApp ({WHATSAPP_DISPLAY})
                 </a>
                 . Al usar este sitio aceptás estos términos.
               </p>
@@ -51,11 +52,21 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">3. Precios y pagos</h2>
               <p>
-                Los precios publicados son el precio de contado (efectivo o transferencia).
-                Con MercadoPago podés pagar en cuotas con un
-                recargo del 15% sobre el precio de contado (precio de lista). El
-                precio final según el medio de pago elegido se muestra siempre en
-                el resumen antes de confirmar la compra.
+                Los productos tienen dos precios: uno <strong>en efectivo o por
+                transferencia</strong> y otro <strong>con tarjeta hasta 6
+                cuotas</strong> (15% más alto). Los dos se muestran en la ficha
+                del producto y el que corresponde al medio de pago elegido
+                aparece siempre en el resumen antes de confirmar la compra. Los
+                precios están expresados en pesos argentinos (ARS) e incluyen
+                los impuestos correspondientes.
+              </p>
+              <p>
+                El precio <strong>no incluye el costo de envío</strong>: se
+                cotiza según la zona y el tamaño del mueble, y te lo informamos
+                antes del despacho. Si no aceptás ese costo, podés cancelar la
+                compra sin cargo y te reintegramos el total abonado.
+              </p>
+              <p>
                 Los precios pueden actualizarse, pero las compras ya confirmadas
                 se respetan al precio pagado. Ante un error manifiesto de
                 publicación te contactaremos antes de procesar el pedido para
@@ -112,16 +123,56 @@ export default function TermsPage() {
                 >
                   Ventanilla Única Federal de Defensa del Consumidor
                 </a>
-                .
+                . También podés iniciar un reclamo ante el Servicio de
+                Conciliación Previa en las Relaciones de Consumo (COPREC),
+                gratuito y previo a cualquier acción judicial. Si tenés un
+                reclamo, escribinos primero: en la mayoría de los casos lo
+                resolvemos ahí mismo.
               </p>
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-2xl font-semibold">7. Contacto</h2>
+              <h2 className="text-2xl font-semibold">
+                7. Capacidad para contratar
+              </h2>
+              <p>
+                Para comprar tenés que ser mayor de 18 años y tener capacidad
+                legal para contratar. Si comprás a nombre de una empresa o de
+                otra persona, declarás contar con autorización para hacerlo.
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">
+                8. Comprobantes de compra
+              </h2>
+              <p>
+                Emitimos el comprobante correspondiente por cada venta y te lo
+                enviamos junto con la confirmación del pedido. El número de
+                pedido que te damos al finalizar la compra sirve como
+                identificación para cualquier consulta, cambio o reclamo.
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">
+                9. Cambios en estos términos
+              </h2>
+              <p>
+                Podemos actualizar estos términos para reflejar cambios en la
+                tienda o en la normativa. La versión vigente es siempre la
+                publicada en esta página, con su fecha de actualización. Los
+                pedidos ya confirmados se rigen por las condiciones vigentes al
+                momento de la compra.
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-2xl font-semibold">10. Contacto</h2>
               <p>
                 Por dudas sobre estos términos escribinos por{' '}
                 <a
-                  href="https://wa.me/5491173666370"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"

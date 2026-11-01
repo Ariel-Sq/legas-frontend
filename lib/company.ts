@@ -1,5 +1,7 @@
 // Company information and content
 
+import { WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+
 export interface CompanyInfo {
   name: string;
   tagline: string;
@@ -80,12 +82,12 @@ export async function getAboutContent(): Promise<AboutContent> {
 export async function getContactInfo(): Promise<ContactInfo> {
   return {
     address: {
-      street: 'Juan de Herrera 2542',
-      city: 'Malvinas Argentinas',
-      state: 'Provincia de Buenos Aires',
+      street: 'Juan de Herrera 2651',
+      city: 'Villa de Mayo',
+      state: 'Malvinas Argentinas, Buenos Aires',
       zip: 'B1614',
     },
-    phone: '+54 11 7366-6370',
+    phone: WHATSAPP_DISPLAY,
     businessHours: {
       weekdays: 'Lunes a Viernes: 9:00 a 18:00',
       saturday: 'Sábados: 10:00 a 14:00',
@@ -96,6 +98,7 @@ export async function getContactInfo(): Promise<ContactInfo> {
 
 export async function getFooterLinks(): Promise<FooterLinks[]> {
   return [
+    { label: 'Cómo comprar', href: '/como-comprar' },
     { label: 'Política de Privacidad', href: '/privacy' },
     { label: 'Términos del Servicio', href: '/terms' },
     { label: 'Envíos & Devoluciones', href: '/shipping' },

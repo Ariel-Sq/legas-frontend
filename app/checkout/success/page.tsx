@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getOrderStatusAction } from '@/lib/order-actions';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
-const WHATSAPP_NUMBER = '5491173666370';
 const PAID_STATUSES = [
   'paid_preparing',
   'paid_ready_to_ship',

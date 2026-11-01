@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
 export default function GlobalError({
   reset,
@@ -21,7 +22,7 @@ export default function GlobalError({
           <Button onClick={reset}>Reintentar</Button>
           <Button asChild variant="outline">
             <a
-              href="https://wa.me/5491173666370"
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -6,13 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { MessageCircle } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
 /**
  * Contact form that opens WhatsApp with the composed message — WhatsApp is
  * the store's real contact channel (there is no email inbox), and the old
  * form was decorative: it had no action and just reloaded the page.
  */
-const WHATSAPP_NUMBER = '5491173666370';
 
 export function ContactForm() {
   const [name, setName] = useState('');

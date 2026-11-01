@@ -1,7 +1,13 @@
 import type { Order } from './orders-shared';
 import { formatPrice } from '@/lib/utils';
 
-const DEFAULT_PHONE = '5491173666370';
+/** Single source of truth for the shop's WhatsApp number (wa.me format). */
+export const WHATSAPP_NUMBER = '5491134414929';
+
+/** Same number, formatted for display. */
+export const WHATSAPP_DISPLAY = '+54 11 3441-4929';
+
+const DEFAULT_PHONE = WHATSAPP_NUMBER;
 
 export function getWhatsAppPhone(): string {
   return process.env.NEXT_PUBLIC_WHATSAPP_PHONE || DEFAULT_PHONE;

@@ -9,6 +9,12 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
             <Link
+              href="/como-comprar"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Cómo comprar
+            </Link>
+            <Link
               href="/privacy"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
@@ -37,6 +43,13 @@ export function Footer() {
             © 2026 Legas. Todos los derechos reservados
           </p>
         </div>
+
+        {/* Seller identification (Ley 24.240 art. 4) — visible on every page. */}
+        <p className="text-xs text-muted-foreground text-center md:text-left">
+          Legas Muebles — Leonardo Gastón Gamarra · CUIT 20-32319747-5 ·
+          Monotributista · Juan de Herrera 2651, Villa de Mayo, B1614 Malvinas
+          Argentinas, Buenos Aires, Argentina
+        </p>
 
         {/* Res. 274/2021: link a la Ventanilla Única Federal de Defensa del
             Consumidor, con el texto establecido por la norma. */}

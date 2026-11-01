@@ -11,6 +11,14 @@
 
 ### Open
 
+- **Post-MercadoPago (end of project): order notifications + admin panel.**
+  Two options, to decide once real MP credentials are configured:
+  1. Automatic notice to the shop: include address + order detail in the
+     WhatsApp hand-off, and/or email every new order to the shop (needs
+     SMTP_USER/SMTP_PASS in prod; today emails go only to the buyer).
+  2. Simple admin panel for orders (status, address, contact), protected
+     by an admin user — the project deliberately has none today; admin work
+     is done via SQL/chat.
 - Cache Service / SWR layer.
 - Palette picker analytics: track which base/accent combination users
   pick (today it only lives in each browser's localStorage) so we can

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad',
@@ -23,16 +24,16 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold">1. Responsable</h2>
               <p>
                 El responsable del tratamiento de tus datos es Legas Muebles,
-                con domicilio en Juan de Herrera 2542, B1614 Malvinas
-                Argentinas, Provincia de Buenos Aires, Argentina. Podés
+                con domicilio en Juan de Herrera 2651, Villa de Mayo, B1614
+                Malvinas Argentinas, Provincia de Buenos Aires, Argentina. Podés
                 contactarnos por{' '}
                 <a
-                  href="https://wa.me/5491173666370"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  WhatsApp (+54 11 7366-6370)
+                  WhatsApp ({WHATSAPP_DISPLAY})
                 </a>{' '}
                 o desde la página de{' '}
                 <Link href="/contact" className="text-primary hover:underline">
@@ -48,14 +49,15 @@ export default function PrivacyPage() {
               </h2>
               <p>
                 Tratamos los datos que nos das al iniciar sesión con Google
-                (nombre, email, foto de perfil), al comprar (dirección de
-                envío, teléfono, email de contacto) y al usar el sitio
-                (carrito, pedidos, favoritos, reseñas). Los usamos únicamente
-                para procesar tus pedidos, coordinar entregas, responder
-                consultas y gestionar tu cuenta. Entregar los datos de contacto
-                es necesario para poder venderte y coordinar el envío; el resto
-                es opcional. No vendemos tus datos ni los usamos para
-                publicidad de terceros.
+                (nombre, email, foto de perfil), al comprar (nombre, DNI,
+                dirección de entrega, teléfono y email de contacto) y al usar el
+                sitio (carrito, pedidos, favoritos, reseñas). Los usamos
+                únicamente para procesar tus pedidos, emitir el comprobante
+                correspondiente, coordinar entregas, responder consultas y
+                gestionar tu cuenta. Entregar los datos de contacto y el DNI es
+                necesario para poder venderte y facturar; el resto es opcional.
+                No vendemos tus datos ni los usamos para publicidad de
+                terceros.
               </p>
             </section>
 
@@ -102,7 +104,7 @@ export default function PrivacyPage() {
                 actualización y supresión (arts. 6, 14, 16 y concordantes de la
                 Ley 25.326). Escribinos por{' '}
                 <a
-                  href="https://wa.me/5491173666370"
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
