@@ -16,6 +16,7 @@ const ORGANIZATION_JSON_LD = {
       name: 'Legas Muebles',
       url: SITE_URL,
       sameAs: ['https://www.instagram.com/legasmuebles/'],
+      email: 'legasmuebles@gmail.com',
       description:
         'Muebles de madera artesanales: mesas de comedor, sillas, racks y más. Petiribí macizo y álamo.',
       currenciesAccepted: 'ARS',

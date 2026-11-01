@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+import { EMAIL } from '@/lib/company';
 
 export const metadata: Metadata = {
   title: 'Términos del Servicio',
@@ -35,6 +36,13 @@ export default function TermsPage() {
                   className="text-primary hover:underline"
                 >
                   WhatsApp ({WHATSAPP_DISPLAY})
+                </a>{' '}
+                o por email a{' '}
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="text-primary hover:underline"
+                >
+                  {EMAIL}
                 </a>
                 . Al usar este sitio aceptás estos términos.
               </p>
@@ -178,6 +186,13 @@ export default function TermsPage() {
                   className="text-primary hover:underline"
                 >
                   WhatsApp
+                </a>
+                , por email a{' '}
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="text-primary hover:underline"
+                >
+                  {EMAIL}
                 </a>{' '}
                 o desde la página de{' '}
                 <Link href="/contact" className="text-primary hover:underline">

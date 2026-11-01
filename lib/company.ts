@@ -20,6 +20,9 @@ export interface AboutContent {
   }[];
 }
 
+/** Public contact email (legal notices, orders and data-protection requests). */
+export const EMAIL = 'legasmuebles@gmail.com';
+
 export interface ContactInfo {
   address: {
     street: string;
@@ -28,6 +31,7 @@ export interface ContactInfo {
     zip: string;
   };
   phone: string;
+  email: string;
   businessHours: {
     weekdays: string;
     saturday: string;
@@ -88,6 +92,7 @@ export async function getContactInfo(): Promise<ContactInfo> {
       zip: 'B1614',
     },
     phone: WHATSAPP_DISPLAY,
+    email: EMAIL,
     businessHours: {
       weekdays: 'Lunes a Viernes: 9:00 a 18:00',
       saturday: 'Sábados: 10:00 a 14:00',

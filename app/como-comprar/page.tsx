@@ -12,6 +12,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { EMAIL } from '@/lib/company';
 
 export const metadata: Metadata = {
   title: 'Cómo comprar',
@@ -207,6 +208,13 @@ export default function HowToBuyPage() {
                   className="text-primary hover:underline"
                 >
                   {WHATSAPP_DISPLAY}
+                </a>{' '}
+                o por email a{' '}
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="text-primary hover:underline"
+                >
+                  {EMAIL}
                 </a>
                 . Atendemos de lunes a viernes de 9 a 18 y sábados de 10 a 14.
               </p>

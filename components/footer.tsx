@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Instagram } from 'lucide-react';
-import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from '@/lib/company';
+import { EMAIL, INSTAGRAM_HANDLE, INSTAGRAM_URL } from '@/lib/company';
 
 export function Footer() {
   return (
@@ -59,7 +59,13 @@ export function Footer() {
         <p className="text-xs text-muted-foreground text-center md:text-left">
           Legas Muebles — Leonardo Gastón Gamarra · CUIT 20-32319747-5 ·
           Monotributista · Juan de Herrera 2651, Villa de Mayo, B1614 Malvinas
-          Argentinas, Buenos Aires, Argentina
+          Argentinas, Buenos Aires, Argentina ·{' '}
+          <a
+            href={`mailto:${EMAIL}`}
+            className="underline hover:text-primary transition-colors"
+          >
+            {EMAIL}
+          </a>
         </p>
 
         {/* Res. 274/2021: link a la Ventanilla Única Federal de Defensa del

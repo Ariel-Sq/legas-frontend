@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '@/lib/whatsapp';
+import { EMAIL } from '@/lib/company';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad',
@@ -34,6 +35,13 @@ export default function PrivacyPage() {
                   className="text-primary hover:underline"
                 >
                   WhatsApp ({WHATSAPP_DISPLAY})
+                </a>
+                , por email a{' '}
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="text-primary hover:underline"
+                >
+                  {EMAIL}
                 </a>{' '}
                 o desde la página de{' '}
                 <Link href="/contact" className="text-primary hover:underline">
@@ -110,6 +118,13 @@ export default function PrivacyPage() {
                   className="text-primary hover:underline"
                 >
                   WhatsApp
+                </a>
+                , por email a{' '}
+                <a
+                  href={`mailto:${EMAIL}`}
+                  className="text-primary hover:underline"
+                >
+                  {EMAIL}
                 </a>{' '}
                 o desde{' '}
                 <Link href="/contact" className="text-primary hover:underline">

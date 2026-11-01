@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { CancellationForm } from '@/components/cancellation-form';
+import { EMAIL } from '@/lib/company';
 
 export const metadata: Metadata = {
   title: 'Botón de arrepentimiento',
