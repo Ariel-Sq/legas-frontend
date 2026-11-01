@@ -2,6 +2,7 @@
 
 import { BACKEND_URL } from '@/utils/environments';
 import { frontendKeyHeaders } from '@/utils/frontend-key';
+import { SHOP_MATERIALS, getShopMaterial, type ShopMaterial } from '@/lib/materials';
 
 export interface Category {
   id: string;
@@ -126,15 +127,21 @@ export async function getProductTemplates(
   }
 }
 
+/**
+ * Materials exposed by the shop filter live in `lib/materials.ts` (this module
+ * is `'use server'`, so it cannot export plain values/helpers).
+ */
 export interface ShopDisplayProduct {
   id: string;
+  /** Template uuid — the wishlist stores it alongside the variation id. */
+  templateId: string;
   name: string;
   price: number;
   image: string;
   category: string;
   /** Template slug — preferred over the uuid for product URLs (SEO). */
   slug?: string;
-  material?: string;
+  material?: ShopMaterial;
   color?: string;
   createdAt: string;
   variations: ProductVariation[];
@@ -151,7 +158,6 @@ export interface ShopProductsPage {
   filterOptions: {
     categories: string[];
     materials: string[];
-    colors: { name: string; hex: string }[];
     priceRange: { min: number; max: number };
   };
 }
@@ -164,8 +170,6 @@ export interface GetShopProductsPageParams {
   categories?: string[];
   /** Material names — product matches if ANY active variation has the material. */
   materials?: string[];
-  /** Color name — product matches if ANY active variation has the color. */
-  color?: string;
   /** Price range — product matches if its variation price range overlaps. */
   minPrice?: number;
   maxPrice?: number;
@@ -247,12 +251,16 @@ export async function getShopProductsPage(
     const prices = activeVariations.map((v) => parseFloat(v.price));
     displayProducts.push({
       id: template.id,
+      templateId: template.id,
       name: template.name,
       price: parseFloat(defaultVariation.price),
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Sin categoría',
       slug: template.slug,
-      material: defaultVariation.attributes?.material,
+      material: getShopMaterial(
+        template.name,
+        defaultVariation.attributes?.material
+      ),
       color: defaultVariation.attributes?.color,
       createdAt: template.created_at,
       variations: activeVariations,
@@ -275,20 +283,10 @@ export async function getShopProductsPage(
     : displayProducts;
 
   // Facet filters, also over the full (searched) set — before pagination.
-  const { categories, materials, color, minPrice, maxPrice } = params;
+  const { categories, materials, minPrice, maxPrice } = params;
   const matchedProducts = searchedProducts.filter((p) => {
     if (categories?.length && !categories.includes(p.category)) return false;
-    if (
-      materials?.length &&
-      !p.variations.some(
-        (v) =>
-          typeof v.attributes?.material === 'string' &&
-          materials.includes(v.attributes.material)
-      )
-    )
-      return false;
-    if (color && !p.variations.some((v) => v.attributes?.color === color))
-      return false;
+    if (materials?.length && !materials.includes(p.material ?? '')) return false;
     if (minPrice !== undefined && p.maxPrice < minPrice) return false;
     if (maxPrice !== undefined && p.minPrice > maxPrice) return false;
     return true;
@@ -541,10 +539,36 @@ export async function getRelatedProducts(
   return related;
 }
 
+/**
+ * Curated order for the home "Productos destacados" grid. `is_featured` marks
+ * which templates are eligible; this list only decides the order they appear
+ * in (and the first one doubles as the hero image). Anything featured but not
+ * listed here still shows up, sorted by name, at the end.
+ */
+const FEATURED_ORDER = [
+  'mesa-comedor-ovalada-alamo',
+  'mesa-comedor-gerbasoni-alamo-pata-central',
+  'mesa-comedor-gerbasoni-alamo-pata-cruz',
+  'mesa-comedor-tradicional-petiribi',
+  'mesa-comedor-gerbasoni-petiribi-pata-central',
+  'silla-ibiza-tapizada',
+  'silla-bali-tapizada',
+  'rack-alamo-2-cajones-4-puertas',
+  'vajillero-alamo-una-puerta-1-cajon',
+  'escritorio-alamo-1-cajon',
+  'combo-mesa-alamo-100-4-sillas-bali-petiribi',
+  'mesa-comedor-carpintera-alamo',
+];
+
+function featuredRank(slug?: string): number {
+  const index = slug ? FEATURED_ORDER.indexOf(slug) : -1;
+  return index === -1 ? FEATURED_ORDER.length : index;
+}
+
 export async function getFeaturedProducts(): Promise<Product[]> {
   const templates = await getProductTemplates({
     featured: true,
-    limit: 3,
+    limit: 50,
   });
 
   const products: Product[] = [];
@@ -569,7 +593,10 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       defaultVariationId: variation.id,
     });
   }
-  return products;
+
+  return products
+    .sort((a, b) => featuredRank(a.slug) - featuredRank(b.slug))
+    .slice(0, FEATURED_ORDER.length);
 }
 
 export async function getNewArrivals(): Promise<Product[]> {
@@ -604,25 +631,8 @@ export async function getNewArrivals(): Promise<Product[]> {
   return products;
 }
 
-const COLOR_HEX: Record<string, string> = {
-  white: '#ffffff',
-  black: '#000000',
-  brown: '#8b4513',
-  natural: '#a0522d',
-  silver: '#c0c0c0',
-  gray: '#808080',
-  grey: '#808080',
-  red: '#e11d48',
-  blue: '#2563eb',
-  green: '#16a34a',
-  yellow: '#facc15',
-  beige: '#f5f5dc',
-};
-
 export async function getFilterOptions(templates: ProductTemplate[]) {
   const categories = new Set<string>();
-  const materials = new Set<string>();
-  const colors = new Map<string, string>();
   let maxPrice = 0;
 
   for (const t of templates) {
@@ -640,22 +650,14 @@ export async function getFilterOptions(templates: ProductTemplate[]) {
     for (const v of activeVariations) {
       const price = parseFloat(v.price);
       if (Number.isFinite(price) && price > maxPrice) maxPrice = price;
-      const mat = v.attributes?.material;
-      if (typeof mat === 'string' && mat.trim()) materials.add(mat);
-      const col = v.attributes?.color;
-      if (typeof col === 'string' && col.trim()) {
-        const key = col.toLowerCase();
-        if (!colors.has(col)) {
-          colors.set(col, COLOR_HEX[key] ?? key);
-        }
-      }
     }
   }
 
   return {
     categories: Array.from(categories).sort(),
-    materials: Array.from(materials).sort(),
-    colors: Array.from(colors, ([name, hex]) => ({ name, hex })),
+    // Fixed facet: two woods, resolved per product from its name (see
+    // getShopMaterial) instead of from the free-text variation attribute.
+    materials: [...SHOP_MATERIALS],
     priceRange: { min: 0, max: Math.ceil(maxPrice) },
   };
 }

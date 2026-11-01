@@ -27,18 +27,12 @@ export function HeroSection({ featuredProduct }: HeroSectionProps) {
             Descubrí piezas atemporales que aportan calidez y elegancia a tu
             hogar
           </p>
-          <div className="mt-8 flex gap-4 justify-center md:justify-start">
+          <div className="mt-8 flex justify-center md:justify-start">
             <Link
               href="/shop"
-              className="inline-block bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all shadow-lg"
+              className="inline-block bg-primary text-primary-foreground text-lg sm:text-xl font-bold py-4 px-10 sm:px-12 rounded-lg hover:opacity-90 transition-all shadow-lg"
             >
               Ver Colección
-            </Link>
-            <Link
-              href="/about"
-              className="inline-block bg-card text-card-foreground font-bold py-3 px-8 rounded-lg hover:bg-muted/50 transition-all border border-border"
-            >
-              Saber Más
             </Link>
           </div>
         </div>

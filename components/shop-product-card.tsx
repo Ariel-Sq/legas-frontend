@@ -5,7 +5,6 @@ import type React from 'react';
 import { Heart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useWishlist } from '@/components/wishlist-provider';
 import { formatPrice } from '@/lib/utils';
 
@@ -16,6 +15,7 @@ interface ShopProductCardProps {
     price: number;
     image: string;
     slug?: string;
+    category?: string;
     variations?: any[];
     minPrice?: number;
     maxPrice?: number;
@@ -24,7 +24,6 @@ interface ShopProductCardProps {
 }
 
 export function ShopProductCard({ product }: ShopProductCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const { toggleWishlist, isInWishlist } = useWishlist();
   const defaultVariationId = product.variations?.[0]?.id;
   const inWishlist = defaultVariationId
@@ -37,21 +36,17 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
     if (defaultVariationId) {
       toggleWishlist({
         productVariationId: defaultVariationId,
-        templateId: product.templateId ?? undefined,
+        templateId: product.templateId ?? product.id,
         name: product.name,
         price: product.price,
         image: product.image,
-        category: 'Muebles',
+        category: product.category ?? 'Muebles',
       });
     }
   };
 
   return (
-    <div
-      className="group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="group">
       <Link href={`/product/${product.slug ?? product.id}`}>
         <div className="relative overflow-hidden rounded-lg">
           <div className="relative w-full aspect-square bg-muted rounded-lg">
@@ -63,16 +58,16 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
-          {product.templateId && (
+          {defaultVariationId && (
             <button
-              // Always visible on touch (no hover); reveal on hover on desktop.
-              className={`absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center transition-opacity cursor-pointer hover:bg-background opacity-100 lg:opacity-0 ${
-                isHovered ? 'lg:opacity-100' : ''
-              }`}
+              // Always visible: favouriting is a first-class action in the
+              // catalogue, not something hidden behind hover.
+              className="absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center transition-colors cursor-pointer hover:bg-background"
               aria-label={
                 inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'
               }
               aria-pressed={inWishlist}
+              title={inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'}
               onClick={handleWishlistClick}
             >
               <Heart

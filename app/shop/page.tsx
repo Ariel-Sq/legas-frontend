@@ -28,7 +28,6 @@ export default async function ShopPage({
     limit?: string;
     category?: string;
     material?: string;
-    color?: string;
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
@@ -57,7 +56,6 @@ export default async function ShopPage({
 
   const categories = parseList(params.category);
   const materials = parseList(params.material);
-  const color = params.color?.trim() || undefined;
   const minPrice = parsePrice(params.minPrice);
   const maxPrice = parsePrice(params.maxPrice);
   const sort: ShopSortOption = [
@@ -76,7 +74,6 @@ export default async function ShopPage({
       q: query,
       categories,
       materials,
-      color,
       minPrice,
       maxPrice,
       sort,
@@ -94,7 +91,6 @@ export default async function ShopPage({
         totalPages={totalPages}
         selectedCategories={categories}
         selectedMaterials={materials}
-        selectedColor={color ?? null}
         minPrice={minPrice}
         maxPrice={maxPrice}
         sort={sort}

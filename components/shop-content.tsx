@@ -40,12 +40,14 @@ interface Product {
   material?: string;
   color?: string;
   createdAt?: string;
+  /** Template uuid — lets the card toggle the wishlist heart. */
+  templateId?: string;
+  variations?: { id: string }[];
 }
 
 interface FilterOptions {
   categories: string[];
   materials: string[];
-  colors: { name: string; hex: string }[];
   priceRange: { min: number; max: number };
 }
 
@@ -59,7 +61,6 @@ interface ShopContentProps {
   totalPages: number;
   selectedCategories: string[];
   selectedMaterials: string[];
-  selectedColor: string | null;
   minPrice?: number;
   maxPrice?: number;
   sort: string;
@@ -71,7 +72,6 @@ interface ShopFilterState {
   limit?: number;
   categories?: string[];
   materials?: string[];
-  color?: string | null;
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
@@ -84,7 +84,6 @@ function buildShopHref(opts: ShopFilterState): string {
   if (opts.limit && opts.limit !== 12) sp.set('limit', String(opts.limit));
   if (opts.categories?.length) sp.set('category', opts.categories.join(','));
   if (opts.materials?.length) sp.set('material', opts.materials.join(','));
-  if (opts.color) sp.set('color', opts.color);
   if (opts.minPrice !== undefined) sp.set('minPrice', String(opts.minPrice));
   if (opts.maxPrice !== undefined) sp.set('maxPrice', String(opts.maxPrice));
   if (opts.sort && opts.sort !== 'default') sp.set('sort', opts.sort);
@@ -102,7 +101,6 @@ export function ShopContent({
   totalPages,
   selectedCategories,
   selectedMaterials,
-  selectedColor,
   minPrice,
   maxPrice,
   sort,
@@ -132,7 +130,6 @@ export function ShopContent({
     limit,
     categories: selectedCategories,
     materials: selectedMaterials,
-    color: selectedColor,
     minPrice,
     maxPrice,
     sort,
@@ -163,10 +160,6 @@ export function ShopContent({
     });
   };
 
-  const handleColorChange = (color: string) => {
-    pushFilters({ color: selectedColor === color ? null : color });
-  };
-
   const handlePriceRangeCommit = (range: [number, number]) => {
     pushFilters({
       minPrice: range[0] > filterOptions.priceRange.min ? range[0] : undefined,
@@ -174,22 +167,25 @@ export function ShopContent({
     });
   };
 
-  // The quick tags toggle categories over the same URL param the sidebar
-  // checkboxes use — multi-select, "Todos" clears the selection.
+  // The quick tags are exclusive: they share the `category` URL param with the
+  // sidebar checkboxes but replace the whole selection with a single category,
+  // so switching tags never accumulates results. Clicking the active tag (or
+  // "Todos") clears the category filter.
   const handleTagClick = (cat: string) => {
     if (cat === 'All') {
       pushFilters({ categories: [] });
       return;
     }
-    handleCategoryChange(cat);
+    const isOnlyActiveTag =
+      selectedCategories.length === 1 && selectedCategories[0] === cat;
+    pushFilters({ categories: isOnlyActiveTag ? [] : [cat] });
   };
 
   const activeFiltersCount = useMemo(() => {
     let count = selectedCategories.length + selectedMaterials.length;
-    if (selectedColor) count += 1;
     if (minPrice !== undefined || maxPrice !== undefined) count += 1;
     return count;
-  }, [selectedCategories, selectedMaterials, selectedColor, minPrice, maxPrice]);
+  }, [selectedCategories, selectedMaterials, minPrice, maxPrice]);
 
   const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
   const rangeEnd = Math.min(page * limit, total);
@@ -206,11 +202,9 @@ export function ShopContent({
           filterOptions={filterOptions}
           selectedCategories={selectedCategories}
           selectedMaterials={selectedMaterials}
-          selectedColor={selectedColor}
           priceRange={priceDraft}
           onCategoryChange={handleCategoryChange}
           onMaterialChange={handleMaterialChange}
-          onColorChange={handleColorChange}
           onPriceRangeChange={setPriceDraft}
           onPriceRangeCommit={handlePriceRangeCommit}
         />
@@ -262,11 +256,9 @@ export function ShopContent({
                     filterOptions={filterOptions}
                     selectedCategories={selectedCategories}
                     selectedMaterials={selectedMaterials}
-                    selectedColor={selectedColor}
                     priceRange={priceDraft}
                     onCategoryChange={handleCategoryChange}
                     onMaterialChange={handleMaterialChange}
-                    onColorChange={handleColorChange}
                     onPriceRangeChange={setPriceDraft}
                     onPriceRangeCommit={handlePriceRangeCommit}
                     hideTitle={true}
@@ -313,20 +305,26 @@ export function ShopContent({
 
         {!searchQuery && filterOptions.categories.length > 0 && (
           <div className="flex gap-3 mb-6 flex-wrap">
-            {['All', ...filterOptions.categories].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => handleTagClick(cat)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                  (cat === 'All' && selectedCategories.length === 0) ||
-                  selectedCategories.includes(cat)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-primary/20 hover:bg-primary/30'
-                }`}
-              >
-                {cat === 'All' ? 'Todos' : cat}
-              </button>
-            ))}
+            {['All', ...filterOptions.categories].map((cat) => {
+              const isActive =
+                cat === 'All'
+                  ? selectedCategories.length === 0
+                  : selectedCategories.length === 1 &&
+                    selectedCategories[0] === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => handleTagClick(cat)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-primary/20 hover:bg-primary/30'
+                  }`}
+                >
+                  {cat === 'All' ? 'Todos' : cat}
+                </button>
+              );
+            })}
           </div>
         )}
 
