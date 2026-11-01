@@ -53,7 +53,7 @@ export default function TermsPage() {
               <p>
                 Los precios publicados son el precio de contado (efectivo o transferencia).
                 Con MercadoPago podés pagar en cuotas con un
-                recargo del 20% sobre el precio de contado (precio de lista). El
+                recargo del 15% sobre el precio de contado (precio de lista). El
                 precio final según el medio de pago elegido se muestra siempre en
                 el resumen antes de confirmar la compra.
                 Los precios pueden actualizarse, pero las compras ya confirmadas

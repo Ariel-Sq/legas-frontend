@@ -99,7 +99,7 @@ export function CheckoutClient() {
     }));
   }, [session]);
 
-  // Transfer/cash pays the catalogue price. MercadoPago pays list price (+20%).
+  // Transfer/cash pays the catalogue price. MercadoPago pays list price (+15%).
   const isTransfer = paymentMethod === 'offline';
   const mpSurcharge = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
   const total = subtotal + mpSurcharge;
