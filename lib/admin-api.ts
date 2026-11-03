@@ -205,6 +205,54 @@ export async function deleteImage(imageId: string, productId: string) {
   revalidatePath(`/admin/products/${productId}`);
 }
 
+export interface AdminOrderRow {
+  id: string;
+  status: string;
+  totalAmount: string | number;
+  customerEmail: string | null;
+  customerPhone: string | null;
+  deliveryMethod: string | null;
+  deliveryAddress: string | null;
+  depositAmount: string | number | null;
+  balanceAmount: string | number | null;
+  depositPaidAt: string | null;
+  createdAt: string;
+  items: number;
+  titles: string | null;
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  await adminFetch(`/products/${id}`, { method: 'DELETE' });
+  revalidatePath('/admin');
+  revalidatePath('/shop');
+}
+
+export async function listAdminOrders(status?: string): Promise<AdminOrderRow[]> {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+  return adminFetch<AdminOrderRow[]>(`/orders${qs}`);
+}
+
+export async function updateOrderStatus(id: string, status: string) {
+  await adminFetch(`/orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+  revalidatePath('/admin/orders');
+}
+
+export async function markDepositPaid(id: string) {
+  await adminFetch(`/orders/${id}/deposit`, { method: 'PATCH' });
+  revalidatePath('/admin/orders');
+}
+
+export async function inviteAdminUser(email: string, role: string) {
+  await adminFetch('/users/invite', {
+    method: 'POST',
+    body: JSON.stringify({ email, role }),
+  });
+  revalidatePath('/admin/users');
+}
+
 export async function listAdminUsers(): Promise<AdminUserRow[]> {
   return adminFetch<AdminUserRow[]>('/users');
 }

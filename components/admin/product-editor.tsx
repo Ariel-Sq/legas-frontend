@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   createVariation,
   deleteImage,
+  deleteProduct,
   setMainImage,
   updateProduct,
   updateVariation,
@@ -71,6 +72,7 @@ export function ProductEditor({
   );
 
   // New variation form
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [newMedida, setNewMedida] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newStock, setNewStock] = useState('10');
@@ -333,12 +335,19 @@ export function ProductEditor({
                     <span className="text-sm font-medium">
                       Fotos ({variation.images.length})
                     </span>
-                    <label className="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted">
-                      Subir foto
+                    <label
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                        variation.images.length >= 6
+                          ? 'cursor-not-allowed opacity-50'
+                          : 'cursor-pointer hover:bg-muted'
+                      }`}
+                    >
+                      {variation.images.length >= 6 ? 'Máximo 6 fotos' : 'Subir foto'}
                       <input
                         type="file"
                         accept="image/webp,image/jpeg,image/png"
                         className="hidden"
+                        disabled={variation.images.length >= 6}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) uploadImage(variation.id, file);
@@ -444,6 +453,60 @@ export function ProductEditor({
               demás cambios se guardan con el botón de abajo.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Danger zone */}
+      <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-6">
+        <h2 className="text-lg font-semibold text-destructive">
+          Eliminar producto
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Se borra el producto con sus variantes y fotos. Los pedidos ya hechos
+          no se modifican.
+        </p>
+        <div className="mt-3">
+          {confirmDelete ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium">¿Seguro?</span>
+              <Button
+                variant="destructive"
+                disabled={pending}
+                onClick={() =>
+                  startTransition(async () => {
+                    try {
+                      await deleteProduct(product.id);
+                      toast.success('Producto eliminado');
+                      router.push('/admin');
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : 'No se pudo eliminar'
+                      );
+                    }
+                  })
+                }
+              >
+                Sí, eliminar
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDelete(false)}
+                disabled={pending}
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="text-destructive"
+              onClick={() => setConfirmDelete(true)}
+            >
+              Eliminar este producto
+            </Button>
+          )}
         </div>
       </section>
 

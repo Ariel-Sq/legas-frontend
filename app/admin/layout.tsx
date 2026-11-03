@@ -42,6 +42,9 @@ export default async function AdminLayout({
             <Link href="/admin" className="hover:text-primary">
               Productos
             </Link>
+            <Link href="/admin/orders" className="hover:text-primary">
+              Pedidos
+            </Link>
             {canManageUsers && (
               <Link href="/admin/users" className="hover:text-primary">
                 Usuarios

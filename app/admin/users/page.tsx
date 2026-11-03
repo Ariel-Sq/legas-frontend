@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getAdminMe, listAdminUsers } from '@/lib/admin-api';
 import { UsersTable } from '@/components/admin/users-table';
+import { InviteForm } from '@/components/admin/invite-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ export default async function AdminUsersPage() {
         </p>
       </div>
 
+      <InviteForm />
       <UsersTable users={users} ownerEmail={ownerEmail} />
 
       <div className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
