@@ -80,7 +80,11 @@ export function middleware(request: NextRequest) {
     path === '/logo-legas.png' ||
     path === '/favicon.ico';
   if (!allowed) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    // Build from the bare host: request.url can carry the Basic Auth userinfo,
+    // which must never end up in a Location header.
+    return NextResponse.redirect(
+      new URL('/admin', `${request.nextUrl.protocol}//${host}`)
+    );
   }
 
   // No Google session yet: log in on the storefront (the cookie is shared
