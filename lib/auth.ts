@@ -56,10 +56,44 @@ async function fetchBackendUser(backendToken: string) {
   }
 }
 
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+/**
+ * The admin panel lives on admin.legasmuebles.com and shares this app, so the
+ * session cookie is scoped to the whole domain: logging in on the storefront
+ * also authenticates the panel. Unset in development (default cookies).
+ */
+const COOKIE_DOMAIN = process.env.NEXTAUTH_COOKIE_DOMAIN;
+
 export const authOptions: NextAuthOptions = {
   // Stateless JWT sessions: the backend token + user are persisted on the
   // (encrypted, httpOnly) NextAuth token via the jwt callback below.
   session: { strategy: 'jwt' },
+  ...(IS_PROD && COOKIE_DOMAIN
+    ? {
+        cookies: {
+          sessionToken: {
+            name: '__Secure-next-auth.session-token',
+            options: {
+              httpOnly: true,
+              sameSite: 'lax' as const,
+              path: '/',
+              secure: true,
+              domain: COOKIE_DOMAIN,
+            },
+          },
+          callbackUrl: {
+            name: '__Secure-next-auth.callback-url',
+            options: {
+              sameSite: 'lax' as const,
+              path: '/',
+              secure: true,
+              domain: COOKIE_DOMAIN,
+            },
+          },
+        },
+      }
+    : {}),
   providers: [
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID!,
