@@ -21,7 +21,9 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
   const template = await getProductTemplateBySlugOrId(id);
-  if (!template || !template.is_active) return {};
+  // Throwing here (before the shell is streamed) is what makes the response an
+  // actual 404 instead of a 200 with the not-found UI inside the stream.
+  if (!template || !template.is_active) notFound();
 
   const variation =
     template.variations.find((v) => v.is_active) || template.variations[0];
