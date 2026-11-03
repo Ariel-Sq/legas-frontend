@@ -24,11 +24,10 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-2xl font-semibold">1. Quiénes somos</h2>
               <p>
-                Legas Muebles es la marca comercial de{' '}
-                <strong>Leonardo Gastón Gamarra</strong> (CUIT 20-32319747-5,
-                monotributista), con domicilio en Juan de Herrera 2651, Villa de Mayo,
-                B1614 Malvinas Argentinas, Provincia de Buenos Aires, Argentina. Vende
-                muebles de madera fabricados a pedido. Atención al cliente por{' '}
+                <strong>Legas Muebles</strong> es una marca de muebles de madera
+                fabricados a pedido, con domicilio en Juan de Herrera 2651, Villa
+                de Mayo, B1614 Malvinas Argentinas, Provincia de Buenos Aires,
+                Argentina. Atención al cliente por{' '}
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"

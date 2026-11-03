@@ -55,10 +55,10 @@ export function Footer() {
           </p>
         </div>
 
-        {/* Seller identification (Ley 24.240 art. 4) — visible on every page. */}
+        {/* Brand, address and contact only — the seller's legal details live in
+            the Terms page. */}
         <p className="text-xs text-muted-foreground text-center md:text-left">
-          Legas Muebles — Leonardo Gastón Gamarra · CUIT 20-32319747-5 ·
-          Monotributista · Juan de Herrera 2651, Villa de Mayo, B1614 Malvinas
+          Legas Muebles · Juan de Herrera 2651, Villa de Mayo, B1614 Malvinas
           Argentinas, Buenos Aires, Argentina ·{' '}
           <a
             href={`mailto:${EMAIL}`}
