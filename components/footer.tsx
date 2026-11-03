@@ -2,6 +2,12 @@
 
 import Link from 'next/link';
 import { Instagram } from 'lucide-react';
+import {
+  SiAmericanexpress,
+  SiMastercard,
+  SiMercadopago,
+  SiVisa,
+} from 'react-icons/si';
 import { EMAIL, INSTAGRAM_HANDLE, INSTAGRAM_URL } from '@/lib/company';
 
 export function Footer() {
@@ -67,6 +73,32 @@ export function Footer() {
             {EMAIL}
           </a>
         </p>
+
+        {/* Accepted payment methods */}
+        <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+          <span className="text-xs text-muted-foreground">Medios de pago:</span>
+          {[
+            { label: 'Visa', Icon: SiVisa },
+            { label: 'Mastercard', Icon: SiMastercard },
+            { label: 'American Express', Icon: SiAmericanexpress },
+            { label: 'Mercado Pago', Icon: SiMercadopago },
+          ].map(({ label, Icon }) => (
+            <span
+              key={label}
+              title={label}
+              aria-label={label}
+              className="flex h-7 w-11 items-center justify-center rounded border border-border bg-background text-foreground/70"
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+            </span>
+          ))}
+          <span className="rounded border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground/70">
+            Transferencia
+          </span>
+          <span className="rounded border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground/70">
+            Efectivo
+          </span>
+        </div>
 
         {/* Res. 274/2021: link a la Ventanilla Única Federal de Defensa del
             Consumidor, con el texto establecido por la norma. */}
