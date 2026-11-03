@@ -73,19 +73,19 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
           <span className="text-xs text-muted-foreground">Medios de pago:</span>
           {[
-            { label: 'Visa', file: 'visa' },
-            { label: 'Mastercard', file: 'mastercard' },
-            { label: 'American Express', file: 'amex' },
-            { label: 'Cabal', file: 'cabal' },
-            { label: 'Tarjeta Naranja', file: 'naranja' },
-            { label: 'Mercado Pago', file: 'mercadopago' },
-            { label: 'Transferencia bancaria', file: 'transferencia' },
-            { label: 'Efectivo', file: 'efectivo' },
+            { label: 'Visa', file: 'visa.png' },
+            { label: 'Mastercard', file: 'mastercard.png' },
+            { label: 'American Express', file: 'amex.png' },
+            { label: 'Cabal', file: 'cabal.png' },
+            { label: 'Tarjeta Naranja', file: 'naranja.png' },
+            { label: 'Mercado Pago', file: 'mercadopago.png' },
+            { label: 'Transferencia bancaria', file: 'transferencia.svg' },
+            { label: 'Efectivo', file: 'efectivo.png' },
           ].map(({ label, file }) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={file}
-              src={`/payment/${file}.png`}
+              src={`/payment/${file}`}
               alt={label}
               title={label}
               className="h-7 w-auto rounded border border-border bg-white p-1"
