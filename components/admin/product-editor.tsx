@@ -17,6 +17,7 @@ import {
   uploadVariationImage,
   type AdminCategory,
   type AdminProduct,
+  type AdminVariation,
 } from '@/lib/admin-api';
 
 const money = (value: string | number) =>
@@ -25,6 +26,22 @@ const money = (value: string | number) =>
     currency: 'ARS',
     maximumFractionDigits: 0,
   }).format(Number(value));
+
+interface VariationDraft {
+  name: string;
+  price: string;
+  stock: string;
+  isActive: boolean;
+}
+
+function toDraft(variation: AdminVariation): VariationDraft {
+  return {
+    name: variation.name,
+    price: String(Number(variation.price)),
+    stock: String(variation.stock),
+    isActive: variation.is_active,
+  };
+}
 
 export function ProductEditor({
   product,
@@ -38,6 +55,8 @@ export function ProductEditor({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+
+  // Product fields
   const [name, setName] = useState(product.name);
   const [description, setDescription] = useState(product.description ?? '');
   const [isActive, setIsActive] = useState(product.is_active);
@@ -45,12 +64,32 @@ export function ProductEditor({
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     product.categories.map((c) => c.id)
   );
+
+  // Variation fields — edited locally and saved with the main button.
+  const [drafts, setDrafts] = useState<Record<string, VariationDraft>>(() =>
+    Object.fromEntries(product.variations.map((v) => [v.id, toDraft(v)]))
+  );
+
+  // New variation form
   const [newMedida, setNewMedida] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newStock, setNewStock] = useState('10');
 
+  const updateDraft = (id: string, patch: Partial<VariationDraft>) =>
+    setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
 
-  const saveProduct = () => {
+  const hasVariationChanges = product.variations.some((variation) => {
+    const draft = drafts[variation.id];
+    if (!draft) return false;
+    return (
+      draft.name !== variation.name ||
+      Number(draft.price) !== Number(variation.price) ||
+      Number(draft.stock) !== variation.stock ||
+      draft.isActive !== variation.is_active
+    );
+  });
+
+  const saveAll = () => {
     startTransition(async () => {
       try {
         await updateProduct(product.id, {
@@ -60,25 +99,34 @@ export function ProductEditor({
           is_featured: isFeatured,
           categoryIds: selectedCategories,
         });
-        toast.success('Producto guardado');
-        router.refresh();
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
-      }
-    });
-  };
 
-  const saveVariation = (
-    id: string,
-    data: { name?: string; price?: number; stock?: number; is_active?: boolean }
-  ) => {
-    startTransition(async () => {
-      try {
-        await updateVariation(id, data);
-        toast.success('Variante guardada');
-        router.refresh();
+        const changed = product.variations.filter((variation) => {
+          const draft = drafts[variation.id];
+          if (!draft) return false;
+          return (
+            draft.name !== variation.name ||
+            Number(draft.price) !== Number(variation.price) ||
+            Number(draft.stock) !== variation.stock ||
+            draft.isActive !== variation.is_active
+          );
+        });
+
+        for (const variation of changed) {
+          const draft = drafts[variation.id];
+          await updateVariation(variation.id, {
+            name: draft.name,
+            price: Number(draft.price),
+            stock: Number(draft.stock),
+            is_active: draft.isActive,
+          });
+        }
+
+        toast.success('Cambios guardados');
+        router.push('/admin');
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
+        toast.error(
+          error instanceof Error ? error.message : 'No se pudo guardar'
+        );
       }
     });
   };
@@ -121,8 +169,34 @@ export function ProductEditor({
     });
   };
 
+  const addVariation = () => {
+    const price = Number(newPrice);
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error('Poné un precio válido');
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await createVariation(product.id, {
+          medida: newMedida.trim(),
+          price,
+          stock: Number(newStock) || 0,
+        });
+        toast.success('Variante creada');
+        setNewMedida('');
+        setNewPrice('');
+        setNewStock('10');
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'No se pudo crear'
+        );
+      }
+    });
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-28">
       {/* Product data */}
       <section className="rounded-xl border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Datos del producto</h2>
@@ -188,11 +262,6 @@ export function ProductEditor({
               Destacado en la home
             </label>
           </div>
-          <div>
-            <Button onClick={saveProduct} disabled={pending}>
-              Guardar producto
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -200,138 +269,135 @@ export function ProductEditor({
       <section className="rounded-xl border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Variantes y precios</h2>
         <div className="space-y-6">
-          {product.variations.map((variation, index) => (
-            <div
-              key={variation.id}
-              className="rounded-lg border p-4"
-              id={`variation-${variation.id}`}
-            >
-              <div className="grid gap-3 sm:grid-cols-[1fr_140px_100px_auto] sm:items-end">
-                <div>
-                  <Label htmlFor={`vname-${variation.id}`}>Nombre</Label>
-                  <Input
-                    id={`vname-${variation.id}`}
-                    defaultValue={variation.name}
-                    onBlur={(e) =>
-                      e.target.value !== variation.name &&
-                      saveVariation(variation.id, { name: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`price-${variation.id}`}>
-                    Precio (efectivo)
-                  </Label>
-                  <Input
-                    id={`price-${variation.id}`}
-                    type="number"
-                    defaultValue={Number(variation.price)}
-                    onBlur={(e) => {
-                      const value = Number(e.target.value);
-                      if (Number.isFinite(value) && value !== Number(variation.price)) {
-                        saveVariation(variation.id, { price: value });
+          {product.variations.map((variation, index) => {
+            const draft = drafts[variation.id] ?? toDraft(variation);
+            return (
+              <div
+                key={variation.id}
+                className="rounded-lg border p-4"
+                id={`variation-${variation.id}`}
+              >
+                <div className="grid gap-3 sm:grid-cols-[1fr_140px_100px_auto] sm:items-end">
+                  <div>
+                    <Label htmlFor={`vname-${variation.id}`}>Nombre</Label>
+                    <Input
+                      id={`vname-${variation.id}`}
+                      value={draft.name}
+                      onChange={(e) =>
+                        updateDraft(variation.id, { name: e.target.value })
                       }
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`stock-${variation.id}`}>Stock</Label>
-                  <Input
-                    id={`stock-${variation.id}`}
-                    type="number"
-                    defaultValue={variation.stock}
-                    onBlur={(e) => {
-                      const value = Number(e.target.value);
-                      if (Number.isFinite(value) && value !== variation.stock) {
-                        saveVariation(variation.id, { stock: value });
-                      }
-                    }}
-                  />
-                </div>
-                <label className="flex items-center gap-2 pb-2 text-sm">
-                  <Checkbox
-                    checked={variation.is_active}
-                    onCheckedChange={(v) =>
-                      saveVariation(variation.id, { is_active: v === true })
-                    }
-                  />
-                  Activa
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                SKU {variation.sku} · con tarjeta: {money(Number(variation.price) * 1.15)}
-              </p>
-
-              {/* Images */}
-              <div className="mt-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    Fotos ({variation.images.length})
-                  </span>
-                  <label className="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted">
-                    Subir foto
-                    <input
-                      type="file"
-                      accept="image/webp,image/jpeg,image/png"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) uploadImage(variation.id, file);
-                        e.target.value = '';
-                      }}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor={`price-${variation.id}`}>
+                      Precio (efectivo)
+                    </Label>
+                    <Input
+                      id={`price-${variation.id}`}
+                      type="number"
+                      value={draft.price}
+                      onChange={(e) =>
+                        updateDraft(variation.id, { price: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`stock-${variation.id}`}>Stock</Label>
+                    <Input
+                      id={`stock-${variation.id}`}
+                      type="number"
+                      value={draft.stock}
+                      onChange={(e) =>
+                        updateDraft(variation.id, { stock: e.target.value })
+                      }
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 pb-2 text-sm">
+                    <Checkbox
+                      checked={draft.isActive}
+                      onCheckedChange={(v) =>
+                        updateDraft(variation.id, { isActive: v === true })
+                      }
+                    />
+                    Activa
                   </label>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {variation.images.map((image) => (
-                    <div key={image.id} className="w-28">
-                      <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={
-                            image.url?.startsWith('http')
-                              ? image.url
-                              : `${imageBase}${image.url}`
-                          }
-                          alt={image.altText ?? ''}
-                          className="h-full w-full object-cover"
-                        />
-                        {image.isMain && (
-                          <span className="absolute left-1 top-1 rounded bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-                            principal
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 flex justify-between text-[11px]">
-                        {!image.isMain && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  SKU {variation.sku} · con tarjeta:{' '}
+                  {money(Number(draft.price || 0) * 1.15)}
+                </p>
+
+                {/* Images */}
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      Fotos ({variation.images.length})
+                    </span>
+                    <label className="cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                      Subir foto
+                      <input
+                        type="file"
+                        accept="image/webp,image/jpeg,image/png"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadImage(variation.id, file);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {variation.images.map((image) => (
+                      <div key={image.id} className="w-28">
+                        <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              image.url?.startsWith('http')
+                                ? image.url
+                                : `${imageBase}${image.url}`
+                            }
+                            alt={image.altText ?? ''}
+                            className="h-full w-full object-cover"
+                          />
+                          {image.isMain && (
+                            <span className="absolute left-1 top-1 rounded bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+                              principal
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 flex justify-between text-[11px]">
+                          {!image.isMain && (
+                            <button
+                              onClick={() => makeMain(image.id)}
+                              className="text-primary hover:underline"
+                            >
+                              Principal
+                            </button>
+                          )}
                           <button
-                            onClick={() => makeMain(image.id)}
-                            className="text-primary hover:underline"
+                            onClick={() => removeImage(image.id)}
+                            className="text-destructive hover:underline"
                           >
-                            Principal
+                            Borrar
                           </button>
-                        )}
-                        <button
-                          onClick={() => removeImage(image.id)}
-                          className="text-destructive hover:underline"
-                        >
-                          Borrar
-                        </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {variation.images.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      Sin fotos todavía.
-                    </p>
-                  )}
+                    ))}
+                    {variation.images.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Sin fotos todavía.
+                      </p>
+                    )}
+                  </div>
                 </div>
+                {index < product.variations.length - 1 && (
+                  <hr className="mt-6" />
+                )}
               </div>
-              {index < product.variations.length - 1 && (
-                <hr className="mt-6" />
-              )}
-            </div>
-          ))}
+            );
+          })}
 
           {/* New variation */}
           <div className="rounded-lg border border-dashed p-4">
@@ -368,44 +434,41 @@ export function ProductEditor({
               <Button
                 type="button"
                 disabled={pending || !newMedida.trim() || !newPrice}
-                onClick={() => {
-                  const price = Number(newPrice);
-                  if (!Number.isFinite(price) || price <= 0) {
-                    toast.error('Poné un precio válido');
-                    return;
-                  }
-                  startTransition(async () => {
-                    try {
-                      await createVariation(product.id, {
-                        medida: newMedida.trim(),
-                        price,
-                        stock: Number(newStock) || 0,
-                      });
-                      toast.success('Variante creada');
-                      setNewMedida('');
-                      setNewPrice('');
-                      setNewStock('10');
-                      router.refresh();
-                    } catch (error) {
-                      toast.error(
-                        error instanceof Error
-                          ? error.message
-                          : 'No se pudo crear'
-                      );
-                    }
-                  });
-                }}
+                onClick={addVariation}
               >
                 Agregar
               </Button>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              El SKU y el nombre se generan solos a partir del producto y la
-              medida.
+              Se guarda al instante (el SKU y el nombre se generan solos). Los
+              demás cambios se guardan con el botón de abajo.
             </p>
           </div>
         </div>
       </section>
+
+      {/* Sticky save bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur">
+        <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-sm text-muted-foreground">
+            {hasVariationChanges
+              ? 'Hay cambios sin guardar en las variantes'
+              : 'Los cambios de fotos y variantes nuevas se guardan al instante'}
+          </span>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/admin')}
+              disabled={pending}
+            >
+              Volver sin guardar
+            </Button>
+            <Button onClick={saveAll} disabled={pending}>
+              {pending ? 'Guardando…' : 'Guardar y volver al panel'}
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
