@@ -88,6 +88,7 @@ export default async function ProfilePage() {
                 dni: user.dni ?? '',
                 address: user.address ?? '',
                 city: user.city ?? '',
+                state: user.state ?? '',
                 zipCode: user.zipCode ?? '',
                 country: user.country ?? '',
               }}

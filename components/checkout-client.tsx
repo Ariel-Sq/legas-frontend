@@ -29,6 +29,7 @@ import {
   listPrice,
   pickupDeposit,
 } from '@/lib/pricing';
+import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -68,33 +69,6 @@ const PAYMENT_OPTIONS: {
   },
 ];
 
-/** Argentine jurisdictions for the delivery address. */
-const ARGENTINIAN_PROVINCES = [
-  'Ciudad Autónoma de Buenos Aires',
-  'Buenos Aires',
-  'Catamarca',
-  'Chaco',
-  'Chubut',
-  'Córdoba',
-  'Corrientes',
-  'Entre Ríos',
-  'Formosa',
-  'Jujuy',
-  'La Pampa',
-  'La Rioja',
-  'Mendoza',
-  'Misiones',
-  'Neuquén',
-  'Río Negro',
-  'Salta',
-  'San Juan',
-  'San Luis',
-  'Santa Cruz',
-  'Santa Fe',
-  'Santiago del Estero',
-  'Tierra del Fuego',
-  'Tucumán',
-] as const;
 
 export function CheckoutClient() {
   const { items, subtotal, loading, clearCart } = useCart();

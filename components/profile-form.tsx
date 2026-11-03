@@ -14,6 +14,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { updateProfileAction, type ProfileUpdate } from '@/lib/profile';
+import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProfileFormProps {
   userId: string;
@@ -24,6 +32,7 @@ interface ProfileFormProps {
     dni: string;
     address: string;
     city: string;
+    state: string;
     zipCode: string;
     country: string;
   };
@@ -55,6 +64,7 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
   const [dni, setDni] = useState(initial.dni);
   const [address, setAddress] = useState(initial.address);
   const [city, setCity] = useState(initial.city);
+  const [province, setProvince] = useState(initial.state);
   const [zipCode, setZipCode] = useState(initial.zipCode);
   const [country, setCountry] = useState(initial.country);
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
@@ -93,6 +103,7 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
     submit('address', {
       address,
       city,
+      state: province,
       zipCode,
       country,
     });
@@ -179,7 +190,7 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ciudad</Label>
+                  <Label htmlFor="city">Ciudad / Localidad</Label>
                   <Input
                     id="city"
                     value={city}
@@ -195,13 +206,28 @@ export function ProfileForm({ userId, initial }: ProfileFormProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">País</Label>
-                  <Input
-                    id="country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                  />
+                  <Label htmlFor="province">Provincia</Label>
+                  <Select value={province} onValueChange={setProvince}>
+                    <SelectTrigger id="province" className="w-full">
+                      <SelectValue placeholder="Elegí la provincia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ARGENTINIAN_PROVINCES.map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">País</Label>
+                <Input
+                  id="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
               </div>
             </div>
             {status.kind === 'ok' && status.section === 'address' && (
