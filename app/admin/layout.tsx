@@ -20,7 +20,12 @@ export default async function AdminLayout({
   let me: AdminMe;
   try {
     me = await getAdminMe();
-  } catch {
+  } catch (error) {
+    // Visible in the deployment logs, never to the visitor (they get a 404).
+    console.error(
+      'admin gate:',
+      error instanceof Error ? error.message : error
+    );
     notFound();
   }
 
