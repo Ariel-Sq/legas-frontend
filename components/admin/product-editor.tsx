@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+  createVariation,
   deleteImage,
   setMainImage,
   updateProduct,
@@ -35,6 +36,7 @@ export function ProductEditor({
   /** Backend origin, so relative /api/images?path= URLs resolve. */
   imageBase: string;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState(product.name);
   const [description, setDescription] = useState(product.description ?? '');
@@ -43,7 +45,10 @@ export function ProductEditor({
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     product.categories.map((c) => c.id)
   );
-  const [variations, setVariations] = useState(product.variations);
+  const [newMedida, setNewMedida] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newStock, setNewStock] = useState('10');
+
 
   const saveProduct = () => {
     startTransition(async () => {
@@ -56,6 +61,7 @@ export function ProductEditor({
           categoryIds: selectedCategories,
         });
         toast.success('Producto guardado');
+        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
       }
@@ -70,6 +76,7 @@ export function ProductEditor({
       try {
         await updateVariation(id, data);
         toast.success('Variante guardada');
+        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
       }
@@ -83,6 +90,7 @@ export function ProductEditor({
       try {
         await uploadVariationImage(variationId, formData);
         toast.success('Foto subida');
+        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'No se pudo subir');
       }
@@ -94,6 +102,7 @@ export function ProductEditor({
       try {
         await setMainImage(imageId, product.id);
         toast.success('Foto principal actualizada');
+        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'No se pudo cambiar');
       }
@@ -105,6 +114,7 @@ export function ProductEditor({
       try {
         await deleteImage(imageId, product.id);
         toast.success('Foto eliminada');
+        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'No se pudo borrar');
       }
@@ -190,7 +200,7 @@ export function ProductEditor({
       <section className="rounded-xl border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Variantes y precios</h2>
         <div className="space-y-6">
-          {variations.map((variation, index) => (
+          {product.variations.map((variation, index) => (
             <div
               key={variation.id}
               className="rounded-lg border p-4"
@@ -317,9 +327,83 @@ export function ProductEditor({
                   )}
                 </div>
               </div>
-              {index < variations.length - 1 && <hr className="mt-6" />}
+              {index < product.variations.length - 1 && (
+                <hr className="mt-6" />
+              )}
             </div>
           ))}
+
+          {/* New variation */}
+          <div className="rounded-lg border border-dashed p-4">
+            <p className="mb-3 text-sm font-medium">Agregar variante</p>
+            <div className="grid gap-3 sm:grid-cols-[1fr_140px_100px_auto] sm:items-end">
+              <div>
+                <Label htmlFor="new-medida">Medida</Label>
+                <Input
+                  id="new-medida"
+                  placeholder="100x60 o 100x60x40"
+                  value={newMedida}
+                  onChange={(e) => setNewMedida(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-price">Precio (efectivo)</Label>
+                <Input
+                  id="new-price"
+                  type="number"
+                  placeholder="399000"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-stock">Stock</Label>
+                <Input
+                  id="new-stock"
+                  type="number"
+                  value={newStock}
+                  onChange={(e) => setNewStock(e.target.value)}
+                />
+              </div>
+              <Button
+                type="button"
+                disabled={pending || !newMedida.trim() || !newPrice}
+                onClick={() => {
+                  const price = Number(newPrice);
+                  if (!Number.isFinite(price) || price <= 0) {
+                    toast.error('Poné un precio válido');
+                    return;
+                  }
+                  startTransition(async () => {
+                    try {
+                      await createVariation(product.id, {
+                        medida: newMedida.trim(),
+                        price,
+                        stock: Number(newStock) || 0,
+                      });
+                      toast.success('Variante creada');
+                      setNewMedida('');
+                      setNewPrice('');
+                      setNewStock('10');
+                      router.refresh();
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : 'No se pudo crear'
+                      );
+                    }
+                  });
+                }}
+              >
+                Agregar
+              </Button>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              El SKU y el nombre se generan solos a partir del producto y la
+              medida.
+            </p>
+          </div>
         </div>
       </section>
     </div>

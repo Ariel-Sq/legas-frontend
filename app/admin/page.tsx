@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listAdminProducts } from '@/lib/admin-api';
+import { BACKEND_URL } from '@/utils/environments';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,7 @@ export default async function AdminProductsPage({
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
             <tr>
+              <th className="w-16 p-3">Foto</th>
               <th className="p-3">Producto</th>
               <th className="p-3">Categoría</th>
               <th className="p-3">Variantes</th>
@@ -60,6 +62,18 @@ export default async function AdminProductsPage({
           <tbody>
             {products.map((p) => (
               <tr key={p.id} className="border-t">
+                <td className="p-3">
+                  <div className="h-10 w-10 overflow-hidden rounded bg-muted">
+                    {p.mainImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`${BACKEND_URL}/api/images?path=${p.mainImage}`}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                </td>
                 <td className="p-3">
                   <div className="font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{p.slug}</div>
@@ -97,7 +111,7 @@ export default async function AdminProductsPage({
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-muted-foreground">
+                <td colSpan={7} className="p-6 text-center text-muted-foreground">
                   No hay productos que coincidan.
                 </td>
               </tr>

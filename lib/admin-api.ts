@@ -154,6 +154,18 @@ export async function updateVariation(
   revalidatePath('/admin');
 }
 
+export async function createVariation(
+  productId: string,
+  data: { medida: string; price: number; stock?: number }
+): Promise<AdminVariation> {
+  const created = await adminFetch<AdminVariation>(
+    `/products/${productId}/variations`,
+    { method: 'POST', body: JSON.stringify(data) }
+  );
+  revalidatePath(`/admin/products/${productId}`);
+  return created;
+}
+
 export async function uploadVariationImage(
   variationId: string,
   formData: FormData
