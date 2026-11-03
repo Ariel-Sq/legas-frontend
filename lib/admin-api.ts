@@ -123,6 +123,21 @@ export async function listAdminCategories(): Promise<AdminCategory[]> {
   return adminFetch<AdminCategory[]>('/categories');
 }
 
+export async function createProduct(data: {
+  name: string;
+  description?: string;
+  categoryIds: string[];
+  is_active?: boolean;
+  is_featured?: boolean;
+}): Promise<{ id: string; slug: string }> {
+  const created = await adminFetch<{ id: string; slug: string }>(
+    '/products',
+    { method: 'POST', body: JSON.stringify(data) }
+  );
+  revalidatePath('/admin');
+  return created;
+}
+
 export async function updateProduct(
   id: string,
   data: {

@@ -30,6 +30,13 @@ export default async function AdminProductsPage({
             {q ? ` para “${q}”` : ''}
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/admin/products/new"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+        >
+          + Nuevo producto
+        </Link>
         <form className="flex gap-2" action="/admin">
           <input
             name="q"
@@ -39,11 +46,12 @@ export default async function AdminProductsPage({
           />
           <button
             type="submit"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted"
           >
             Buscar
           </button>
         </form>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
