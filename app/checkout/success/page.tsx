@@ -46,54 +46,95 @@ function SuccessContent() {
     `Hola Legas! Acabo de hacer el pedido${shortId ? ` ${shortId}` : ''}. ¿Coordinamos la entrega?`
   );
 
-  // undefined = loading, null = not found
-  const [status, setStatus] = useState<string | null | undefined>(undefined);
+  // undefined = consultando, null = no encontramos el pedido
+  const [status, setStatus] = useState<string | null | undefined>(
+    externalReference ? undefined : null
+  );
 
   useEffect(() => {
     clearCart();
-    if (!externalReference) {
-      setStatus(null);
-      return;
-    }
+    if (!externalReference) return;
+
     let active = true;
-    getOrderStatusAction(externalReference).then((r) => {
-      if (active) setStatus(r?.status ?? null);
-    });
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    // The webhook may land a few seconds after the redirect, so poll a bit
+    // instead of trusting the first read. Never leave the visitor spinning: if
+    // the order is not found after a few tries, fall back to a neutral state.
+    const check = async () => {
+      attempts += 1;
+      try {
+        const result = await getOrderStatusAction(externalReference);
+        if (!active) return;
+
+        if (result) {
+          setStatus(result.status);
+          const settled = [
+            ...PAID_STATUSES,
+            'cancelled',
+            'expired',
+            'refunded',
+          ].includes(result.status);
+          if (!settled && attempts < 6) {
+            timer = setTimeout(check, 3000);
+          }
+          return;
+        }
+
+        if (attempts < 3) {
+          timer = setTimeout(check, 3000);
+        } else {
+          setStatus(null);
+        }
+      } catch {
+        if (active) setStatus(null);
+      }
+    };
+
+    void check();
+
     return () => {
       active = false;
+      if (timer) clearTimeout(timer);
     };
   }, [clearCart, externalReference]);
 
+  const isChecking = status === undefined;
   const isPaid = status ? PAID_STATUSES.includes(status) : false;
-  const isPending =
-    status === 'processing_payment' || status === 'pending_transfer';
+  const isPending = status === 'processing_payment' || status === 'pending_transfer';
   const isFailed =
     status === 'cancelled' || status === 'expired' || status === 'refunded';
+  const isUnknown = status === null;
 
-  const heading = isPaid
-    ? '¡Pago confirmado!'
-    : isPending
-      ? 'Estamos confirmando tu pago'
-      : isFailed
-        ? 'El pago no se pudo confirmar'
-        : 'Pedido recibido';
+  const heading = isChecking
+    ? 'Confirmando tu pago…'
+    : isPaid
+      ? '¡Pago confirmado!'
+      : isPending
+        ? 'Estamos confirmando tu pago'
+        : isFailed
+          ? 'El pago no se pudo confirmar'
+          : 'Pedido registrado';
 
-  const description = isPaid
-    ? 'Gracias por tu compra. Te enviamos un email de confirmación.'
-    : isPending
-      ? 'MercadoPago todavía está procesando el pago. Te avisamos cuando se acredite.'
-      : isFailed
-        ? 'No registramos el pago. Si ya pagaste, escribinos por WhatsApp y lo revisamos.'
-        : 'Te vamos a contactar para coordinar.';
+  const description = isChecking
+    ? 'Estamos consultando el estado del pedido. Tarda unos segundos.'
+    : isPaid
+      ? 'Gracias por tu compra. Te enviamos un email de confirmación.'
+      : isPending
+        ? 'MercadoPago todavía está procesando el pago. Te avisamos cuando se acredite.'
+        : isFailed
+          ? 'No registramos el pago. Si ya pagaste, escribinos por WhatsApp y lo revisamos.'
+          : 'Si ya pagaste, en unos minutos va a figurar confirmado en Mis pedidos. Cualquier duda, escribinos.';
 
-  const icon = isPaid ? (
+  const icon = isChecking ? (
+    <Loader2 className="h-16 w-16 text-muted-foreground mb-4 animate-spin" />
+  ) : isPaid ? (
     <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-  ) : isPending ? (
-    <Clock className="h-16 w-16 text-amber-500 mb-4" />
   ) : isFailed ? (
     <XCircle className="h-16 w-16 text-red-500 mb-4" />
   ) : (
-    <Loader2 className="h-16 w-16 text-muted-foreground mb-4 animate-spin" />
+    <Clock className="h-16 w-16 text-amber-500 mb-4" />
   );
 
   return (
@@ -119,6 +160,12 @@ function SuccessContent() {
                 {isPaid && (
                   <p>
                     Ahora coordinamos la fabricación y la entrega por WhatsApp.
+                  </p>
+                )}
+                {isUnknown && (
+                  <p className="text-sm">
+                    Si pasaron más de 10 minutos y no aparece, escribinos con el
+                    número de pedido.
                   </p>
                 )}
               </div>
