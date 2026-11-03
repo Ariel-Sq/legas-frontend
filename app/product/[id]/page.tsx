@@ -21,9 +21,12 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
   const template = await getProductTemplateBySlugOrId(id);
-  // Throwing here (before the shell is streamed) is what makes the response an
-  // actual 404 instead of a 200 with the not-found UI inside the stream.
-  if (!template || !template.is_active) notFound();
+  // Next streams the shell before the page resolves, so a notFound() here can
+  // still answer 200. Marking these as noindex keeps Google from treating the
+  // not-found UI as a real page (soft 404) until the status is fixed upstream.
+  if (!template || !template.is_active) {
+    return { robots: { index: false, follow: false } };
+  }
 
   const variation =
     template.variations.find((v) => v.is_active) || template.variations[0];
