@@ -89,7 +89,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const ratingSummary = await getProductRatingSummary(foundTemplate.id);
 
   // Product structured data (schema.org) so Google can show rich results
-  // (price, availability) for product pages.
+  // (price, availability) for product pages. JSON-LD is a non-executable data
+  // block, not code.
   const activeVariations = foundTemplate.variations.filter(
     (v) => v.is_active
   );
@@ -132,8 +133,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <script
         type="application/ld+json"
         // Escape `<` so a product name/description containing `</script>`
-        // can't break out of the JSON-LD block (stored XSS). JSON.stringify
-        // alone does not escape it.
+        // can't break out of the JSON-LD block. JSON.stringify alone does not
+        // escape it.
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
         }}

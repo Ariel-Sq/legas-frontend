@@ -9,6 +9,7 @@ import { SITE_URL } from '@/utils/environments';
 
 // Organization + WebSite structured data (schema.org) for the home page —
 // helps Google associate the site with the brand and show the site name.
+// JSON-LD is a non-executable data block, not code.
 const ORGANIZATION_JSON_LD = {
   '@context': 'https://schema.org',
   '@graph': [
