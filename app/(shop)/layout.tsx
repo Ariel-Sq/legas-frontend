@@ -5,6 +5,8 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { WhatsAppFab } from '@/components/whatsapp-fab';
 import { CookieNotice } from '@/components/cookie-notice';
+import { MarqueeBar } from '@/components/marquee-bar';
+import { getShopSettings } from '@/lib/site-settings';
 
 /**
  * Storefront shell: header, footer, WhatsApp button and cookie notice.
@@ -13,14 +15,20 @@ import { CookieNotice } from '@/components/cookie-notice';
  *
  * The root layout keeps the document, fonts, theme and auth providers.
  */
-export default function ShopLayout({
+export default async function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getShopSettings();
+  const marquee = settings.marquee;
+
   return (
     <WishlistProvider>
       <CartProvider>
+        {marquee.isActive && marquee.text.trim() && (
+          <MarqueeBar text={marquee.text} speed={marquee.speed} />
+        )}
         <Header />
         {children}
         <Footer />

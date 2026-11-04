@@ -141,3 +141,22 @@
     filter: brightness(0.85);
   }
 }
+
+/* Marquee strip (panel → Configuración → Cinta de mensajes). No JS: the
+   track is duplicated and translated by -50% for a seamless loop. */
+@keyframes legas-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: inline-flex;
+  width: max-content;
+  animation-name: legas-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}

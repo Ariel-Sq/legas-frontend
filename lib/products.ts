@@ -68,6 +68,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  /** List price when a promotion is applied (for the strikethrough). */
+  originalPrice?: number;
   image: string;
   category: string;
   /** Template slug — preferred over the uuid for product URLs (SEO). */
@@ -165,6 +167,8 @@ export interface ShopDisplayProduct {
   templateId: string;
   name: string;
   price: number;
+  /** List price when a promotion is applied (for the strikethrough). */
+  originalPrice?: number;
   image: string;
   category: string;
   /** Template slug — preferred over the uuid for product URLs (SEO). */
@@ -282,6 +286,9 @@ export async function getShopProductsPage(
       templateId: template.id,
       name: template.name,
       price: parseFloat(defaultVariation.price),
+      originalPrice: (defaultVariation as any).originalPrice
+        ? Number((defaultVariation as any).originalPrice)
+        : undefined,
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Sin categoría',
       slug: template.slug,
@@ -428,6 +435,9 @@ export async function getShopProducts(): Promise<Product[]> {
           name: variation.name,
           description: template.description || '',
           price: parseFloat(variation.price),
+          originalPrice: (variation as any).originalPrice
+            ? Number((variation as any).originalPrice)
+            : undefined,
           image: mainImage?.url || '',
           category: template.categories[0]?.name || 'Uncategorized',
           slug: template.slug,
@@ -478,6 +488,9 @@ export async function getProductById(id: string): Promise<Product | null> {
         name: variation.name,
         description: template.description || '',
         price: parseFloat(variation.price),
+          originalPrice: (variation as any).originalPrice
+            ? Number((variation as any).originalPrice)
+            : undefined,
         image: mainImage?.url || '',
         category: template.categories[0]?.name || 'Uncategorized',
         slug: template.slug,
@@ -519,6 +532,9 @@ export async function getAllProducts(): Promise<Product[]> {
           description: template.description || '',
           fullDescription: template.description || '',
           price: parseFloat(variation.price),
+          originalPrice: (variation as any).originalPrice
+            ? Number((variation as any).originalPrice)
+            : undefined,
           image: mainImage?.url || '',
           images: variation.images
             .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -610,6 +626,9 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       name: template.name,
       description: template.description || '',
       price: parseFloat(variation.price),
+          originalPrice: (variation as any).originalPrice
+            ? Number((variation as any).originalPrice)
+            : undefined,
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'featured',
       slug: template.slug,
@@ -645,6 +664,9 @@ export async function getNewArrivals(): Promise<Product[]> {
       name: template.name,
       description: template.description || '',
       price: parseFloat(variation.price),
+          originalPrice: (variation as any).originalPrice
+            ? Number((variation as any).originalPrice)
+            : undefined,
       image: mainImage?.url || '',
       category: template.categories[0]?.name || 'Uncategorized',
       slug: template.slug,

@@ -70,13 +70,26 @@ const PAYMENT_OPTIONS: {
 ];
 
 
-export function CheckoutClient() {
+export interface CheckoutSettings {
+  /** Payment methods enabled in the panel. */
+  enabledPayments?: { mercadopago: boolean; offline: boolean };
+  shipping?: { cost: number; freeFrom: number; notes: string };
+}
+
+export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {}) {
   const { items, subtotal, loading, clearCart } = useCart();
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] =
-    useState<CheckoutPaymentMethod>('mercadopago');
+  // Only the methods the panel leaves enabled are offered.
+  const paymentOptions = PAYMENT_OPTIONS.filter((option) =>
+    settings?.enabledPayments
+      ? settings.enabledPayments[option.key]
+      : true
+  );
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>(
+    paymentOptions[0]?.key ?? 'mercadopago'
+  );
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
   // Set once an offline order is placed → success screen with WhatsApp CTA.
@@ -676,7 +689,7 @@ export function CheckoutClient() {
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2 mb-6">
-                    {PAYMENT_OPTIONS.map((option) => (
+                    {paymentOptions.map((option) => (
                       <button
                         key={option.key}
                         type="button"
@@ -877,12 +890,36 @@ export function CheckoutClient() {
                   </div>
                 </div>
 
+                {settings?.shipping &&
+                  (settings.shipping.cost > 0 ||
+                    settings.shipping.freeFrom > 0 ||
+                    settings.shipping.notes) && (
+                    <div className="mt-3 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+                      <p className="font-medium text-foreground">Envío</p>
+                      {settings.shipping.freeFrom > 0 && (
+                        <p>
+                          Sin cargo desde{' '}
+                          {formatPrice(settings.shipping.freeFrom)}.
+                        </p>
+                      )}
+                      {settings.shipping.cost > 0 && (
+                        <p>
+                          AMBA: {formatPrice(settings.shipping.cost)} (se
+                          coordina al confirmar).
+                        </p>
+                      )}
+                      {settings.shipping.notes && (
+                        <p className="mt-1">{settings.shipping.notes}</p>
+                      )}
+                    </div>
+                  )}
+
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los productos tienen dos precios: en efectivo o transferencia,
-                  y con tarjeta hasta 6 cuotas. El envío no está incluido: se
-                  cotiza según la zona antes del despacho. Si no aceptás el
-                  costo del envío, podés cancelar la compra sin cargo y te
-                  reintegramos el total.
+                  y con tarjeta hasta 6 cuotas. El envío no está incluido en el
+                  total: se cotiza según la zona antes del despacho. Si no
+                  aceptás el costo del envío, podés cancelar la compra sin cargo
+                  y te reintegramos el total.
                 </p>
               </div>
             </div>

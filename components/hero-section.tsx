@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { HeroCarousel } from './hero-carousel';
 import type { HeroContent } from '@/lib/hero';
 
 /**
@@ -15,6 +16,23 @@ import type { HeroContent } from '@/lib/hero';
  * portrait screen) and the copy shrinks: subtitle and button wait for `sm`.
  */
 export function HeroSection({ content }: { content: HeroContent }) {
+  // A carousel replaces the single banner when slides are configured.
+  if (content.slides.length > 0) {
+    return (
+      <HeroCarousel
+        slides={content.slides}
+        position={`center ${clamp(content.imagePosition, 0, 100, 50)}%`}
+        veil={clamp(content.overlayOpacity, 0, 60, 15) / 100}
+        fallback={{
+          headline: content.headline,
+          subheadline: content.subheadline,
+          ctaLabel: content.ctaLabel,
+          ctaHref: content.ctaHref,
+        }}
+      />
+    );
+  }
+
   const hasImage = Boolean(content.imageUrl);
   const position = `center ${clamp(content.imagePosition, 0, 100, 50)}%`;
   const veil = clamp(content.overlayOpacity, 0, 60, 15) / 100;

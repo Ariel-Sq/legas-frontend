@@ -77,9 +77,16 @@ export function ProductCard({
             <p className="hidden text-sm text-muted-foreground line-clamp-2 sm:block">
               {teaser}
             </p>
-            <p className="mt-1 font-bold text-primary text-base sm:mt-2 sm:text-xl">
-              {formatPrice(product.price)}
-            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-2 sm:mt-2">
+              <p className="font-bold text-primary text-base sm:text-xl">
+                {formatPrice(product.price)}
+              </p>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <p className="text-xs text-muted-foreground line-through">
+                  {formatPrice(product.originalPrice)}
+                </p>
+              )}
+            </div>
           </div>
         </Link>
         {wishlistButton}
@@ -108,9 +115,16 @@ export function ProductCard({
           <p className="mt-1 hidden text-sm text-muted-foreground flex-grow line-clamp-3 sm:block">
             {teaser}
           </p>
-          <p className="mt-2 font-bold text-primary text-base sm:mt-4 sm:text-xl">
-            {formatPrice(product.price)}
-          </p>
+          <div className="mt-2 flex flex-wrap items-baseline gap-2 sm:mt-4">
+            <p className="font-bold text-primary text-base sm:text-xl">
+              {formatPrice(product.price)}
+            </p>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <p className="text-xs text-muted-foreground line-through sm:text-sm">
+                {formatPrice(product.originalPrice)}
+              </p>
+            )}
+          </div>
         </div>
       </Link>
       {wishlistButton}
