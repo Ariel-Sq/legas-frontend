@@ -91,6 +91,29 @@ export interface ListProductTemplatesParams {
   featured?: boolean;
 }
 
+
+/**
+ * Photos belong to the product, but the backend stores one row per variant.
+ * Older data (or a variant created before its photos) can leave a variant
+ * empty: borrow the images from the first variant that has them, so a
+ * measurement never shows a blank gallery.
+ */
+function withSharedImages(template: ProductTemplate): ProductTemplate {
+  const source = template.variations?.find(
+    (variation) => (variation.images?.length ?? 0) > 0
+  );
+  if (!source) return template;
+
+  return {
+    ...template,
+    variations: template.variations.map((variation) =>
+      variation.images?.length
+        ? variation
+        : { ...variation, images: source.images }
+    ),
+  };
+}
+
 export async function getProductTemplates(
   params?: ListProductTemplatesParams
 ): Promise<ProductTemplate[]> {
@@ -120,7 +143,7 @@ export async function getProductTemplates(
       return [];
     }
     const data: ProductTemplate[] = await resp.json();
-    return Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data.map(withSharedImages) : [];
   } catch (err) {
     console.error('getProductTemplates: backend unreachable', err);
     return [];
