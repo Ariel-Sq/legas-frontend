@@ -99,10 +99,10 @@ export function HeroSection({ content }: { content: HeroContent }) {
           )}
 
           {content.ctaLabel && (
-            <div className="mt-8 hidden justify-center sm:flex">
+            <div className="mt-3 flex justify-center sm:mt-8">
               <Link
                 href={content.ctaHref || '/shop'}
-                className="inline-block bg-primary text-primary-foreground text-lg sm:text-xl font-bold py-4 px-10 sm:px-12 rounded-lg hover:opacity-90 transition-all shadow-lg"
+                className="inline-block rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground shadow-lg transition-all hover:opacity-90 sm:px-12 sm:py-4 sm:text-xl"
               >
                 {content.ctaLabel}
               </Link>
