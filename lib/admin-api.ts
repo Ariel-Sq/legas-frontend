@@ -245,12 +245,16 @@ export async function markDepositPaid(id: string) {
   revalidatePath('/admin/orders');
 }
 
-export async function inviteAdminUser(email: string, role: string) {
-  await adminFetch('/users/invite', {
+export async function inviteAdminUser(
+  email: string,
+  role: string
+): Promise<{ emailSent: boolean }> {
+  const result = await adminFetch<{ emailSent: boolean }>('/users/invite', {
     method: 'POST',
     body: JSON.stringify({ email, role }),
   });
   revalidatePath('/admin/users');
+  return result;
 }
 
 export async function listAdminUsers(): Promise<AdminUserRow[]> {

@@ -26,8 +26,14 @@ export function InviteForm() {
     }
     startTransition(async () => {
       try {
-        await inviteAdminUser(email.trim(), role);
-        toast.success(`Invitación enviada a ${email.trim()}`);
+        const { emailSent } = await inviteAdminUser(email.trim(), role);
+        if (emailSent) {
+          toast.success(`Invitación enviada a ${email.trim()}`);
+        } else {
+          toast.warning(
+            'El rol quedó guardado, pero el mail no salió. Avisanos y lo revisamos.'
+          );
+        }
         setEmail('');
       } catch (error) {
         toast.error(
