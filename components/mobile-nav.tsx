@@ -57,7 +57,7 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden cursor-pointer"
+          className="lg:hidden cursor-pointer"
           aria-label="Abrir menú"
         >
           <Menu className="h-5 w-5" />

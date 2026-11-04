@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function HeaderNav() {
   return (
-    <nav className="hidden md:flex items-center gap-8">
+    <nav className="hidden lg:flex items-center gap-8">
       <Link
         href="/shop"
         className="text-sm font-medium hover:text-primary transition-colors"
