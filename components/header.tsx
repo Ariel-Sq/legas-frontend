@@ -39,7 +39,11 @@ export function Header() {
             >
               <SearchBar />
             </Suspense>
-            <ThemeToggle />
+            {/* Phones: the toggle lives inside the menu, it was hitting the
+                logo in the header row. */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             <WishlistButton />
             <CartButton />
             <AuthSection />

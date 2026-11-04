@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, Home, ShoppingBag, Mail, Search } from 'lucide-react';
+import { Menu, Home, ShoppingBag, Mail, Search, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +20,13 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
+  // next-themes resolves on the client; avoid a hydration mismatch by
+  // rendering the neutral state until mounted.
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === 'dark';
 
   const navItems = [
     { href: '/', label: 'Inicio', icon: Home },
@@ -80,6 +88,23 @@ export function MobileNav() {
             );
           })}
         </nav>
+
+        <Separator className="my-6" />
+
+        {/* Theme switch: removed from the header on phones, where it collided
+            with the logo. */}
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all hover:bg-primary/10 hover:text-primary"
+        >
+          {isDark ? (
+            <Moon className="h-5 w-5" />
+          ) : (
+            <Sun className="h-5 w-5" />
+          )}
+          Tema: {isDark ? 'oscuro' : 'claro'}
+        </button>
       </SheetContent>
     </Sheet>
   );

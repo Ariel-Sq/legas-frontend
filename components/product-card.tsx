@@ -59,7 +59,7 @@ export function ProductCard({
 
   if (variant === 'compact') {
     return (
-      <div className="group relative flex flex-col gap-3">
+      <div className="group relative flex flex-col gap-2 sm:gap-3">
         <Link href={href}>
           <div className="relative w-full aspect-square rounded-lg overflow-hidden">
             <Image
@@ -71,13 +71,13 @@ export function ProductCard({
             />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+            <h3 className="text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-base">
               {product.name}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="hidden text-sm text-muted-foreground line-clamp-2 sm:block">
               {teaser}
             </p>
-            <p className="mt-2 font-bold text-primary text-xl">
+            <p className="mt-1 font-bold text-primary text-base sm:mt-2 sm:text-xl">
               {formatPrice(product.price)}
             </p>
           </div>
@@ -101,14 +101,14 @@ export function ProductCard({
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="p-5 flex flex-col flex-grow">
-          <h3 className="text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
+        <div className="flex flex-grow flex-col p-3 sm:p-5">
+          <h3 className="text-sm font-semibold leading-snug text-card-foreground transition-colors group-hover:text-primary sm:text-lg">
             {product.name}
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground flex-grow line-clamp-3">
+          <p className="mt-1 hidden text-sm text-muted-foreground flex-grow line-clamp-3 sm:block">
             {teaser}
           </p>
-          <p className="mt-4 font-bold text-primary text-xl">
+          <p className="mt-2 font-bold text-primary text-base sm:mt-4 sm:text-xl">
             {formatPrice(product.price)}
           </p>
         </div>
