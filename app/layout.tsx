@@ -3,16 +3,10 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { GeistMono } from 'geist/font/mono';
 import { Analytics } from '@vercel/analytics/next';
-import { CartProvider } from '@/components/cart-provider';
 import { ThemeProvider } from '@/components/theme-provider';
-import { WishlistProvider } from '@/components/wishlist-provider';
 import { AuthProvider } from '@/lib/auth-context';
 import './globals.css';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
-import { WhatsAppFab } from '@/components/whatsapp-fab';
 import { Toaster } from 'sonner';
-import { CookieNotice } from '@/components/cookie-notice';
 import { SITE_URL } from '@/utils/environments';
 
 // Self-hosted (app/fonts) so the build never depends on fetching Google Fonts.
@@ -77,16 +71,10 @@ export default function RootLayout({
           enableSystem={false}
         >
           <AuthProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <Header />
-                {children}
-                <Footer />
-                <WhatsAppFab />
-                <CookieNotice />
-                <Toaster position="top-center" richColors />
-              </CartProvider>
-            </WishlistProvider>
+            {/* Storefront chrome lives in app/(shop)/layout.tsx; the admin
+                panel renders without it. */}
+            {children}
+            <Toaster position="top-center" richColors />
           </AuthProvider>
         </ThemeProvider>
         <Analytics />
