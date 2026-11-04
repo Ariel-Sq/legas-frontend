@@ -143,7 +143,12 @@ export async function getProductTemplates(
       return [];
     }
     const data: ProductTemplate[] = await resp.json();
-    return Array.isArray(data) ? data.map(withSharedImages) : [];
+    if (!Array.isArray(data)) return [];
+    // "Oculto" in the panel means hidden from the shop: the storefront never
+    // renders an inactive template (shop, featured, new arrivals, sitemap).
+    return data
+      .filter((template) => template.is_active !== false)
+      .map(withSharedImages);
   } catch (err) {
     console.error('getProductTemplates: backend unreachable', err);
     return [];
