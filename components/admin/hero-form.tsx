@@ -130,7 +130,7 @@ export function HeroForm({
           <div className="relative px-4 py-14 text-center sm:py-20">
             <p
               className={`text-2xl font-extrabold leading-tight sm:text-4xl ${
-                imageUrl ? 'text-white' : 'text-foreground'
+                imageUrl ? 'text-white' : 'text-[#2f2418]'
               }`}
             >
               {headline.trim() || 'Título de la portada'}
@@ -138,7 +138,7 @@ export function HeroForm({
             {subheadline.trim() && (
               <p
                 className={`mx-auto mt-3 max-w-xl text-sm sm:text-base ${
-                  imageUrl ? 'text-white/90' : 'text-muted-foreground'
+                  imageUrl ? 'text-white/90' : 'text-[#5f4f3c]'
                 }`}
               >
                 {subheadline.trim()}

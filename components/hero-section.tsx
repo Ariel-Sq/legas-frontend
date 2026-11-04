@@ -33,7 +33,9 @@ export function HeroSection({ content }: { content: HeroContent }) {
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 md:py-36 text-center">
         <h1
           className={`text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-balance ${
-            hasImage ? 'text-white' : 'text-foreground'
+            // Fixed dark ink: the beige fallback is always light, even in
+            // dark mode, so the theme's foreground would be unreadable.
+            hasImage ? 'text-white' : 'text-[#2f2418]'
           }`}
         >
           {content.headline}
@@ -42,7 +44,7 @@ export function HeroSection({ content }: { content: HeroContent }) {
         {content.subheadline && (
           <p
             className={`mt-4 max-w-2xl mx-auto text-lg text-pretty ${
-              hasImage ? 'text-white/90' : 'text-muted-foreground'
+              hasImage ? 'text-white/90' : 'text-[#5f4f3c]'
             }`}
           >
             {content.subheadline}
