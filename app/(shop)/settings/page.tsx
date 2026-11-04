@@ -19,7 +19,6 @@ import {
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
-import { PaletteControls } from '@/components/palette-picker';
 import { deleteAccountAction } from '@/lib/account';
 import { signOut } from 'next-auth/react';
 import { useState, useTransition } from 'react';
@@ -99,19 +98,6 @@ export default function SettingsPage() {
                     preferencias de tu sistema
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Color Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Colores</CardTitle>
-                <CardDescription>
-                  Elegí un tema completo, o armá tu combinación de base y acento
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PaletteControls />
               </CardContent>
             </Card>
 
