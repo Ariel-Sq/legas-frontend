@@ -15,7 +15,7 @@ import { updateUserRole, type AdminUserRow } from '@/lib/admin-api';
 const ROLES = [
   { value: 'admin', label: 'Administrador (todo)' },
   { value: 'editor', label: 'Editor (catálogo)' },
-  { value: 'customer', label: 'Cliente (sin acceso)' },
+  { value: 'customer', label: 'Cliente (le saca el acceso)' },
 ];
 
 export function UsersTable({

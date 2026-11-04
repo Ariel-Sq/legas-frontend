@@ -17,9 +17,8 @@ export default async function AdminUsersPage() {
       <div>
         <h1 className="text-2xl font-bold">Usuarios y permisos</h1>
         <p className="text-sm text-muted-foreground">
-          Cualquiera que inicie sesión con Google y tenga rol de editor o
-          administrador puede entrar a <code>/admin</code>. El dueño se define
-          con la variable <code>OWNER_EMAIL</code>.
+          Acá aparecen solo las personas con acceso al panel. Los clientes de
+          la tienda no se listan.
         </p>
       </div>
 
@@ -28,10 +27,18 @@ export default async function AdminUsersPage() {
 
       <div className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">Cómo sumar a alguien</p>
-        <p className="mt-1">
-          La persona entra una vez a la tienda con su cuenta de Google (así se
-          crea su usuario) y después le asignás el rol acá. No hace falta
-          invitación ni contraseña.
+        <ol className="mt-2 list-decimal space-y-1 pl-5">
+          <li>Ponés su email arriba, elegís el rol y tocás «Invitar».</li>
+          <li>Le llega un mail con el link del panel.</li>
+          <li>
+            Entra con Google usando <strong>ese mismo email</strong> y ya queda
+            con el rol asignado. No hay contraseñas ni registros aparte.
+          </li>
+        </ol>
+        <p className="mt-2">
+          Si la persona ya compró en la tienda, la invitación le cambia el rol
+          sobre su cuenta existente. Sacarle el acceso es ponerle «Cliente» en
+          la lista de abajo.
         </p>
       </div>
     </div>
