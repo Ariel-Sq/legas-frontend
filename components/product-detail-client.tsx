@@ -294,19 +294,11 @@ export function ProductDetailClient({
                 {initialTemplate.description || selectedVariation.name}
               </p>
 
-              {/* Availability — made-to-order, so no misleading "N en stock". */}
+              {/* Every piece is made to order — no stock language. */}
               <div className="flex items-center gap-2">
-                <div
-                  className={`h-2 w-2 rounded-full ${
-                    selectedVariation.stock > 0
-                      ? 'bg-green-500'
-                      : 'bg-amber-500'
-                  }`}
-                />
+                <div className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-sm text-muted-foreground">
-                  {selectedVariation.stock > 0
-                    ? 'Disponible — fabricación y entrega a coordinar por WhatsApp'
-                    : 'Se fabrica a pedido — consultanos el plazo por WhatsApp'}
+                  Se fabrica a pedido — coordinamos el plazo por WhatsApp
                 </span>
               </div>
 
@@ -324,7 +316,6 @@ export function ProductDetailClient({
                 price: unitPrice,
                 image: selectedProduct.image,
                 category: selectedProduct.category,
-                stock: selectedProduct.stock,
               }}
               wishlistId={initialTemplate.id}
               wishlistVariationId={selectedVariation.id}

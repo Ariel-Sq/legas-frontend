@@ -58,9 +58,7 @@ export function AddToCartSection({
   };
 
   const handleIncrement = () => {
-    if (!product.stock || quantity < product.stock) {
-      setQuantity(quantity + 1);
-    }
+    setQuantity(quantity + 1);
   };
 
   const handleAddOrUpdateCart = () => {
@@ -99,7 +97,6 @@ export function AddToCartSection({
     });
   };
 
-  const isOutOfStock = product.stock !== undefined && product.stock === 0;
   const quantityChanged = cartItem && cartItem.quantity !== quantity;
 
   return (
@@ -120,7 +117,7 @@ export function AddToCartSection({
           </span>
           <button
             onClick={handleIncrement}
-            disabled={!!product.stock && quantity >= product.stock}
+
             aria-label="Sumar uno"
             className="h-10 w-10 flex items-center justify-center hover:bg-muted cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -168,12 +165,11 @@ export function AddToCartSection({
           <div className="flex gap-3">
             <Button
               onClick={handleAddOrUpdateCart}
-              disabled={isOutOfStock}
               className="flex-1 h-12 text-base cursor-pointer"
               size="lg"
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {isOutOfStock ? 'Sin stock' : 'Agregar al carrito'}
+              Agregar al carrito
             </Button>
             <Button
               onClick={handleToggleWishlist}

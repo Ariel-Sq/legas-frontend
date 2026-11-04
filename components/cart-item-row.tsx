@@ -22,9 +22,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
   };
 
   const handleIncrease = () => {
-    if (!item.stock || item.quantity < item.stock) {
-      updateQuantity(item.id, item.quantity + 1);
-    }
+    updateQuantity(item.id, item.quantity + 1);
   };
 
   const handleRemove = () => {
@@ -80,7 +78,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
               variant="ghost"
               size="icon"
               onClick={handleIncrease}
-              disabled={!!item.stock && item.quantity >= item.stock}
+
               className="h-10 w-10 cursor-pointer"
             >
               <Plus className="h-4 w-4" />

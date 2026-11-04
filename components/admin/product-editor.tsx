@@ -31,7 +31,6 @@ const money = (value: string | number) =>
 interface VariationDraft {
   name: string;
   price: string;
-  stock: string;
   isActive: boolean;
 }
 
@@ -39,7 +38,6 @@ function toDraft(variation: AdminVariation): VariationDraft {
   return {
     name: variation.name,
     price: String(Number(variation.price)),
-    stock: String(variation.stock),
     isActive: variation.is_active,
   };
 }
@@ -75,7 +73,6 @@ export function ProductEditor({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newMedida, setNewMedida] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  const [newStock, setNewStock] = useState('10');
 
   const updateDraft = (id: string, patch: Partial<VariationDraft>) =>
     setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
@@ -86,7 +83,6 @@ export function ProductEditor({
     return (
       draft.name !== variation.name ||
       Number(draft.price) !== Number(variation.price) ||
-      Number(draft.stock) !== variation.stock ||
       draft.isActive !== variation.is_active
     );
   });
@@ -108,7 +104,6 @@ export function ProductEditor({
           return (
             draft.name !== variation.name ||
             Number(draft.price) !== Number(variation.price) ||
-            Number(draft.stock) !== variation.stock ||
             draft.isActive !== variation.is_active
           );
         });
@@ -118,7 +113,6 @@ export function ProductEditor({
           await updateVariation(variation.id, {
             name: draft.name,
             price: Number(draft.price),
-            stock: Number(draft.stock),
             is_active: draft.isActive,
           });
         }
@@ -182,12 +176,10 @@ export function ProductEditor({
         await createVariation(product.id, {
           medida: newMedida.trim(),
           price,
-          stock: Number(newStock) || 0,
         });
         toast.success('Variante creada');
         setNewMedida('');
         setNewPrice('');
-        setNewStock('10');
         router.refresh();
       } catch (error) {
         toast.error(
@@ -303,17 +295,6 @@ export function ProductEditor({
                       }
                     />
                   </div>
-                  <div>
-                    <Label htmlFor={`stock-${variation.id}`}>Stock</Label>
-                    <Input
-                      id={`stock-${variation.id}`}
-                      type="number"
-                      value={draft.stock}
-                      onChange={(e) =>
-                        updateDraft(variation.id, { stock: e.target.value })
-                      }
-                    />
-                  </div>
                   <label className="flex items-center gap-2 pb-2 text-sm">
                     <Checkbox
                       checked={draft.isActive}
@@ -425,15 +406,6 @@ export function ProductEditor({
                   placeholder="399000"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-stock">Stock</Label>
-                <Input
-                  id="new-stock"
-                  type="number"
-                  value={newStock}
-                  onChange={(e) => setNewStock(e.target.value)}
                 />
               </div>
               <Button
