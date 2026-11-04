@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { BACKEND_URL } from '@/utils/environments';
 import { getAuthHeaders } from './server-auth';
 import { frontendKeyHeaders } from '@/utils/frontend-key';
@@ -255,6 +255,58 @@ export async function inviteAdminUser(
   });
   revalidatePath('/admin/users');
   return result;
+}
+
+export interface AdminHero {
+  imageUrl: string | null;
+  imagePath: string | null;
+  headline: string;
+  subheadline: string;
+  ctaLabel: string;
+  ctaHref: string;
+  updatedAt: string;
+}
+
+export async function getAdminHero(): Promise<AdminHero> {
+  return adminFetch<AdminHero>('/hero');
+}
+
+export async function saveAdminHero(input: {
+  headline: string;
+  subheadline: string;
+  ctaLabel: string;
+  ctaHref: string;
+}): Promise<AdminHero> {
+  const hero = await adminFetch<AdminHero>('/hero', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+  await refreshHeroCaches();
+  return hero;
+}
+
+export async function uploadHeroImage(formData: FormData): Promise<AdminHero> {
+  const hero = await adminFetch<AdminHero>('/hero/image', {
+    method: 'POST',
+    body: formData,
+  });
+  await refreshHeroCaches();
+  return hero;
+}
+
+export async function removeHeroImage(): Promise<AdminHero> {
+  const hero = await adminFetch<AdminHero>('/hero/image', {
+    method: 'DELETE',
+  });
+  await refreshHeroCaches();
+  return hero;
+}
+
+/** Home page is ISR-cached with the `hero` tag: drop it after every save. */
+async function refreshHeroCaches() {
+  revalidatePath('/');
+  revalidatePath('/admin/portada');
+  revalidateTag('hero');
 }
 
 export async function listAdminUsers(): Promise<AdminUserRow[]> {

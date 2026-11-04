@@ -24,6 +24,12 @@ const nextConfig = {
         hostname: 'legas-api.vercel.app',
       },
       {
+        // Storefront API origin: the hero banner is served through
+        // /api/images/<path> (same route product thumbnails use).
+        protocol: 'https',
+        hostname: 'api.legasmuebles.com',
+      },
+      {
         // Vercel Blob CDN — product images are served straight from here.
         protocol: 'https',
         hostname: 'vuc1kji60ug9rvd6.public.blob.vercel-storage.com',

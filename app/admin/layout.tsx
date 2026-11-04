@@ -39,6 +39,9 @@ export default async function AdminLayout({
             Legas · Panel
           </Link>
           <nav className="flex flex-wrap items-center gap-4 text-sm">
+            <Link href="/admin/portada" className="hover:text-primary">
+              Portada
+            </Link>
             <Link href="/admin" className="hover:text-primary">
               Productos
             </Link>

@@ -1,4 +1,5 @@
 import { getFeaturedProducts, getNewArrivals } from '@/lib/products';
+import { getHero } from '@/lib/hero';
 import { HeroSection } from '@/components/hero-section';
 import { FeaturedProducts } from '@/components/featured-products';
 import { NewArrivals } from '@/components/new-arrivals';
@@ -31,7 +32,8 @@ const ORGANIZATION_JSON_LD = {
 };
 
 export default async function Home() {
-  const [featuredProducts, newArrivals] = await Promise.all([
+  const [hero, featuredProducts, newArrivals] = await Promise.all([
+    getHero(),
     getFeaturedProducts(),
     getNewArrivals(),
   ]);
@@ -45,7 +47,7 @@ export default async function Home() {
         }}
       />
       <main className="flex-grow">
-        <HeroSection featuredProduct={featuredProducts[0]} />
+        <HeroSection content={hero} />
         <FeaturedProducts products={featuredProducts} />
         <NewArrivals products={newArrivals} />
         <InstagramSection />

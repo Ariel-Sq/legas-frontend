@@ -38,9 +38,14 @@ function safeEqual(a: string, b: string): boolean {
 export function middleware(request: NextRequest) {
   const host = (request.headers.get('host') ?? '').split(':')[0].toLowerCase();
   const isAdminHost = host.startsWith('admin.');
+  // Local development has no admin subdomain and no Basic Auth credentials:
+  // /admin stays reachable so the panel can be worked on offline. Production
+  // builds (and previews, which also run with NODE_ENV=production) keep both
+  // protections.
+  const isDev = process.env.NODE_ENV !== 'production';
 
   if (!isAdminHost) {
-    if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (request.nextUrl.pathname.startsWith('/admin') && !isDev) {
       return new NextResponse('Not found', { status: 404 });
     }
     return NextResponse.next();
@@ -48,6 +53,9 @@ export function middleware(request: NextRequest) {
 
   const user = process.env.ADMIN_BASIC_AUTH_USER;
   const pass = process.env.ADMIN_BASIC_AUTH_PASS;
+  if (isDev && (!user || !pass)) {
+    return NextResponse.next();
+  }
   if (!user || !pass) {
     return new NextResponse('Panel no configurado', { status: 503 });
   }
