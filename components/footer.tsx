@@ -79,11 +79,6 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
           <span className="text-xs text-muted-foreground">Medios de pago:</span>
           {[
-            { label: 'Visa', file: 'visa.png' },
-            { label: 'Mastercard', file: 'mastercard.png' },
-            { label: 'American Express', file: 'amex.png' },
-            { label: 'Cabal', file: 'cabal.png' },
-            { label: 'Tarjeta Naranja', file: 'naranja.png' },
             { label: 'Mercado Pago', file: 'mercadopago.png' },
             { label: 'Transferencia bancaria', file: 'transferencia.svg' },
             { label: 'Efectivo', file: 'efectivo.png' },
