@@ -12,6 +12,10 @@ export interface HeroContent {
   imageUrl: string | null;
   /** Draw the headline/button over the image, or show the banner as designed. */
   showText: boolean;
+  /** Darkness of the veil over the photo, 0-60 (percent). */
+  overlayOpacity: number;
+  /** Vertical focal point of the photo, 0 (top) - 100 (bottom). */
+  imagePosition: number;
   headline: string;
   subheadline: string;
   ctaLabel: string;
@@ -22,6 +26,8 @@ export interface HeroContent {
 export const HERO_FALLBACK: HeroContent = {
   imageUrl: null,
   showText: true,
+  overlayOpacity: 15,
+  imagePosition: 50,
   headline: 'Muebles de Madera Artesanales',
   subheadline:
     'Descubrí piezas atemporales que aportan calidez y elegancia a tu hogar',
@@ -41,6 +47,8 @@ export async function getHero(): Promise<HeroContent> {
     return {
       imageUrl: data.imageUrl ?? null,
       showText: data.showText ?? true,
+      overlayOpacity: data.overlayOpacity ?? 15,
+      imagePosition: data.imagePosition ?? 50,
       headline: data.headline?.trim() || HERO_FALLBACK.headline,
       subheadline: data.subheadline ?? HERO_FALLBACK.subheadline,
       ctaLabel: data.ctaLabel?.trim() || HERO_FALLBACK.ctaLabel,

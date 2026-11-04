@@ -261,6 +261,8 @@ export interface AdminHero {
   imageUrl: string | null;
   imagePath: string | null;
   showText: boolean;
+  overlayOpacity: number;
+  imagePosition: number;
   headline: string;
   subheadline: string;
   ctaLabel: string;
@@ -278,6 +280,8 @@ export async function saveAdminHero(input: {
   ctaLabel: string;
   ctaHref: string;
   showText: boolean;
+  overlayOpacity: number;
+  imagePosition: number;
 }): Promise<AdminHero> {
   const hero = await adminFetch<AdminHero>('/hero', {
     method: 'PATCH',

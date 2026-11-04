@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import {
   removeHeroImage,
@@ -19,8 +20,8 @@ import {
  * Home banner editor: background image plus the copy over it.
  *
  * The photo is saved the moment it is uploaded (no "save" needed); the button
- * only persists the text and the "text over photo" switch. The preview mirrors
- * the storefront exactly.
+ * persists the text, the veil and the framing. The preview mirrors the
+ * storefront exactly, using the same CSS the storefront uses.
  */
 export function HeroForm({
   hero,
@@ -36,6 +37,8 @@ export function HeroForm({
   const [ctaLabel, setCtaLabel] = useState(hero.ctaLabel);
   const [ctaHref, setCtaHref] = useState(hero.ctaHref);
   const [showText, setShowText] = useState(hero.showText);
+  const [overlayOpacity, setOverlayOpacity] = useState(hero.overlayOpacity);
+  const [imagePosition, setImagePosition] = useState(hero.imagePosition);
   const [imageUrl, setImageUrl] = useState(hero.imageUrl);
   const [confirmRemove, setConfirmRemove] = useState(false);
 
@@ -86,6 +89,8 @@ export function HeroForm({
           ctaLabel: ctaLabel.trim(),
           ctaHref: ctaHref.trim(),
           showText,
+          overlayOpacity,
+          imagePosition,
         });
         toast.success('Portada guardada');
         router.refresh();
@@ -99,6 +104,13 @@ export function HeroForm({
 
   const textOnImage = Boolean(imageUrl) && showText;
   const imageOnly = Boolean(imageUrl) && !showText;
+  const imageStyle = imageUrl
+    ? {
+        backgroundImage: `url('${imageUrl}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: `center ${imagePosition}%`,
+      }
+    : undefined;
 
   return (
     <div className="space-y-6 pb-24">
@@ -118,53 +130,50 @@ export function HeroForm({
           </Link>
         </div>
 
-        {imageOnly ? (
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#f8ebd3]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl!}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className="relative isolate overflow-hidden rounded-lg bg-[#f8ebd3]">
-            {imageUrl && (
-              // Plain img: the banner is a single large asset, no need for the
-              // Next image optimizer in the panel.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={imageUrl}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
+        <div className="relative isolate overflow-hidden rounded-lg bg-[#f8ebd3]">
+          <div
+            className={imageOnly ? 'relative aspect-[16/9]' : 'relative'}
+            style={imageStyle}
+          >
+            {textOnImage && (
+              <div
+                className="absolute inset-0"
+                style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity / 100})` }}
               />
             )}
-            {textOnImage && <div className="absolute inset-0 bg-black/40" />}
-            <div className="relative px-4 py-14 text-center sm:py-20">
-              <p
-                className={`text-2xl font-extrabold leading-tight sm:text-4xl ${
-                  textOnImage ? 'text-white' : 'text-[#2f2418]'
-                }`}
-              >
-                {headline.trim() || 'Título de la portada'}
-              </p>
-              {subheadline.trim() && (
+            {!imageOnly && (
+              <div className="relative px-4 py-14 text-center sm:py-20">
                 <p
-                  className={`mx-auto mt-3 max-w-xl text-sm sm:text-base ${
-                    textOnImage ? 'text-white/90' : 'text-[#5f4f3c]'
+                  style={{
+                    textShadow:
+                      textOnImage && overlayOpacity < 30
+                        ? '0 2px 12px rgba(0,0,0,0.45)'
+                        : undefined,
+                  }}
+                  className={`text-2xl font-extrabold leading-tight sm:text-4xl ${
+                    textOnImage ? 'text-white' : 'text-[#2f2418]'
                   }`}
                 >
-                  {subheadline.trim()}
+                  {headline.trim() || 'Título de la portada'}
                 </p>
-              )}
-              {ctaLabel.trim() && (
-                <span className="mt-6 inline-block rounded-lg bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg">
-                  {ctaLabel.trim()}
-                </span>
-              )}
-            </div>
+                {subheadline.trim() && (
+                  <p
+                    className={`mx-auto mt-3 max-w-xl text-sm sm:text-base ${
+                      textOnImage ? 'text-white/90' : 'text-[#5f4f3c]'
+                    }`}
+                  >
+                    {subheadline.trim()}
+                  </p>
+                )}
+                {ctaLabel.trim() && (
+                  <span className="mt-6 inline-block rounded-lg bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg">
+                    {ctaLabel.trim()}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </section>
 
       {/* Image */}
@@ -233,23 +242,75 @@ export function HeroForm({
         </div>
 
         {imageUrl && (
-          <div className="mt-5 flex items-start justify-between gap-4 rounded-lg border p-4">
-            <div>
-              <p className="text-sm font-medium">
-                Mostrar título y botón sobre la foto
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Si el banner ya tiene su propio logo y texto, desactivalo: la
-                foto se ve completa, sin oscurecer ni textos encima.
-              </p>
+          <>
+            <div className="mt-5 flex items-start justify-between gap-4 rounded-lg border p-4">
+              <div>
+                <p className="text-sm font-medium">
+                  Mostrar título y botón sobre la foto
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Si el banner ya tiene su propio logo y texto, desactivalo: la
+                  foto se ve completa, sin velo ni textos encima.
+                </p>
+              </div>
+              <Switch
+                checked={showText}
+                onCheckedChange={setShowText}
+                disabled={pending}
+                aria-label="Mostrar título y botón sobre la foto"
+              />
             </div>
-            <Switch
-              checked={showText}
-              onCheckedChange={setShowText}
-              disabled={pending}
-              aria-label="Mostrar título y botón sobre la foto"
-            />
-          </div>
+
+            <div className="mt-4 grid gap-6 sm:grid-cols-2">
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <Label>Oscurecer la foto</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {overlayOpacity === 0
+                      ? 'sin velo'
+                      : `${overlayOpacity}%`}
+                  </span>
+                </div>
+                <Slider
+                  className="mt-3"
+                  value={[overlayOpacity]}
+                  min={0}
+                  max={60}
+                  step={5}
+                  disabled={pending || !showText}
+                  onValueChange={([value]) => setOverlayOpacity(value)}
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  0 = foto limpia (el texto lleva sombra), 60 = bien oscura.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <Label>Encuadre de la foto</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {imagePosition < 40
+                      ? 'arriba'
+                      : imagePosition > 60
+                        ? 'abajo'
+                        : 'centro'}
+                  </span>
+                </div>
+                <Slider
+                  className="mt-3"
+                  value={[imagePosition]}
+                  min={0}
+                  max={100}
+                  step={5}
+                  disabled={pending}
+                  onValueChange={([value]) => setImagePosition(value)}
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Movelo para elegir qué parte de la foto queda a la vista.
+                </p>
+              </div>
+            </div>
+          </>
         )}
       </section>
 
@@ -318,7 +379,8 @@ export function HeroForm({
       <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
           <span className="text-xs text-muted-foreground">
-            La foto se guarda al subirla; el botón guarda los textos.
+            La foto se guarda al subirla; el botón guarda los textos y los
+            ajustes.
           </span>
           <Button onClick={save} disabled={pending}>
             {pending ? 'Guardando…' : 'Guardar portada'}
