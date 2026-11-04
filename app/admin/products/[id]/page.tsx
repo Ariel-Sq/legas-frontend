@@ -5,7 +5,6 @@ import {
   listAdminCategories,
 } from '@/lib/admin-api';
 import { ProductEditor } from '@/components/admin/product-editor';
-import { BACKEND_URL } from '@/utils/environments';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,11 +38,7 @@ export default async function AdminProductPage({
         </p>
       </div>
 
-      <ProductEditor
-        product={product}
-        categories={categories}
-        imageBase={BACKEND_URL ?? ''}
-      />
+      <ProductEditor product={product} categories={categories} />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { listAdminProducts } from '@/lib/admin-api';
-import { BACKEND_URL } from '@/utils/environments';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,11 +71,14 @@ export default async function AdminProductsPage({
               <tr key={p.id} className="border-t">
                 <td className="p-3">
                   <div className="h-10 w-10 overflow-hidden rounded bg-muted">
-                    {p.mainImage ? (
+                    {p.mainImageUrl ? (
+                      // Served straight from the CDN; the API proxy needs a
+                      // cold start per image and gets rate-limited.
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={`${BACKEND_URL}/api/images/${p.mainImage}`}
+                        src={p.mainImageUrl}
                         alt=""
+                        loading="lazy"
                         className="h-full w-full object-cover"
                       />
                     ) : null}

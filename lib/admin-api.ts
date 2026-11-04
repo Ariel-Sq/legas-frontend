@@ -56,6 +56,8 @@ export interface AdminProductRow {
   variations: number;
   minPrice: number;
   mainImage: string | null;
+  /** Absolute (CDN) URL for the thumbnail, when there is one. */
+  mainImageUrl: string | null;
 }
 
 export interface AdminImage {

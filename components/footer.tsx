@@ -12,6 +12,12 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
             <Link
+              href="/quienes-somos"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Quiénes somos
+            </Link>
+            <Link
               href="/como-comprar"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >

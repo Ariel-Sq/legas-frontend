@@ -9,7 +9,12 @@ export function HeaderNav() {
       >
         Productos
       </Link>
-      {/* "Nosotros" hidden until it has real content — see TODO.md */}
+      <Link
+        href="/quienes-somos"
+        className="text-sm font-medium hover:text-primary transition-colors"
+      >
+        Quiénes somos
+      </Link>
       <Link
         href="/contact"
         className="text-sm font-medium hover:text-primary transition-colors"

@@ -3,7 +3,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, Home, ShoppingBag, Mail, Search, Sun, Moon } from 'lucide-react';
+import {
+  Menu,
+  Home,
+  ShoppingBag,
+  Mail,
+  Search,
+  Sun,
+  Moon,
+  Users,
+} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Sheet,
@@ -31,7 +40,7 @@ export function MobileNav() {
   const navItems = [
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/shop', label: 'Productos', icon: ShoppingBag },
-    // 'Nosotros' hidden until it has real content — see TODO.md
+    { href: '/quienes-somos', label: 'Quiénes somos', icon: Users },
     { href: '/contact', label: 'Contacto', icon: Mail },
   ];
 
