@@ -112,9 +112,23 @@ export async function getAdminMe(): Promise<AdminMe> {
   return adminFetch<AdminMe>('/me');
 }
 
-export async function listAdminProducts(q?: string): Promise<AdminProductRow[]> {
-  const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
-  return adminFetch<AdminProductRow[]>(`/products${qs}`);
+export interface AdminProductPage {
+  items: AdminProductRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export async function listAdminProducts(
+  q?: string,
+  page = 1
+): Promise<AdminProductPage> {
+  const params = new URLSearchParams();
+  if (q?.trim()) params.set('q', q.trim());
+  if (page > 1) params.set('page', String(page));
+  const qs = params.toString();
+  return adminFetch<AdminProductPage>(`/products${qs ? `?${qs}` : ''}`);
 }
 
 export async function getAdminProduct(id: string): Promise<AdminProduct> {

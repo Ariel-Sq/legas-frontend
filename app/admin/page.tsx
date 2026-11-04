@@ -14,10 +14,34 @@ function formatPrice(value: number) {
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const { q } = await searchParams;
-  const products = await listAdminProducts(q);
+  const { q, page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const {
+    items: products,
+    total,
+    totalPages,
+    pageSize,
+  } = await listAdminProducts(q, page);
+  const firstRow = products.length ? (page - 1) * pageSize + 1 : 0;
+  const lastRow = products.length ? firstRow + products.length - 1 : 0;
+
+  const hrefFor = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (targetPage > 1) params.set('page', String(targetPage));
+    const qs = params.toString();
+    return qs ? `/admin?${qs}` : '/admin';
+  };
+
+  // Windowed page numbers: 1 … 4 5 [6] 7 8 … 25
+  const pages: (number | '…')[] = [];
+  for (let n = 1; n <= totalPages; n += 1) {
+    const near = Math.abs(n - page) <= 2;
+    if (n === 1 || n === totalPages || near) pages.push(n);
+    else if (pages[pages.length - 1] !== '…') pages.push('…');
+  }
 
   return (
     <div className="space-y-6">
@@ -25,7 +49,11 @@ export default async function AdminProductsPage({
         <div>
           <h1 className="text-2xl font-bold">Productos</h1>
           <p className="text-sm text-muted-foreground">
-            {products.length} producto{products.length === 1 ? '' : 's'}
+            {total === 0
+              ? 'Sin productos'
+              : products.length === 0
+                ? `Esta página está vacía (hay ${totalPages})`
+                : `${firstRow}–${lastRow} de ${total}`}
             {q ? ` para “${q}”` : ''}
           </p>
         </div>
@@ -129,6 +157,61 @@ export default async function AdminProductsPage({
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          className="flex flex-wrap items-center justify-center gap-1"
+          aria-label="Paginación de productos"
+        >
+          <Link
+            href={hrefFor(Math.max(1, page - 1))}
+            aria-disabled={page === 1}
+            className={`rounded-lg border px-3 py-1.5 text-sm ${
+              page === 1
+                ? 'pointer-events-none opacity-40'
+                : 'hover:bg-muted'
+            }`}
+          >
+            Anterior
+          </Link>
+
+          {pages.map((n, index) =>
+            n === '…' ? (
+              <span
+                key={`gap-${index}`}
+                className="px-2 text-sm text-muted-foreground"
+              >
+                …
+              </span>
+            ) : (
+              <Link
+                key={n}
+                href={hrefFor(n)}
+                aria-current={n === page ? 'page' : undefined}
+                className={`min-w-9 rounded-lg border px-3 py-1.5 text-center text-sm ${
+                  n === page
+                    ? 'border-primary bg-primary font-semibold text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                {n}
+              </Link>
+            )
+          )}
+
+          <Link
+            href={hrefFor(Math.min(totalPages, page + 1))}
+            aria-disabled={page >= totalPages}
+            className={`rounded-lg border px-3 py-1.5 text-sm ${
+              page >= totalPages
+                ? 'pointer-events-none opacity-40'
+                : 'hover:bg-muted'
+            }`}
+          >
+            Siguiente
+          </Link>
+        </nav>
+      )}
     </div>
   );
 }
