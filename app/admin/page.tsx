@@ -75,7 +75,7 @@ export default async function AdminProductsPage({
                     {p.mainImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={`${BACKEND_URL}/api/images?path=${p.mainImage}`}
+                        src={`${BACKEND_URL}/api/images/${p.mainImage}`}
                         alt=""
                         className="h-full w-full object-cover"
                       />

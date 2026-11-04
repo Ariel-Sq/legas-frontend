@@ -362,11 +362,7 @@ export function ProductEditor({
                         <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={
-                              image.url?.startsWith('http')
-                                ? image.url
-                                : `${imageBase}${image.url}`
-                            }
+                            src={`${imageBase}/api/images/${image.path}`}
                             alt={image.altText ?? ''}
                             className="h-full w-full object-cover"
                           />
