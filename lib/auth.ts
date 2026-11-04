@@ -101,6 +101,26 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    /**
+     * Allow the login started on the storefront to come back to the admin
+     * subdomain. NextAuth only accepts same-host callbacks by default, which
+     * made admin.legasmuebles.com/admin land on the storefront instead.
+     */
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      try {
+        const target = new URL(url);
+        const base = new URL(baseUrl);
+        const root = base.hostname.replace(/^www\./, '');
+        const sameHost =
+          target.hostname === base.hostname ||
+          target.hostname.endsWith(`.${root}`);
+        if (sameHost) return url;
+      } catch {
+        // fall through to the base URL
+      }
+      return baseUrl;
+    },
     // Runs server-side. On initial sign-in `account` carries the Google
     // id_token; we exchange it for a backend session JWT once and cache both
     // the token and the backend user on the NextAuth token.
