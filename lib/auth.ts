@@ -102,9 +102,9 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     /**
-     * Allow the login started on the storefront to come back to the admin
-     * subdomain. NextAuth only accepts same-host callbacks by default, which
-     * made admin.legasmuebles.com/admin land on the storefront instead.
+     * Allow callbacks to any *.legasmuebles.com host. The panel is a separate
+     * app on admin.legasmuebles.com, and NextAuth only accepts same-host
+     * callbacks by default.
      */
     async redirect({ url, baseUrl }) {
       if (url.startsWith('/')) return `${baseUrl}${url}`;

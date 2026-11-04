@@ -2,7 +2,7 @@ import { BACKEND_URL } from '@/utils/environments';
 import { frontendKeyHeaders } from '@/utils/frontend-key';
 
 /**
- * Home hero content, editable from the admin panel (/admin/portada).
+ * Home hero content, editable from the admin panel (`legas-admin`).
  *
  * Cached for 60s with the `hero` tag so a save from the panel shows up on the
  * next visit without a deploy; the backend is also the source of truth for

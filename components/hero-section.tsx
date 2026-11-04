@@ -4,8 +4,8 @@ import type { HeroContent } from '@/lib/hero';
 
 /**
  * Full-bleed home banner. Everything here is driven by the panel
- * (/admin/portada): the photo, its vertical framing, how dark the veil is and
- * the copy.
+ * (the `legas-admin` app, in its Portada tab): the photo, its vertical
+ * framing, how dark the veil is and the copy.
  *
  *  - image + text  → photo behind, adjusted veil, centered title/button
  *  - image only    → the banner is shown as designed (own logo and copy)

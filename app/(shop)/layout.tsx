@@ -7,9 +7,9 @@ import { WhatsAppFab } from '@/components/whatsapp-fab';
 import { CookieNotice } from '@/components/cookie-notice';
 
 /**
- * Storefront shell: header, footer, WhatsApp button and cookie notice only
- * exist here. The admin panel lives outside this route group
- * (`app/admin/...`), so it renders with just the panel chrome.
+ * Storefront shell: header, footer, WhatsApp button and cookie notice.
+ * The admin panel is a separate app (legas-admin, on admin.legasmuebles.com),
+ * so nothing here leaks into it.
  *
  * The root layout keeps the document, fonts, theme and auth providers.
  */

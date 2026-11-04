@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 
+const TAGS = ['catalog', 'hero'] as const;
+type Tag = (typeof TAGS)[number];
+
 /**
- * On-demand cache purge for the catalogue. The storefront caches catalogue
- * fetches with `next: { tags: ['catalog'] }`, so after the editor changes
- * products directly in the DB, this drops that cache immediately (otherwise
- * the old data lingers until the 60s revalidate window and deployments that
- * can still serve stale entries).
+ * On-demand cache purge for the storefront. The panel lives in another
+ * deployment (`legas-admin`), so it can't call `revalidateTag` directly: it
+ * POSTs here after saving a product or the home banner.
  *
- * Call: POST /api/revalidate?secret=<REVALIDATE_SECRET>
+ * Call: POST /api/revalidate?secret=<REVALIDATE_SECRET>&tag=catalog|hero
+ * (`tag` defaults to catalog.)
  */
 export async function POST(req: NextRequest) {
   const secret =
@@ -23,6 +25,12 @@ export async function POST(req: NextRequest) {
       { status: 401 }
     );
   }
-  revalidateTag('catalog');
-  return NextResponse.json({ ok: true, revalidated: 'catalog' });
+
+  const requested = req.nextUrl.searchParams.get('tag') ?? 'catalog';
+  const tag: Tag = (TAGS as readonly string[]).includes(requested)
+    ? (requested as Tag)
+    : 'catalog';
+
+  revalidateTag(tag);
+  return NextResponse.json({ ok: true, revalidated: tag });
 }
