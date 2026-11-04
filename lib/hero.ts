@@ -10,6 +10,8 @@ import { frontendKeyHeaders } from '@/utils/frontend-key';
  */
 export interface HeroContent {
   imageUrl: string | null;
+  /** Draw the headline/button over the image, or show the banner as designed. */
+  showText: boolean;
   headline: string;
   subheadline: string;
   ctaLabel: string;
@@ -19,6 +21,7 @@ export interface HeroContent {
 /** Same copy the site shipped with, used if the backend is unreachable. */
 export const HERO_FALLBACK: HeroContent = {
   imageUrl: null,
+  showText: true,
   headline: 'Muebles de Madera Artesanales',
   subheadline:
     'Descubrí piezas atemporales que aportan calidez y elegancia a tu hogar',
@@ -37,6 +40,7 @@ export async function getHero(): Promise<HeroContent> {
     const data = (await res.json()) as Partial<HeroContent>;
     return {
       imageUrl: data.imageUrl ?? null,
+      showText: data.showText ?? true,
       headline: data.headline?.trim() || HERO_FALLBACK.headline,
       subheadline: data.subheadline ?? HERO_FALLBACK.subheadline,
       ctaLabel: data.ctaLabel?.trim() || HERO_FALLBACK.ctaLabel,

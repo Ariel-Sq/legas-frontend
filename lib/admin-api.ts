@@ -260,6 +260,7 @@ export async function inviteAdminUser(
 export interface AdminHero {
   imageUrl: string | null;
   imagePath: string | null;
+  showText: boolean;
   headline: string;
   subheadline: string;
   ctaLabel: string;
@@ -276,6 +277,7 @@ export async function saveAdminHero(input: {
   subheadline: string;
   ctaLabel: string;
   ctaHref: string;
+  showText: boolean;
 }): Promise<AdminHero> {
   const hero = await adminFetch<AdminHero>('/hero', {
     method: 'PATCH',

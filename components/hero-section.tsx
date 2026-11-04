@@ -3,19 +3,40 @@ import Link from 'next/link';
 import type { HeroContent } from '@/lib/hero';
 
 /**
- * Full-bleed home banner: optional background image, centered headline,
- * subtitle and a single call to action. Copy and image are edited from the
- * admin panel (/admin/portada).
+ * Full-bleed home banner. Three shapes, all driven by the panel
+ * (/admin/portada):
  *
- * With no image the section keeps the original warm beige tone, so the home
- * page looks finished before the first promo photo exists.
+ *  - image + text  → photo behind, darkened, centered title/button over it
+ *  - image only    → the banner is shown as designed (own logo and copy)
+ *  - no image      → the original warm beige with the centered copy
  */
 export function HeroSection({ content }: { content: HeroContent }) {
   const hasImage = Boolean(content.imageUrl);
 
+  // Designed banners carry their own text: show them edge to edge, keeping
+  // the 16:9 artwork intact.
+  if (hasImage && !content.showText) {
+    return (
+      <section className="relative isolate w-full overflow-hidden bg-[#f8ebd3]">
+        <div className="relative aspect-[16/9] w-full">
+          <Image
+            src={content.imageUrl!}
+            alt={content.headline || 'Legas Muebles'}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+      </section>
+    );
+  }
+
+  const overlay = hasImage;
+
   return (
     <section className="relative isolate overflow-hidden bg-[#f8ebd3]">
-      {hasImage && (
+      {overlay && (
         <>
           <Image
             src={content.imageUrl!}
@@ -35,7 +56,7 @@ export function HeroSection({ content }: { content: HeroContent }) {
           className={`text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-balance ${
             // Fixed dark ink: the beige fallback is always light, even in
             // dark mode, so the theme's foreground would be unreadable.
-            hasImage ? 'text-white' : 'text-[#2f2418]'
+            overlay ? 'text-white' : 'text-[#2f2418]'
           }`}
         >
           {content.headline}
@@ -44,7 +65,7 @@ export function HeroSection({ content }: { content: HeroContent }) {
         {content.subheadline && (
           <p
             className={`mt-4 max-w-2xl mx-auto text-lg text-pretty ${
-              hasImage ? 'text-white/90' : 'text-[#5f4f3c]'
+              overlay ? 'text-white/90' : 'text-[#5f4f3c]'
             }`}
           >
             {content.subheadline}

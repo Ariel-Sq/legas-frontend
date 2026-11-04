@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   removeHeroImage,
   saveAdminHero,
@@ -15,9 +16,11 @@ import {
 } from '@/lib/admin-api';
 
 /**
- * Home banner editor: background image plus the copy over it. The preview
- * mirrors the real section (same beige fallback, same dark overlay), so what
- * is saved is what the storefront shows.
+ * Home banner editor: background image plus the copy over it.
+ *
+ * The photo is saved the moment it is uploaded (no "save" needed); the button
+ * only persists the text and the "text over photo" switch. The preview mirrors
+ * the storefront exactly.
  */
 export function HeroForm({
   hero,
@@ -32,14 +35,9 @@ export function HeroForm({
   const [subheadline, setSubheadline] = useState(hero.subheadline);
   const [ctaLabel, setCtaLabel] = useState(hero.ctaLabel);
   const [ctaHref, setCtaHref] = useState(hero.ctaHref);
+  const [showText, setShowText] = useState(hero.showText);
   const [imageUrl, setImageUrl] = useState(hero.imageUrl);
   const [confirmRemove, setConfirmRemove] = useState(false);
-
-  const dirty =
-    headline !== hero.headline ||
-    subheadline !== hero.subheadline ||
-    ctaLabel !== hero.ctaLabel ||
-    ctaHref !== hero.ctaHref;
 
   const upload = (file: File) => {
     if (file.size > 4 * 1024 * 1024) {
@@ -87,6 +85,7 @@ export function HeroForm({
           subheadline: subheadline.trim(),
           ctaLabel: ctaLabel.trim(),
           ctaHref: ctaHref.trim(),
+          showText,
         });
         toast.success('Portada guardada');
         router.refresh();
@@ -97,6 +96,9 @@ export function HeroForm({
       }
     });
   };
+
+  const textOnImage = Boolean(imageUrl) && showText;
+  const imageOnly = Boolean(imageUrl) && !showText;
 
   return (
     <div className="space-y-6 pb-24">
@@ -115,50 +117,63 @@ export function HeroForm({
             Ver la tienda ↗
           </Link>
         </div>
-        <div className="relative isolate overflow-hidden rounded-lg bg-[#f8ebd3]">
-          {imageUrl && (
-            // Plain img: the banner is a single large asset, no need for the
-            // Next image optimizer in the panel.
-            // eslint-disable-next-line @next/next/no-img-element
+
+        {imageOnly ? (
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#f8ebd3]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageUrl}
+              src={imageUrl!}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
-          )}
-          {imageUrl && <div className="absolute inset-0 bg-black/40" />}
-          <div className="relative px-4 py-14 text-center sm:py-20">
-            <p
-              className={`text-2xl font-extrabold leading-tight sm:text-4xl ${
-                imageUrl ? 'text-white' : 'text-[#2f2418]'
-              }`}
-            >
-              {headline.trim() || 'Título de la portada'}
-            </p>
-            {subheadline.trim() && (
+          </div>
+        ) : (
+          <div className="relative isolate overflow-hidden rounded-lg bg-[#f8ebd3]">
+            {imageUrl && (
+              // Plain img: the banner is a single large asset, no need for the
+              // Next image optimizer in the panel.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
+            {textOnImage && <div className="absolute inset-0 bg-black/40" />}
+            <div className="relative px-4 py-14 text-center sm:py-20">
               <p
-                className={`mx-auto mt-3 max-w-xl text-sm sm:text-base ${
-                  imageUrl ? 'text-white/90' : 'text-[#5f4f3c]'
+                className={`text-2xl font-extrabold leading-tight sm:text-4xl ${
+                  textOnImage ? 'text-white' : 'text-[#2f2418]'
                 }`}
               >
-                {subheadline.trim()}
+                {headline.trim() || 'Título de la portada'}
               </p>
-            )}
-            {ctaLabel.trim() && (
-              <span className="mt-6 inline-block rounded-lg bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg">
-                {ctaLabel.trim()}
-              </span>
-            )}
+              {subheadline.trim() && (
+                <p
+                  className={`mx-auto mt-3 max-w-xl text-sm sm:text-base ${
+                    textOnImage ? 'text-white/90' : 'text-[#5f4f3c]'
+                  }`}
+                >
+                  {subheadline.trim()}
+                </p>
+              )}
+              {ctaLabel.trim() && (
+                <span className="mt-6 inline-block rounded-lg bg-primary px-8 py-3 text-base font-bold text-primary-foreground shadow-lg">
+                  {ctaLabel.trim()}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Image */}
       <section className="rounded-xl border bg-card p-6">
         <h2 className="text-lg font-semibold">Foto de fondo</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ideal 1920 × 900 px (apaisada), JPG, PNG o WebP de hasta 4 MB. Sin
-          foto, la portada queda en el beige de siempre.
+          Ideal 1920 × 900 px (apaisada), JPG, PNG o WebP de hasta 4 MB. Se
+          guarda sola al subirla. Sin foto, la portada queda en el beige de
+          siempre.
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -216,11 +231,40 @@ export function HeroForm({
               </Button>
             ))}
         </div>
+
+        {imageUrl && (
+          <div className="mt-5 flex items-start justify-between gap-4 rounded-lg border p-4">
+            <div>
+              <p className="text-sm font-medium">
+                Mostrar título y botón sobre la foto
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Si el banner ya tiene su propio logo y texto, desactivalo: la
+                foto se ve completa, sin oscurecer ni textos encima.
+              </p>
+            </div>
+            <Switch
+              checked={showText}
+              onCheckedChange={setShowText}
+              disabled={pending}
+              aria-label="Mostrar título y botón sobre la foto"
+            />
+          </div>
+        )}
       </section>
 
       {/* Copy */}
-      <section className="rounded-xl border bg-card p-6">
+      <section
+        className={`rounded-xl border bg-card p-6 ${
+          imageOnly ? 'opacity-60' : ''
+        }`}
+      >
         <h2 className="text-lg font-semibold">Textos</h2>
+        {imageOnly && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Ahora mismo están ocultos porque elegiste mostrar solo la foto.
+          </p>
+        )}
         <div className="mt-4 grid gap-4">
           <div>
             <Label htmlFor="hero-headline">Título</Label>
@@ -274,9 +318,9 @@ export function HeroForm({
       <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
           <span className="text-xs text-muted-foreground">
-            {dirty ? 'Hay cambios sin guardar' : 'Todo guardado'}
+            La foto se guarda al subirla; el botón guarda los textos.
           </span>
-          <Button onClick={save} disabled={pending || !dirty}>
+          <Button onClick={save} disabled={pending}>
             {pending ? 'Guardando…' : 'Guardar portada'}
           </Button>
         </div>
