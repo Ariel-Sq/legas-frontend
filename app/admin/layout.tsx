@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAdminMe, type AdminMe } from '@/lib/admin-api';
+import { SITE_URL } from '@/utils/environments';
 
 export const metadata: Metadata = {
   title: 'Panel',
@@ -58,9 +59,16 @@ export default async function AdminLayout({
                 Historial
               </Link>
             )}
-            <Link href="/" className="hover:text-primary">
+            {/* The storefront lives on another host: "/" here would loop
+                back into the panel. */}
+            <a
+              href={SITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary"
+            >
               Ver tienda ↗
-            </Link>
+            </a>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
             <span>{me.email}</span>
