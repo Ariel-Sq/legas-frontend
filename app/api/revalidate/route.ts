@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 
-const TAGS = ['catalog', 'hero'] as const;
+const TAGS = ['catalog', 'hero', 'settings'] as const;
 type Tag = (typeof TAGS)[number];
 
 /**

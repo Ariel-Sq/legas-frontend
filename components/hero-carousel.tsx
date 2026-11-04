@@ -32,14 +32,16 @@ export function HeroCarousel({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
+  // One timeout per slide: every time the index changes (manual or auto) the
+  // next advance is scheduled. An interval got cleared by re-renders and the
+  // carousel ended up waiting for a click.
   useEffect(() => {
     if (slides.length < 2 || paused) return;
-    const timer = setInterval(
-      () => setIndex((current) => (current + 1) % slides.length),
-      6000
-    );
-    return () => clearInterval(timer);
-  }, [slides.length, paused]);
+    const timer = setTimeout(() => {
+      setIndex((current) => (current + 1) % slides.length);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [index, paused, slides.length]);
 
   const slide = slides[index];
   const headline = slide.headline || fallback.headline;
@@ -52,10 +54,10 @@ export function HeroCarousel({
   return (
     <section
       className="relative isolate overflow-hidden bg-[#f8ebd3]"
+      // Pause only while the pointer is over it (keyboard focus used to freeze
+      // the carousel for good).
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
       aria-roledescription="carrusel"
     >
       <Image

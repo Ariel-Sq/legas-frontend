@@ -13,6 +13,8 @@ interface ShopProductCardProps {
     id: string;
     name: string;
     price: number;
+    /** List price when a promotion applies. */
+    originalPrice?: number;
     image: string;
     slug?: string;
     category?: string;
@@ -77,11 +79,24 @@ export function ShopProductCard({ product }: ShopProductCardProps) {
           )}
         </div>
         <div className="mt-2">
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="mb-1 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+              {Math.round((1 - product.price / product.originalPrice) * 100)}%
+              OFF
+            </span>
+          )}
           <p className="text-base font-medium">{product.name}</p>
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">
-              {formatPrice(product.price)}
-            </p>
+          <div className="flex flex-wrap items-baseline justify-between gap-1">
+            <span className="flex flex-wrap items-baseline gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                {formatPrice(product.price)}
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatPrice(product.originalPrice)}
+                </span>
+              )}
+            </span>
             {product.variations && product.variations.length > 1 && (
               <span className="text-xs text-muted-foreground">
                 {product.variations.length} opciones

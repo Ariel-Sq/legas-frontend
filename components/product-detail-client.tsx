@@ -188,6 +188,24 @@ export function ProductDetailClient({
               ) : null}
 
               <div className="mb-6">
+                {(() => {
+                  const original = Number(
+                    (selectedVariation as unknown as { originalPrice?: number })
+                      .originalPrice ?? 0
+                  );
+                  if (!original || original <= unitPrice) return null;
+                  const percent = Math.round((1 - unitPrice / original) * 100);
+                  return (
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="rounded bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+                        {percent}% OFF
+                      </span>
+                      <span className="text-sm text-muted-foreground line-through">
+                        {formatPrice(original)}
+                      </span>
+                    </div>
+                  );
+                })()}
                 <p className="text-4xl font-bold text-primary">
                   {formatPrice(unitPrice)}
                 </p>
