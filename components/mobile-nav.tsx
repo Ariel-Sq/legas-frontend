@@ -104,23 +104,6 @@ export function MobileNav() {
 
         <Separator className="my-6" />
 
-        {/* Theme switch: removed from the header on phones, where it collided
-            with the logo. */}
-        <button
-          type="button"
-          onClick={() => setTheme(isDark ? 'light' : 'dark')}
-          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all hover:bg-primary/10 hover:text-primary"
-        >
-          {isDark ? (
-            <Moon className="h-5 w-5" />
-          ) : (
-            <Sun className="h-5 w-5" />
-          )}
-          Tema: {isDark ? 'oscuro' : 'claro'}
-        </button>
-
-        <Separator className="my-6" />
-
         {/* Account: without this, the only way to reach the orders on a phone
             was the avatar menu in the header. */}
         <nav className="flex flex-col gap-2">
@@ -152,6 +135,24 @@ export function MobileNav() {
             </Link>
           )}
         </nav>
+
+        <Separator className="my-6" />
+
+        {/* Theme switch: removed from the header on phones, where it collided
+            with the logo. */}
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all hover:bg-primary/10 hover:text-primary"
+        >
+          {isDark ? (
+            <Moon className="h-5 w-5" />
+          ) : (
+            <Sun className="h-5 w-5" />
+          )}
+          Tema: {isDark ? 'oscuro' : 'claro'}
+        </button>
+
       </SheetContent>
     </Sheet>
   );

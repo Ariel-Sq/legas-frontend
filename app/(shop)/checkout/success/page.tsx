@@ -41,6 +41,9 @@ function SuccessContent() {
   const { clearCart } = useCart();
   const searchParams = useSearchParams();
   const externalReference = searchParams.get('external_reference');
+  // MercadoPago appends payment_id/status to the back_url; the id lets the
+  // backend reconcile the payment without waiting for the webhook.
+  const paymentId = searchParams.get('payment_id') ?? undefined;
   const shortId = externalReference?.slice(0, 8).toUpperCase();
   const waText = encodeURIComponent(
     `Hola Legas! Acabo de hacer el pedido${shortId ? ` ${shortId}` : ''}. ¿Coordinamos la entrega?`
@@ -65,7 +68,11 @@ function SuccessContent() {
     const check = async () => {
       attempts += 1;
       try {
-        const result = await getOrderStatusAction(externalReference);
+        const result = await getOrderStatusAction(
+          externalReference,
+          // Only ask MP once: later polls just read the order.
+          attempts === 1 ? paymentId : undefined
+        );
         if (!active) return;
 
         if (result) {
@@ -76,13 +83,13 @@ function SuccessContent() {
             'expired',
             'refunded',
           ].includes(result.status);
-          if (!settled && attempts < 6) {
+          if (!settled && attempts < 10) {
             timer = setTimeout(check, 3000);
           }
           return;
         }
 
-        if (attempts < 3) {
+        if (attempts < 4) {
           timer = setTimeout(check, 3000);
         } else {
           setStatus(null);
@@ -98,7 +105,7 @@ function SuccessContent() {
       active = false;
       if (timer) clearTimeout(timer);
     };
-  }, [clearCart, externalReference]);
+  }, [clearCart, externalReference, paymentId]);
 
   const isChecking = status === undefined;
   const isPaid = status ? PAID_STATUSES.includes(status) : false;
@@ -122,7 +129,7 @@ function SuccessContent() {
     : isPaid
       ? 'Gracias por tu compra. Te enviamos un email de confirmación.'
       : isPending
-        ? 'MercadoPago todavía está procesando el pago. Te avisamos cuando se acredite.'
+        ? 'MercadoPago todavía está procesando el pago. Si ya lo hiciste, escribinos por WhatsApp con el número de pedido y lo confirmamos al instante.'
         : isFailed
           ? 'No registramos el pago. Si ya pagaste, escribinos por WhatsApp y lo revisamos.'
           : 'Si ya pagaste, en unos minutos va a figurar confirmado en Mis pedidos. Cualquier duda, escribinos.';
