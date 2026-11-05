@@ -23,6 +23,8 @@ interface BackendCartItem {
     is_active: boolean;
     images: Array<{ id: string; url: string; path?: string; isMain?: boolean }>;
   };
+  /** Promotion percentages resolved by the backend for this item. */
+  promotions?: { offline: number; mp: number };
 }
 
 interface BackendCart {
@@ -43,6 +45,10 @@ export interface CartItem {
   quantity: number;
   category: string;
   stock: number;
+  /** Card-only promotion (backend `mercadopago` scoped). */
+  mpPercent?: number;
+  /** Cash-only discount already inside `price`, undone for card payers. */
+  offlinePercent?: number;
 }
 
 export interface CartData {
@@ -116,6 +122,8 @@ function mapBackendCart(cart: BackendCart): CartData {
       quantity: item.quantity,
       category: '',
       stock: item.productVariation?.stock ?? 0,
+      mpPercent: item.promotions?.mp ?? 0,
+      offlinePercent: item.promotions?.offline ?? 0,
     };
   });
 

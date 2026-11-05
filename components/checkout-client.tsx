@@ -24,11 +24,7 @@ import {
   type CheckoutPaymentMethod,
 } from '@/lib/checkout';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
-import {
-  LIST_PRICE_MARKUP,
-  listPrice,
-  pickupDeposit,
-} from '@/lib/pricing';
+import { LIST_PRICE_MARKUP, pickupDeposit } from '@/lib/pricing';
 import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
 import {
   AlertTriangle,
@@ -158,8 +154,17 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
   // price (catalogue + markup). Framed as two prices, never as a card
   // surcharge — charging extra for card use is prohibited (Ley 25.065).
   const isTransfer = paymentMethod === 'offline';
-  const cardPriceDifference = isTransfer ? 0 : subtotal * LIST_PRICE_MARKUP;
-  const total = subtotal + cardPriceDifference;
+  // Card price per item: undo the cash-only promo that is already inside the
+  // stored price, add the card markup, then apply the MercadoPago-only promo.
+  // Matches what the backend charges in `createCheckoutPreferenceFromCart`.
+  const cardSubtotal = items.reduce((sum, item) => {
+    const offline = item.offlinePercent ?? 0;
+    const mp = item.mpPercent ?? 0;
+    const base = offline > 0 ? item.price / (1 - offline / 100) : item.price;
+    return sum + base * (1 + LIST_PRICE_MARKUP) * (1 - mp / 100) * item.quantity;
+  }, 0);
+  const total = isTransfer ? subtotal : cardSubtotal;
+  const hasCardPromo = items.some((item) => (item.mpPercent ?? 0) > 0);
 
   // Pickup + cash/transfer: 50% deposit by transfer to reserve the piece, the
   // rest is paid when the shopper picks it up. Exact half, no rounding.
@@ -726,8 +731,8 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                           )
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(listPrice(subtotal))} con
-                            tarjeta hasta 6 cuotas
+                            {formatPriceDecimal(cardSubtotal)} con tarjeta
+                            hasta 6 cuotas
                           </p>
                         )}
                       </button>
@@ -858,10 +863,17 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                       <span>{formatPrice(total)}</span>
                     </div>
                   ) : (
-                    <div className="flex justify-between text-sm text-primary">
-                      <span>Precio con tarjeta hasta 6 cuotas</span>
-                      <span>{formatPrice(total)}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between text-sm text-primary">
+                        <span>Precio con tarjeta hasta 6 cuotas</span>
+                        <span>{formatPrice(total)}</span>
+                      </div>
+                      {hasCardPromo && (
+                        <p className="text-xs text-muted-foreground">
+                          Incluye el descuento vigente para MercadoPago.
+                        </p>
+                      )}
+                    </>
                   )}
                   {isPickupDeposit && (
                     <>
