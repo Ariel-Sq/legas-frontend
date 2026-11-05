@@ -133,10 +133,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, trigger }) {
       if (account?.id_token) {
         const result = await exchangeGoogleIdToken(account.id_token);
-        if (result) {
-          token.backendToken = result.accessToken;
-          token.backendUser = result.user as typeof token.backendUser;
+        if (!result) {
+          // Without the backend token the session would look signed in but
+          // every server call (orders, profile) would be anonymous. Fail the
+          // sign-in instead, so the login page can explain what happened.
+          throw new Error('backend-login-failed');
         }
+        token.backendToken = result.accessToken;
+        token.backendUser = result.user as typeof token.backendUser;
       } else if (trigger === 'update' && token.backendToken) {
         // Client called session.update() (e.g. after a profile save):
         // re-read the authoritative user so the cached copy stays fresh.
