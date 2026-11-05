@@ -56,7 +56,7 @@ export function UserMenu() {
         <Link href="/orders">
           <DropdownMenuItem className="cursor-pointer">
             <Package className="mr-2 h-4 w-4" />
-            <span>Pedidos</span>
+            <span>Mis pedidos</span>
           </DropdownMenuItem>
         </Link>
         <Link href="/settings">

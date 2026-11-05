@@ -12,8 +12,11 @@ import {
   Sun,
   Moon,
   Users,
+  Package,
+  User as UserIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useSession } from 'next-auth/react';
 import {
   Sheet,
   SheetContent,
@@ -26,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
 export function MobileNav() {
+  const { status } = useSession();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -114,6 +118,40 @@ export function MobileNav() {
           )}
           Tema: {isDark ? 'oscuro' : 'claro'}
         </button>
+
+        <Separator className="my-6" />
+
+        {/* Account: without this, the only way to reach the orders on a phone
+            was the avatar menu in the header. */}
+        <nav className="flex flex-col gap-2">
+          <Link
+            href="/orders"
+            className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
+            onClick={() => setOpen(false)}
+          >
+            <Package className="h-5 w-5" />
+            Mis pedidos
+          </Link>
+          {status === 'authenticated' ? (
+            <Link
+              href="/profile"
+              className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
+              onClick={() => setOpen(false)}
+            >
+              <UserIcon className="h-5 w-5" />
+              Mi perfil
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
+              onClick={() => setOpen(false)}
+            >
+              <UserIcon className="h-5 w-5" />
+              Iniciar sesión
+            </Link>
+          )}
+        </nav>
       </SheetContent>
     </Sheet>
   );

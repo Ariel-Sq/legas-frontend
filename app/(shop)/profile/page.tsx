@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const userId = session?.user?.id;
 
   if (!session?.user || !userId) {
-    redirect('/');
+    redirect('/login?callbackUrl=/profile');
   }
 
   const user = session.user as typeof session.user & {

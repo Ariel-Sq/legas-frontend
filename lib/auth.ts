@@ -69,6 +69,12 @@ export const authOptions: NextAuthOptions = {
   // Stateless JWT sessions: the backend token + user are persisted on the
   // (encrypted, httpOnly) NextAuth token via the jwt callback below.
   session: { strategy: 'jwt' },
+  // The default NextAuth screen was confusing (it looked like the admin
+  // panel). Both the shop and the panel sign in from /login.
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   ...(IS_PROD && COOKIE_DOMAIN
     ? {
         cookies: {

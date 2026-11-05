@@ -283,7 +283,7 @@ export function OrdersClient({
                   dispositivo.
                 </p>
                 <Button asChild size="sm" className="cursor-pointer">
-                  <Link href="/api/auth/signin">Iniciar sesión</Link>
+                  <Link href="/login?callbackUrl=/orders">Iniciar sesión</Link>
                 </Button>
               </CardContent>
             </Card>
