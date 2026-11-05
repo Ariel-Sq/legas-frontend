@@ -66,6 +66,31 @@ const PAYMENT_OPTIONS: {
 ];
 
 
+/**
+ * A server action whose function was killed can leave its promise pending
+ * forever, which used to freeze the button on "Procesando". Cap the wait and
+ * let the shopper retry: the backend is idempotent, so a retry reuses the
+ * order/preference already created.
+ */
+function withDeadline<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error('checkout-timeout')),
+      ms
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 export interface CheckoutSettings {
   /** Payment methods enabled in the panel. */
   enabledPayments?: { mercadopago: boolean; offline: boolean };
@@ -228,18 +253,31 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
     submittingRef.current = true;
     setIsWorking(true);
     setError('');
-    const result = await createCheckoutPreference(
-      userId,
-      {
-        customerEmail: formData.email.trim(),
-        customerPhone: formData.phone.trim(),
-        customerDni: dniDigits,
-        deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
-        deliveryAddress: pickupInPerson ? '' : deliveryAddress,
-      },
-      'mercadopago',
-      idempotencyKey
-    );
+    let result;
+    try {
+      result = await withDeadline(
+        createCheckoutPreference(
+          userId,
+          {
+            customerEmail: formData.email.trim(),
+            customerPhone: formData.phone.trim(),
+            customerDni: dniDigits,
+            deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+            deliveryAddress: pickupInPerson ? '' : deliveryAddress,
+          },
+          'mercadopago',
+          idempotencyKey
+        ),
+        20000
+      );
+    } catch {
+      setError(
+        'El pago está tardando más de lo normal. Si el pedido ya se creó va a figurar en Mis pedidos; probá de nuevo en unos segundos.'
+      );
+      setIsWorking(false);
+      submittingRef.current = false;
+      return;
+    }
     if (result.error || !result.checkoutUrl) {
       setError(result.error || 'No pudimos iniciar el pago.');
       setIsWorking(false);
@@ -262,17 +300,30 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
       deposit,
       balance,
     };
-    const result = await createCheckoutPreference(
-      userId,
-      {
-        customerEmail: formData.email.trim(),
-        customerPhone: formData.phone.trim(),
-        customerDni: dniDigits,
-        deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
-        deliveryAddress: pickupInPerson ? '' : deliveryAddress,
-      },
-      'offline'
-    );
+    let result;
+    try {
+      result = await withDeadline(
+        createCheckoutPreference(
+          userId,
+          {
+            customerEmail: formData.email.trim(),
+            customerPhone: formData.phone.trim(),
+            customerDni: dniDigits,
+            deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+            deliveryAddress: pickupInPerson ? '' : deliveryAddress,
+          },
+          'offline'
+        ),
+        20000
+      );
+    } catch {
+      setError(
+        'El pedido está tardando más de lo normal. Probá de nuevo en unos segundos.'
+      );
+      setIsWorking(false);
+      submittingRef.current = false;
+      return;
+    }
     if (result.error || !result.orderId) {
       setError(result.error || 'No pudimos registrar el pedido.');
       submittingRef.current = false;
