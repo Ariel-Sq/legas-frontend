@@ -70,17 +70,30 @@ export function ProductDetailClient({
   const unitPrice = matchedTier ? parseFloat(matchedTier.price) : basePrice;
   const lineTotal = unitPrice * quantity;
 
-  // Card-only promotion (panel → Promociones → Mercado Pago). Cash-only
-  // promos are NOT part of the card price: the checkout undoes them, so the
-  // reference is the undiscounted list price (`originalPrice`).
+  // Card price. Three different promotion scopes, resolved by the backend:
+  //  - `allPercent`  → "todos los medios": also lowers the card price
+  //  - `mpPercent`   → "Mercado Pago": only the card price
+  //  - cash-only promos are NOT part of the card price: the checkout undoes
+  //    them, so the reference is the price before the cash discount.
   const mpPercent = Number(
     (selectedVariation as unknown as { mpPercent?: number }).mpPercent ?? 0
   );
-  const listBasePrice = Number(
-    (selectedVariation as unknown as { originalPrice?: number }).originalPrice ??
-      unitPrice
+  const allPercent = Number(
+    (selectedVariation as unknown as { allPercent?: number }).allPercent ?? 0
   );
-  const cardPrice = listPrice(listBasePrice) * (1 - mpPercent / 100);
+  const originalPrice = Number(
+    (selectedVariation as unknown as { originalPrice?: number }).originalPrice ??
+      0
+  );
+  // Quantity tiers are stored before promotions, so they can be used directly
+  // as the list price for the card calculation.
+  const cardBasePrice = matchedTier
+    ? parseFloat(matchedTier.price)
+    : (originalPrice || unitPrice);
+  const cardPrice =
+    listPrice(cardBasePrice) *
+    (1 - allPercent / 100) *
+    (1 - mpPercent / 100);
 
   // Pick attribute keys whose values differ across variations — these are what
   // the buyer needs to choose between. e.g. two t-shirts both color=white but
