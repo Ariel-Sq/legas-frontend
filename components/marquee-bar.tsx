@@ -8,7 +8,7 @@ export function MarqueeBar({ text, speed }: { text: string; speed: number }) {
 
   return (
     <div
-      className="overflow-hidden bg-primary text-primary-foreground"
+      className="overflow-hidden bg-black text-white"
       role="status"
       aria-label={text}
     >
