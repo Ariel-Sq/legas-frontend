@@ -70,6 +70,18 @@ export function ProductDetailClient({
   const unitPrice = matchedTier ? parseFloat(matchedTier.price) : basePrice;
   const lineTotal = unitPrice * quantity;
 
+  // Card-only promotion (panel → Promociones → Mercado Pago). Cash-only
+  // promos are NOT part of the card price: the checkout undoes them, so the
+  // reference is the undiscounted list price (`originalPrice`).
+  const mpPercent = Number(
+    (selectedVariation as unknown as { mpPercent?: number }).mpPercent ?? 0
+  );
+  const listBasePrice = Number(
+    (selectedVariation as unknown as { originalPrice?: number }).originalPrice ??
+      unitPrice
+  );
+  const cardPrice = listPrice(listBasePrice) * (1 - mpPercent / 100);
+
   // Pick attribute keys whose values differ across variations — these are what
   // the buyer needs to choose between. e.g. two t-shirts both color=white but
   // sizes M/L → label by size; two laptops both ram=16GB but colors differ →
@@ -214,7 +226,12 @@ export function ProductDetailClient({
                 </p>
                 <p className="mt-1 text-sm text-foreground">
                   Precio con tarjeta hasta 6 cuotas{' '}
-                  {formatPriceDecimal(listPrice(unitPrice))}
+                  {formatPriceDecimal(cardPrice)}
+                  {mpPercent > 0 && (
+                    <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                      {mpPercent}% OFF con MercadoPago
+                    </span>
+                  )}
                 </p>
                 {quantity > 1 && (
                   <p className="text-sm text-muted-foreground mt-2">
