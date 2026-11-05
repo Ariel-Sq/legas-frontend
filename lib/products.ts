@@ -400,11 +400,14 @@ export async function getProductTemplateBySlugOrId(
   slugOrId: string
 ): Promise<ProductTemplate | null> {
   try {
+    // No cache here: the product page is where the buyer decides, so it must
+    // show the promotion in force right now. A 60s cached entry made a freshly
+    // created promotion appear on the shop cards but not on the detail page.
     const resp = await fetch(
       `${BACKEND_URL}/api/product-templates/by-slug/${encodeURIComponent(slugOrId)}`,
       {
         headers: frontendKeyHeaders(),
-        next: { revalidate: 60, tags: ['catalog'] },
+        cache: 'no-store',
       }
     );
     if (resp.status === 404) return null;
