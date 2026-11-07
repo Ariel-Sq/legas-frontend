@@ -17,7 +17,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   createCardIntent,
@@ -399,11 +399,11 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
   };
 
   /** Success page polls the order status, so a pending payment lands there too. */
-  const goToSuccess = (orderId: string) => {
+  const goToSuccess = useCallback((orderId: string) => {
     window.location.href = `/checkout/success?external_reference=${encodeURIComponent(
       orderId
     )}`;
-  };
+  }, []);
 
   // ----- Offline success screen -----
   if (offlineOrder) {
@@ -930,7 +930,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         orderId={cardOrder.orderId}
                         amount={cardOrder.amount}
                         email={formData.email.trim()}
-                        identification={{ type: 'DNI', number: dniDigits }}
+                        dni={dniDigits}
                         maxInstallments={6}
                         onApproved={goToSuccess}
                         onPending={goToSuccess}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CardPayment,
   StatusScreen,
@@ -11,7 +11,6 @@ import {
   getCardOrderStatus,
   payWithCard,
   type BrickCardFormData,
-  type CardPaymentResult,
 } from '@/lib/checkout';
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY;
@@ -27,6 +26,14 @@ const PAID_STATUSES = new Set([
 /** `initMercadoPago` must run once, client-side only. */
 let mpInitialized = false;
 
+// The card form is only rendered after a click (never during SSR), so the
+// SDK can be initialized at module load on the client without touching
+// `window` on the server.
+if (typeof window !== 'undefined' && PUBLIC_KEY && !mpInitialized) {
+  initMercadoPago(PUBLIC_KEY, { locale: 'es-AR' });
+  mpInitialized = true;
+}
+
 export interface CardPaymentFormProps {
   /** Order hold created by /payments/card/intent. */
   orderId: string;
@@ -34,8 +41,10 @@ export interface CardPaymentFormProps {
   amount: number;
   /** Pre-fills the card form. */
   email: string;
-  identification?: { type: string; number: string };
+  /** DNI digits, pre-filled into the payer identification field. */
+  dni: string;
   maxInstallments: number;
+  /** Must be stable (useCallback) — a new reference re-mounts the brick. */
   onApproved: (orderId: string) => void;
   onPending: (orderId: string) => void;
 }
@@ -44,21 +53,26 @@ export interface CardPaymentFormProps {
  * On-site card payment: MercadoPago's Card Payment Brick tokenizes the card
  * (raw numbers never touch our servers) and the backend charges the token.
  *
+ * IMPORTANT: the Brick's `useEffect` depends on `initialization`,
+ * `customization` and every callback BY REFERENCE. A new object/function on
+ * any parent re-render (a session refetch on window focus is enough) unmounts
+ * and re-creates the iframe, wiping whatever the shopper had typed. Hence the
+ * memoized props here and `memo()` on the component.
+ *
  * When the issuer requires 3-D Secure, the response carries `three_ds_info`
  * and we swap the card form for the Status Screen Brick, which renders the
  * bank challenge inline. The order status is polled while the shopper
  * completes it.
  */
-export function CardPaymentForm({
+function CardPaymentFormBase({
   orderId,
   amount,
   email,
-  identification,
+  dni,
   maxInstallments,
   onApproved,
   onPending,
 }: CardPaymentFormProps) {
-  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [challenge, setChallenge] = useState<{
@@ -68,14 +82,65 @@ export function CardPaymentForm({
   } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (!PUBLIC_KEY) return;
-    if (!mpInitialized) {
-      initMercadoPago(PUBLIC_KEY, { locale: 'es-AR' });
-      mpInitialized = true;
-    }
-    setReady(true);
-  }, []);
+  // Stable props for the Brick — new references would re-mount it.
+  const initialization = useMemo(
+    () => ({
+      amount,
+      payer: {
+        email,
+        ...(dni ? { identification: { type: 'DNI', number: dni } } : {}),
+      },
+    }),
+    [amount, email, dni]
+  );
+
+  const customization = useMemo(
+    () => ({ paymentMethods: { minInstallments: 1, maxInstallments } }),
+    [maxInstallments]
+  );
+
+  const handleReady = useCallback(() => setError(''), []);
+  const handleBrickError = useCallback(
+    () => setError('Revisá los datos de la tarjeta.'),
+    []
+  );
+
+  const handleSubmit = useCallback(
+    async (formData: BrickCardFormData) => {
+      setBusy(true);
+      setError('');
+      const result = await payWithCard(orderId, formData);
+      setBusy(false);
+
+      if (result.error) {
+        setError(result.error);
+        // Rejecting re-enables the Brick's button so the shopper can retry.
+        throw new Error(result.error);
+      }
+
+      if (result.threeDs && result.paymentId) {
+        setChallenge({
+          paymentId: result.paymentId,
+          externalResourceUrl: result.threeDs.externalResourceUrl,
+          creq: result.threeDs.creq,
+        });
+        return;
+      }
+
+      if (result.status === 'approved') {
+        onApproved(orderId);
+        return;
+      }
+      if (result.status === 'pending' || result.status === 'in_process') {
+        onPending(orderId);
+        return;
+      }
+
+      setError(result.statusMessage || 'El pago fue rechazado.');
+      throw new Error(result.statusMessage || 'payment-rejected');
+    },
+    [orderId, onApproved, onPending]
+  );
 
   // While the bank challenge is open, watch the order until it settles.
   useEffect(() => {
@@ -96,40 +161,6 @@ export function CardPaymentForm({
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [challenge, orderId, onApproved]);
-
-  const handleSubmit = async (formData: BrickCardFormData) => {
-    setBusy(true);
-    setError('');
-    const result = await payWithCard(orderId, formData);
-    setBusy(false);
-
-    if (result.error) {
-      setError(result.error);
-      // Rejecting re-enables the Brick's button so the shopper can retry.
-      throw new Error(result.error);
-    }
-
-    if (result.threeDs && result.paymentId) {
-      setChallenge({
-        paymentId: result.paymentId,
-        externalResourceUrl: result.threeDs.externalResourceUrl,
-        creq: result.threeDs.creq,
-      });
-      return;
-    }
-
-    if (result.status === 'approved') {
-      onApproved(orderId);
-      return;
-    }
-    if (result.status === 'pending' || result.status === 'in_process') {
-      onPending(orderId);
-      return;
-    }
-
-    setError(result.statusMessage || 'El pago fue rechazado.');
-    throw new Error(result.statusMessage || 'payment-rejected');
-  };
 
   if (!PUBLIC_KEY) {
     return (
@@ -176,20 +207,16 @@ export function CardPaymentForm({
           <Loader2 className="h-4 w-4 animate-spin" /> Procesando el pago...
         </div>
       )}
-      {ready && (
-        <CardPayment
-          initialization={{
-            amount,
-            payer: { email, ...(identification ? { identification } : {}) },
-          }}
-          customization={{
-            paymentMethods: { minInstallments: 1, maxInstallments },
-          }}
-          locale="es-AR"
-          onSubmit={handleSubmit}
-          onError={() => setError('Revisá los datos de la tarjeta.')}
-        />
-      )}
+      <CardPayment
+        initialization={initialization}
+        customization={customization}
+        locale="es-AR"
+        onSubmit={handleSubmit}
+        onReady={handleReady}
+        onError={handleBrickError}
+      />
     </div>
   );
 }
+
+export const CardPaymentForm = memo(CardPaymentFormBase);
