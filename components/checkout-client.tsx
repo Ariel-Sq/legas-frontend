@@ -63,7 +63,7 @@ const PAYMENT_OPTIONS: {
     key: 'card',
     label: 'Tarjeta de crédito o débito',
     description:
-      'Pagás acá mismo, sin salir del sitio. Hasta 12 cuotas con MercadoPago.',
+      'Pagás acá mismo, sin salir del sitio. Hasta 12 cuotas con MercadoPago: 3 sin interés con Visa, Mastercard y Naranja. Amex no tiene cuotas sin interés.',
   },
   {
     key: 'offline',
@@ -940,6 +940,10 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                           {formatPriceDecimal(cardOrder.amount)}
                         </strong>
                       </p>
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        3 cuotas sin interés con Visa, Mastercard y Naranja.
+                        Amex no tiene cuotas sin interés.
+                      </p>
                       <CardPaymentForm
                         orderId={cardOrder.orderId}
                         amount={cardOrder.amount}
@@ -1099,10 +1103,12 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los productos tienen dos precios: en efectivo o transferencia,
-                  y con tarjeta hasta 12 cuotas. El envío no está incluido en el
-                  total: se cotiza según la zona antes del despacho. Si no
-                  aceptás el costo del envío, podés cancelar la compra sin cargo
-                  y te reintegramos el total.
+                  y con tarjeta hasta 12 cuotas. Las 3 cuotas sin interés
+                  aplican a Visa, Mastercard y Naranja; Amex no tiene cuotas sin
+                  interés. El envío no está incluido en el total: se cotiza
+                  según la zona antes del despacho. Si no aceptás el costo del
+                  envío, podés cancelar la compra sin cargo y te reintegramos el
+                  total.
                 </p>
               </div>
             </div>
