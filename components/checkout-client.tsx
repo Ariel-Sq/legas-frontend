@@ -36,6 +36,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CreditCard,
+  Lock,
   MapPin,
   CheckCircle,
   Package,
@@ -954,6 +955,13 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         onPending={goToSuccess}
                         onRejected={handleCardRejected}
                       />
+                      <p className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+                        <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          Los datos de la tarjeta los procesa MercadoPago. No
+                          los guardamos ni los vemos en ningún momento.
+                        </span>
+                      </p>
                     </div>
                   )}
 
