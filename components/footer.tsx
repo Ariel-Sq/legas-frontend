@@ -83,7 +83,6 @@ export function Footer() {
             { label: 'Mastercard', file: 'mastercard.png' },
             { label: 'American Express', file: 'amex.png' },
             { label: 'Cabal', file: 'cabal.png' },
-            { label: 'Tarjeta Naranja', file: 'naranja.png' },
             { label: 'Mercado Pago', file: 'mercadopago.png' },
             { label: 'Transferencia bancaria', file: 'transferencia.svg' },
             { label: 'Efectivo', file: 'efectivo.png' },
