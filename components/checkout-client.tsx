@@ -20,9 +20,11 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
+  createCardIntent,
   createCheckoutPreference,
-  type CheckoutPaymentMethod,
+  type CheckoutPaymentOption,
 } from '@/lib/checkout';
+import { CardPaymentForm } from '@/components/card-payment-form';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
 import { LIST_PRICE_MARKUP, pickupDeposit } from '@/lib/pricing';
 import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
@@ -49,14 +51,20 @@ import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
  * (ecommerce-backend/src/payments/payment-method.config.ts) and lib/pricing.ts.
  */
 const PAYMENT_OPTIONS: {
-  key: CheckoutPaymentMethod;
+  key: CheckoutPaymentOption;
   label: string;
   description: string;
 }[] = [
   {
+    key: 'card',
+    label: 'Tarjeta de crédito o débito',
+    description:
+      'Pagás acá mismo, sin salir del sitio. Hasta 6 cuotas con MercadoPago.',
+  },
+  {
     key: 'mercadopago',
     label: 'MercadoPago',
-    description: `Tarjeta, débito o dinero en cuenta.`,
+    description: `Dinero en cuenta o cuotas sin tarjeta. Te llevamos a MercadoPago.`,
   },
   {
     key: 'offline',
@@ -93,7 +101,12 @@ function withDeadline<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 export interface CheckoutSettings {
   /** Payment methods enabled in the panel. */
-  enabledPayments?: { mercadopago: boolean; offline: boolean };
+  enabledPayments?: {
+    mercadopago: boolean;
+    offline: boolean;
+    /** On-site card form. Missing = enabled (older settings predate it). */
+    card?: boolean;
+  };
   shipping?: { cost: number; freeFrom: number; notes: string };
 }
 
@@ -102,14 +115,15 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
-  // Only the methods the panel leaves enabled are offered.
-  const paymentOptions = PAYMENT_OPTIONS.filter((option) =>
-    settings?.enabledPayments
-      ? settings.enabledPayments[option.key]
-      : true
-  );
-  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>(
-    paymentOptions[0]?.key ?? 'mercadopago'
+  // Only the methods the panel leaves enabled are offered. `card` is new:
+  // settings saved before it existed have no key, so treat missing as enabled.
+  const paymentOptions = PAYMENT_OPTIONS.filter((option) => {
+    if (!settings?.enabledPayments) return true;
+    if (option.key === 'card') return settings.enabledPayments.card !== false;
+    return settings.enabledPayments[option.key];
+  });
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentOption>(
+    paymentOptions[0]?.key ?? 'card'
   );
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
@@ -122,6 +136,12 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
     total: number;
     deposit: number;
     balance: number;
+  } | null>(null);
+
+  // Set once the card intent is created → the card form (Brick) is rendered.
+  const [cardOrder, setCardOrder] = useState<{
+    orderId: string;
+    amount: number;
   } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -288,6 +308,49 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
     window.location.href = result.checkoutUrl;
   };
 
+  /**
+   * On-site card payment: create the order hold, then render the card form.
+   * The Brick charges exactly the amount the backend returned.
+   */
+  const startCardPayment = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsWorking(true);
+    setError('');
+    let result;
+    try {
+      result = await withDeadline(
+        createCardIntent(
+          {
+            customerEmail: formData.email.trim(),
+            customerPhone: formData.phone.trim(),
+            customerDni: dniDigits,
+            deliveryMethod: pickupInPerson ? 'pickup' : 'delivery',
+            deliveryAddress: pickupInPerson ? '' : deliveryAddress,
+          },
+          idempotencyKey
+        ),
+        20000
+      );
+    } catch {
+      setError(
+        'El pago está tardando más de lo normal. Probá de nuevo en unos segundos.'
+      );
+      setIsWorking(false);
+      submittingRef.current = false;
+      return;
+    }
+    if (result.error || !result.orderId || !result.amount) {
+      setError(result.error || 'No pudimos preparar el pago con tarjeta.');
+      setIsWorking(false);
+      submittingRef.current = false;
+      return;
+    }
+    setCardOrder({ orderId: result.orderId, amount: result.amount });
+    setIsWorking(false);
+    submittingRef.current = false;
+  };
+
   const placeOfflineOrder = async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
@@ -333,6 +396,13 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
       clearCart();
     }
     setIsWorking(false);
+  };
+
+  /** Success page polls the order status, so a pending payment lands there too. */
+  const goToSuccess = (orderId: string) => {
+    window.location.href = `/checkout/success?external_reference=${encodeURIComponent(
+      orderId
+    )}`;
   };
 
   // ----- Offline success screen -----
@@ -815,7 +885,9 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         onClick={
                           paymentMethod === 'mercadopago'
                             ? payWithMercadoPago
-                            : placeOfflineOrder
+                            : paymentMethod === 'card'
+                              ? startCardPayment
+                              : placeOfflineOrder
                         }
                         className="shrink-0 inline-flex items-center gap-1 underline"
                       >
@@ -830,6 +902,39 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                       <span className="ml-3 text-muted-foreground">
                         Procesando...
                       </span>
+                    </div>
+                  )}
+
+                  {/* Tarjeta en el sitio: crea la orden y muestra el Brick */}
+                  {paymentMethod === 'card' && !isWorking && !cardOrder && (
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      onClick={startCardPayment}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Continuar al pago con tarjeta
+                    </Button>
+                  )}
+
+                  {/* Tarjeta: formulario tokenizado de MercadoPago + 3DS */}
+                  {paymentMethod === 'card' && cardOrder && (
+                    <div className="rounded-lg border bg-card p-4">
+                      <p className="mb-3 text-sm text-muted-foreground">
+                        Total a pagar:{' '}
+                        <strong className="text-foreground">
+                          {formatPriceDecimal(cardOrder.amount)}
+                        </strong>
+                      </p>
+                      <CardPaymentForm
+                        orderId={cardOrder.orderId}
+                        amount={cardOrder.amount}
+                        email={formData.email.trim()}
+                        identification={{ type: 'DNI', number: dniDigits }}
+                        maxInstallments={6}
+                        onApproved={goToSuccess}
+                        onPending={goToSuccess}
+                      />
                     </div>
                   )}
 
