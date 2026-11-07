@@ -405,6 +405,15 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
     )}`;
   }, []);
 
+  /**
+   * A declined card cancels the order on the backend, so the intent is dead:
+   * discard it and show the reason with a retry that creates a new one.
+   */
+  const handleCardRejected = useCallback((message: string) => {
+    setCardOrder(null);
+    setError(message);
+  }, []);
+
   // ----- Offline success screen -----
   if (offlineOrder) {
     const shortId = offlineOrder.orderId.slice(0, 8).toUpperCase();
@@ -934,6 +943,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         maxInstallments={6}
                         onApproved={goToSuccess}
                         onPending={goToSuccess}
+                        onRejected={handleCardRejected}
                       />
                     </div>
                   )}

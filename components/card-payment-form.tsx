@@ -47,6 +47,12 @@ export interface CardPaymentFormProps {
   /** Must be stable (useCallback) — a new reference re-mounts the brick. */
   onApproved: (orderId: string) => void;
   onPending: (orderId: string) => void;
+  /**
+   * Called when the payment is rejected. The backend cancels the order on a
+   * decline, so the parent must discard this intent and create a new one
+   * before the shopper retries with another card.
+   */
+  onRejected: (message: string) => void;
 }
 
 /**
@@ -72,6 +78,7 @@ function CardPaymentFormBase({
   maxInstallments,
   onApproved,
   onPending,
+  onRejected,
 }: CardPaymentFormProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -136,10 +143,11 @@ function CardPaymentFormBase({
         return;
       }
 
-      setError(result.statusMessage || 'El pago fue rechazado.');
-      throw new Error(result.statusMessage || 'payment-rejected');
+      // Rejected: the backend already cancelled the order, so this intent is
+      // dead. Hand control back to the parent to start a fresh one.
+      onRejected(result.statusMessage || 'El pago fue rechazado.');
     },
-    [orderId, onApproved, onPending]
+    [orderId, onApproved, onPending, onRejected]
   );
 
   // While the bank challenge is open, watch the order until it settles.
