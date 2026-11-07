@@ -111,7 +111,7 @@ export function CartContent() {
                 </div>
 
                 <p className="text-sm text-foreground">
-                  Precio con tarjeta hasta 6 cuotas{' '}
+                  Precio con tarjeta hasta 12 cuotas{' '}
                   <span className="font-semibold">
                     {formatPriceDecimal(listPrice(subtotal))}
                   </span>
@@ -128,7 +128,7 @@ export function CartContent() {
 
                 <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
                   Tenés dos precios: en efectivo o transferencia, y con tarjeta
-                  hasta 6 cuotas (15% más). El envío no está incluido: se cotiza
+                  hasta 12 cuotas (15% más). El envío no está incluido: se cotiza
                   según la zona antes del despacho.
                 </p>
 

@@ -26,7 +26,11 @@ import {
 } from '@/lib/checkout';
 import { CardPaymentForm } from '@/components/card-payment-form';
 import { formatPrice, formatPriceDecimal } from '@/lib/utils';
-import { LIST_PRICE_MARKUP, pickupDeposit } from '@/lib/pricing';
+import {
+  INSTALLMENT_COUNT,
+  LIST_PRICE_MARKUP,
+  pickupDeposit,
+} from '@/lib/pricing';
 import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
 import {
   AlertTriangle,
@@ -59,7 +63,7 @@ const PAYMENT_OPTIONS: {
     key: 'card',
     label: 'Tarjeta de crédito o débito',
     description:
-      'Pagás acá mismo, sin salir del sitio. Hasta 6 cuotas con MercadoPago.',
+      'Pagás acá mismo, sin salir del sitio. Hasta 12 cuotas con MercadoPago.',
   },
   {
     key: 'offline',
@@ -863,7 +867,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         ) : (
                           <p className="mt-2 text-sm font-semibold text-primary">
                             {formatPriceDecimal(cardSubtotal)} con tarjeta
-                            hasta 6 cuotas
+                            hasta 12 cuotas
                           </p>
                         )}
                       </button>
@@ -941,7 +945,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         amount={cardOrder.amount}
                         email={formData.email.trim()}
                         dni={dniDigits}
-                        maxInstallments={6}
+                        maxInstallments={INSTALLMENT_COUNT}
                         onApproved={goToSuccess}
                         onPending={goToSuccess}
                         onRejected={handleCardRejected}
@@ -1032,7 +1036,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                   ) : (
                     <>
                       <div className="flex justify-between text-sm text-primary">
-                        <span>Precio con tarjeta hasta 6 cuotas</span>
+                        <span>Precio con tarjeta hasta 12 cuotas</span>
                         <span>{formatPrice(total)}</span>
                       </div>
                       {hasCardPromo && (
@@ -1095,7 +1099,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los productos tienen dos precios: en efectivo o transferencia,
-                  y con tarjeta hasta 6 cuotas. El envío no está incluido en el
+                  y con tarjeta hasta 12 cuotas. El envío no está incluido en el
                   total: se cotiza según la zona antes del despacho. Si no
                   aceptás el costo del envío, podés cancelar la compra sin cargo
                   y te reintegramos el total.
