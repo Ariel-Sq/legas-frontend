@@ -62,16 +62,17 @@ const PAYMENT_OPTIONS: {
       'Pagás acá mismo, sin salir del sitio. Hasta 6 cuotas con MercadoPago.',
   },
   {
-    key: 'mercadopago',
-    label: 'MercadoPago',
-    description: `Dinero en cuenta o cuotas sin tarjeta. Te llevamos a MercadoPago.`,
-  },
-  {
     key: 'offline',
     label: 'Transferencia o efectivo',
     description: `Precio pagando en efectivo o transferencia. Coordinamos por WhatsApp.`,
   },
 ];
+
+/**
+ * MercadoPago (redirect a Checkout Pro) queda fuera de la UI por decisión del
+ * negocio: se ofrece tarjeta en el sitio, efectivo o transferencia. El backend
+ * y `payWithMercadoPago` siguen existiendo por si se vuelve a habilitar.
+ */
 
 
 /**
