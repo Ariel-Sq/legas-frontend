@@ -7,7 +7,7 @@
  * Keep these constants in sync with the backend
  * (ecommerce-backend/src/payments/payment-method.config.ts).
  */
-export const INSTALLMENT_COUNT = 6;
+export const INSTALLMENT_COUNT = 12;
 export const LIST_PRICE_MARKUP = 0.15;
 
 /** List price (card / MercadoPago). e.g. 100000 → 120000. */

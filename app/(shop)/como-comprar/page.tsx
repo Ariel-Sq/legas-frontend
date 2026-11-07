@@ -36,7 +36,7 @@ const STEPS = [
   },
   {
     title: 'Elegí cómo pagar',
-    body: 'Podés pagar online con MercadoPago (tarjeta de crédito, débito o dinero en cuenta, hasta 6 cuotas) o pagar en efectivo o por transferencia coordinando con nosotros por WhatsApp. El precio cambia según el medio de pago y lo ves siempre antes de confirmar.',
+    body: 'Podés pagar online con MercadoPago (tarjeta de crédito, débito o dinero en cuenta, hasta 12 cuotas) o pagar en efectivo o por transferencia coordinando con nosotros por WhatsApp. El precio cambia según el medio de pago y lo ves siempre antes de confirmar.',
   },
   {
     title: 'Recibí la confirmación y seguí tu pedido',
@@ -54,7 +54,7 @@ const PAYMENTS = [
   {
     icon: CreditCard,
     title: 'MercadoPago con tarjeta',
-    detail: 'Hasta 6 cuotas',
+    detail: 'Hasta 12 cuotas',
     body: 'Pagás online en el momento, con tarjeta de crédito, débito o dinero en cuenta. El precio con tarjeta es un 15% más alto que el precio en efectivo o transferencia, y los dos se muestran antes de confirmar. El pedido pasa a preparación cuando MercadoPago acredita el pago.',
   },
 ];
@@ -95,7 +95,7 @@ export default function HowToBuyPage() {
               <p>
                 En cada producto ves los dos precios: el de{' '}
                 <strong>efectivo o transferencia</strong> y el de{' '}
-                <strong>tarjeta hasta 6 cuotas</strong>. El que elijas al pagar
+                <strong>tarjeta hasta 12 cuotas</strong>. El que elijas al pagar
                 es el que se cobra, sin sorpresas al final.
               </p>
               <div className="grid gap-4 sm:grid-cols-2">

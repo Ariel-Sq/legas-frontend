@@ -132,7 +132,7 @@ export function OrderConfirmationClient({
                   </div>
                   {order.total > order.subtotal ? (
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Precio con tarjeta hasta 6 cuotas</span>
+                      <span>Precio con tarjeta hasta 12 cuotas</span>
                       <span>{formatPrice(order.total)}</span>
                     </div>
                   ) : null}

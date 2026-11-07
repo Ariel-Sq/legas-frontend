@@ -238,7 +238,7 @@ export function ProductDetailClient({
                   Precio en efectivo o transferencia
                 </p>
                 <p className="mt-1 text-sm text-foreground">
-                  Precio con tarjeta hasta 6 cuotas{' '}
+                  Precio con tarjeta hasta 12 cuotas{' '}
                   {formatPriceDecimal(cardPrice)}
                   {mpPercent > 0 && (
                     <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
