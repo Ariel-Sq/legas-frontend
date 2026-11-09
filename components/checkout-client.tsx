@@ -83,7 +83,7 @@ const PAYMENT_OPTIONS: {
   },
   {
     key: 'offline',
-    short: 'Efectivo',
+    short: 'Efectivo o transferencia',
     label: 'Transferencia o efectivo',
     description:
       'Precio de contado. Coordinamos el pago por WhatsApp al confirmar el pedido.',
@@ -874,7 +874,7 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                             }`}
                           >
                             <Icon className="h-5 w-5" aria-hidden="true" />
-                            <span className="text-xs font-medium leading-tight">
+                            <span className="text-[11px] font-medium leading-tight">
                               {option.short}
                             </span>
                           </button>
