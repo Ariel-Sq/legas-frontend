@@ -35,6 +35,7 @@ import { ARGENTINIAN_PROVINCES } from '@/lib/provinces';
 import {
   AlertTriangle,
   ArrowLeft,
+  Banknote,
   CreditCard,
   Lock,
   MapPin,
@@ -43,6 +44,7 @@ import {
   Loader2,
   MessageCircle,
   RefreshCw,
+  Wallet,
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
@@ -57,27 +59,37 @@ import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
  */
 const PAYMENT_OPTIONS: {
   key: CheckoutPaymentOption;
+  /** Compact label for the selector. */
+  short: string;
   label: string;
   description: string;
+  icon: typeof CreditCard;
 }[] = [
   {
     key: 'card',
+    short: 'Tarjeta',
     label: 'Tarjeta de crédito o débito',
     description:
-      'Pagás acá mismo, sin salir del sitio. Hasta 12 cuotas con MercadoPago: 3 sin interés con Visa, Mastercard y Naranja. Amex no tiene cuotas sin interés.',
+      'Completás los datos acá mismo, sin salir del sitio. Hasta 12 cuotas.',
+    icon: CreditCard,
+  },
+  {
+    key: 'mercadopago',
+    short: 'MercadoPago',
+    label: 'MercadoPago',
+    description:
+      'Pagás con tu saldo en cuenta o con cuotas sin tarjeta. Te llevamos a MercadoPago y volvés.',
+    icon: Wallet,
   },
   {
     key: 'offline',
+    short: 'Efectivo',
     label: 'Transferencia o efectivo',
-    description: `Precio pagando en efectivo o transferencia. Coordinamos por WhatsApp.`,
+    description:
+      'Precio de contado. Coordinamos el pago por WhatsApp al confirmar el pedido.',
+    icon: Banknote,
   },
 ];
-
-/**
- * MercadoPago (redirect a Checkout Pro) queda fuera de la UI por decisión del
- * negocio: se ofrece tarjeta en el sitio, efectivo o transferencia. El backend
- * y `payWithMercadoPago` siguen existiendo por si se vuelve a habilitar.
- */
 
 
 /**
@@ -131,6 +143,9 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
   const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentOption>(
     paymentOptions[0]?.key ?? 'card'
   );
+  const selectedOption =
+    paymentOptions.find((option) => option.key === paymentMethod) ??
+    paymentOptions[0];
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState('');
   // Set once an offline order is placed → success screen with WhatsApp CTA.
@@ -829,69 +844,85 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                     )}
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2 mb-6">
-                    {paymentOptions.map((option) => (
-                      <button
-                        key={option.key}
-                        type="button"
-                        onClick={() => {
-                          setPaymentMethod(option.key);
-                          setError('');
-                        }}
-                        aria-pressed={paymentMethod === option.key}
-                        className={`rounded-lg border p-4 text-left transition-colors cursor-pointer ${
-                          paymentMethod === option.key
-                            ? 'border-ring bg-secondary'
-                            : 'border-border hover:bg-muted/50'
-                        }`}
-                      >
-                        <p className="font-semibold">{option.label}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {option.description}
-                        </p>
-                        {option.key === 'offline' ? (
-                          isPickupDeposit ? (
-                            <>
-                              <p className="mt-2 text-sm font-semibold text-primary">
-                                Seña 50%: {formatPriceDecimal(deposit)}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                Saldo al retirar: {formatPriceDecimal(balance)}
-                              </p>
-                            </>
-                          ) : (
-                            <p className="mt-2 text-sm font-semibold text-primary">
-                              {formatPriceDecimal(subtotal)} pagando en efectivo
-                              o transferencia
-                            </p>
-                          )
-                        ) : (
-                          <p className="mt-2 text-sm font-semibold text-primary">
-                            {formatPriceDecimal(cardSubtotal)} con tarjeta
-                            hasta 12 cuotas
-                          </p>
-                        )}
-                      </button>
-                    ))}
+                  {/* Selector compacto: tres medios, una sola fila */}
+                  <div className="mb-4">
+                    <p className="mb-2 text-sm font-medium">
+                      ¿Cómo querés pagar?
+                    </p>
+                    <div
+                      role="radiogroup"
+                      aria-label="Medio de pago"
+                      className="grid grid-cols-3 gap-2"
+                    >
+                      {paymentOptions.map((option) => {
+                        const Icon = option.icon;
+                        const active = paymentMethod === option.key;
+                        return (
+                          <button
+                            key={option.key}
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            onClick={() => {
+                              setPaymentMethod(option.key);
+                              setError('');
+                            }}
+                            className={`flex min-h-16 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border px-1 py-2 text-center transition-colors ${
+                              active
+                                ? 'border-primary bg-primary/5 text-primary'
+                                : 'border-border text-muted-foreground hover:bg-muted/50'
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                            <span className="text-xs font-medium leading-tight">
+                              {option.short}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  {isPickupDeposit && (
-                    <div className="mb-4 rounded-lg border bg-muted/40 p-4 text-sm">
-                      <p className="font-semibold">
-                        Seña del 50% para reservar el pedido
-                      </p>
-                      <p className="mt-1 text-muted-foreground">
-                        Como retirás en persona y pagás en efectivo o por
-                        transferencia, abonás{' '}
-                        <strong>{formatPriceDecimal(deposit)}</strong> por
-                        transferencia para reservar la pieza. Los{' '}
-                        <strong>{formatPriceDecimal(balance)}</strong> restantes
-                        los pagás al retirar, en efectivo o por transferencia.
-                        Al confirmar te enviamos los datos por WhatsApp; la seña
-                        se abona <strong>dentro de las 48 horas</strong>.
+                  {/* Detalle del medio elegido */}
+                  <div className="mb-4 rounded-lg border bg-muted/30 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold">{selectedOption?.label}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {selectedOption?.description}
+                        </p>
+                      </div>
+                      <p className="whitespace-nowrap font-semibold text-primary">
+                        {formatPriceDecimal(
+                          paymentMethod === 'offline' ? subtotal : cardSubtotal
+                        )}
                       </p>
                     </div>
-                  )}
+
+                    {paymentMethod === 'card' && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        3 cuotas sin interés con Visa, Mastercard y Naranja.
+                        Amex no tiene cuotas sin interés.
+                      </p>
+                    )}
+
+                    {isPickupDeposit && (
+                      <div className="mt-3 border-t pt-3 text-sm">
+                        <p className="font-semibold">
+                          Seña del 50% para reservar el pedido
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Abonás{' '}
+                          <strong>{formatPriceDecimal(deposit)}</strong> por
+                          transferencia para reservar la pieza. Los{' '}
+                          <strong>{formatPriceDecimal(balance)}</strong>{' '}
+                          restantes los pagás al retirar. Al confirmar te
+                          enviamos los datos por WhatsApp; la seña se abona{' '}
+                          <strong>dentro de las 48 horas</strong>.
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {error && (
                     <div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm mb-4 flex items-center justify-between gap-3">
@@ -940,10 +971,6 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
                         <strong className="text-foreground">
                           {formatPriceDecimal(cardOrder.amount)}
                         </strong>
-                      </p>
-                      <p className="mb-3 text-xs text-muted-foreground">
-                        3 cuotas sin interés con Visa, Mastercard y Naranja.
-                        Amex no tiene cuotas sin interés.
                       </p>
                       <CardPaymentForm
                         orderId={cardOrder.orderId}
