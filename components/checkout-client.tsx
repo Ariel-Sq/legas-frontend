@@ -901,8 +901,9 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
 
                     {paymentMethod === 'card' && (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        3 cuotas sin interés con Visa, Mastercard y Naranja.
-                        Amex no tiene cuotas sin interés.
+                        6 cuotas sin interés con Visa, Mastercard y Naranja.
+                        Amex no tiene cuotas sin interés. En más cuotas, el
+                        interés lo cobra MercadoPago.
                       </p>
                     )}
 
@@ -1138,12 +1139,12 @@ export function CheckoutClient({ settings }: { settings?: CheckoutSettings } = {
 
                 <p className="mt-4 text-xs text-muted-foreground text-center bg-muted p-3 rounded-lg">
                   Los productos tienen dos precios: en efectivo o transferencia,
-                  y con tarjeta hasta 12 cuotas. Las 3 cuotas sin interés
+                  y con tarjeta hasta 12 cuotas. Las 6 cuotas sin interés
                   aplican a Visa, Mastercard y Naranja; Amex no tiene cuotas sin
-                  interés. El envío no está incluido en el total: se cotiza
-                  según la zona antes del despacho. Si no aceptás el costo del
-                  envío, podés cancelar la compra sin cargo y te reintegramos el
-                  total.
+                  interés y en más de 6 cuotas el interés lo cobra MercadoPago.
+                  El envío no está incluido en el total: se cotiza según la zona
+                  antes del despacho. Si no aceptás el costo del envío, podés
+                  cancelar la compra sin cargo y te reintegramos el total.
                 </p>
               </div>
             </div>

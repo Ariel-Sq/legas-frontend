@@ -54,8 +54,8 @@ const PAYMENTS = [
   {
     icon: CreditCard,
     title: 'MercadoPago con tarjeta',
-    detail: 'Hasta 12 cuotas · 3 sin interés con Visa, Mastercard y Naranja',
-    body: 'Pagás online en el momento, con tarjeta de crédito, débito o dinero en cuenta. El precio con tarjeta es un 15% más alto que el precio en efectivo o transferencia, y los dos se muestran antes de confirmar. Las 3 cuotas sin interés aplican a Visa, Mastercard y Naranja; con Amex no hay cuotas sin interés. El pedido pasa a preparación cuando MercadoPago acredita el pago.',
+    detail: 'Hasta 12 cuotas · 6 sin interés con Visa, Mastercard y Naranja',
+    body: 'Pagás online en el momento, con tarjeta de crédito, débito o dinero en cuenta. El precio con tarjeta es un 15% más alto que el precio en efectivo o transferencia, y los dos se muestran antes de confirmar. Las 6 cuotas sin interés aplican a Visa, Mastercard y Naranja; con Amex no hay cuotas sin interés y en más de 6 cuotas el interés lo cobra MercadoPago. El pedido pasa a preparación cuando MercadoPago acredita el pago.',
   },
 ];
 
