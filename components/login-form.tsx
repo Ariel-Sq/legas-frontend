@@ -47,14 +47,24 @@ const ERROR_MESSAGES: Record<string, string> = {
 export function LoginForm({
   callbackUrl,
   error,
+  forceLogin = false,
 }: {
   callbackUrl: string;
   error?: string;
+  /** Force Google to ask for the account even if a storefront session exists. */
+  forceLogin?: boolean;
 }) {
   const [working, setWorking] = useState(false);
   const message = error
     ? (ERROR_MESSAGES[error] ?? ERROR_MESSAGES.Default)
     : '';
+
+  // Signing into the panel goes through this page, so we make Google ask
+  // again: it keeps the panel and the shop decoupled instead of silently
+  // reusing whichever Google session the browser already has.
+  const isAdminHandoff = /\/handoff(?:[?#]|$)/.test(callbackUrl);
+  const prompt =
+    forceLogin || isAdminHandoff ? 'login select_account' : 'select_account';
 
   return (
     <div className="w-full max-w-md space-y-6">
@@ -72,7 +82,7 @@ export function LoginForm({
         disabled={working}
         onClick={() => {
           setWorking(true);
-          void signIn('google', { callbackUrl }, { prompt: 'select_account' });
+          void signIn('google', { callbackUrl }, { prompt });
         }}
       >
         {working ? (
