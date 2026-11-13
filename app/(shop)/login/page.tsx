@@ -19,15 +19,22 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{
+    callbackUrl?: string;
+    error?: string;
+    reauth?: string;
+  }>;
 }) {
   const params = await searchParams;
   const callbackUrl = safeCallback(params.callbackUrl, '/');
+  // `reauth=1` comes from the admin handoff when the stored backend token is
+  // expired: skip the "already signed in" shortcut so Google is asked again.
+  const forceReauth = params.reauth === '1';
   const session = await getServerSession(authOptions);
 
   // Already signed in: go straight back. The admin handoff still needs to run,
   // and it lives on *.legasmuebles.com (allowed by `safeCallback`).
-  if (session?.user?.id) {
+  if (session?.user?.id && !forceReauth) {
     redirect(callbackUrl);
   }
 
@@ -48,7 +55,11 @@ export default async function LoginPage({
 
           <Card>
             <CardContent className="p-6">
-              <LoginForm callbackUrl={callbackUrl} error={params.error} />
+              <LoginForm
+                callbackUrl={callbackUrl}
+                error={params.error}
+                forceLogin={forceReauth}
+              />
             </CardContent>
           </Card>
 
