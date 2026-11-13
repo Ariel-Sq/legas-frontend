@@ -72,7 +72,7 @@ export function LoginForm({
         disabled={working}
         onClick={() => {
           setWorking(true);
-          void signIn('google', { callbackUrl });
+          void signIn('google', { callbackUrl }, { prompt: 'select_account' });
         }}
       >
         {working ? (
